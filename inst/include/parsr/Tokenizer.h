@@ -130,7 +130,7 @@ public:
       ++distance;
 
     // Consume a dot for decimals
-    // Note: '.5' is a valid specificaiton for a number
+    // Note: '.5' is a valid specification for a number
     if (cursor.peek(distance) == '.') {
       ++distance;
       while (std::isdigit(cursor.peek(distance)))
@@ -168,7 +168,7 @@ public:
   {
     std::size_t distance = 1;
     char ch = cursor.peek(distance);
-    while (std::isalnum(ch) || ch == '.' || ch == '_') {
+    while (isValidForRSymbol(ch)) {
       ++distance;
       ch = cursor.peek(distance);
     }

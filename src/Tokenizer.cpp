@@ -52,7 +52,7 @@ extern "C" SEXP parsr_tokenize_file(SEXP absolutePathSEXP)
   }
 
   parsr::Tokenizer tokenizer(contents);
-  const std::vector<parsr::tokens::Token>& tokens = tokenizer.tokens();
+  auto& tokens = tokenizer.tokens();
   return asSEXP(tokens);
 }
 
@@ -60,6 +60,6 @@ extern "C" SEXP parsr_tokenize_string(SEXP stringSEXP)
 {
   const char* string = CHAR(STRING_ELT(stringSEXP, 0));
   parsr::Tokenizer tokenizer(string);
-  auto tokens = tokenizer.tokens();
+  auto& tokens = tokenizer.tokens();
   return asSEXP(tokens);
 }

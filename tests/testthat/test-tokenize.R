@@ -25,7 +25,7 @@ test_that("Operators are tokenized correctly", {
     "::", ":::", "$", "@", "[", "[[", "^", "-", "+", ":",
     "*", "/", "+", "-", "<", ">", "<=", ">=", "==", "!=",
     "!", "&", "&&", "|", "||", "~", "->", "->>", "<-", "<<-",
-    "=", "?", "**"
+    "=", "?", "**", "%%", "%for%"
   )
 
   for (operator in operators) {
@@ -46,6 +46,11 @@ test_that("Numbers are tokenized correctly", {
     expect_true(token$type == "NUMBER", paste("expected a number ('", token$type, "')"))
   }
 
+})
+
+test_that("The tokenizer accepts UTF-8 symbols", {
+  tokenize_string("å√∂")
+  tokenize_string("¡™£¢∞§¶•ªº≠åß∂ƒ©˙∆˚¬…æΩ≈ç√∫˜µ≤≥÷")
 })
 
 test_that("The tokenizer works correctly", {

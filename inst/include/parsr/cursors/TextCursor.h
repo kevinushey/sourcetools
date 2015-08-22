@@ -39,15 +39,13 @@ public:
 
   void moveForward(std::size_t times = 1)
   {
-    while (times != 0) {
+    for (std::size_t i = 0; i < times; ++i) {
       if (peek() == '\n') {
         ++row_;
         column_ = 0;
       } else {
         ++column_;
       }
-
-      --times;
       ++offset_;
     }
   }
