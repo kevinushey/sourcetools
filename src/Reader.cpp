@@ -14,7 +14,7 @@ extern "C" SEXP parsr_read(SEXP absolutePathSEXP)
 
   SEXP resultSEXP;
   PROTECT(resultSEXP = Rf_allocVector(STRSXP, 1));
-  SET_STRING_ELT(resultSEXP, 0, Rf_mkChar(contents.c_str()));
+  SET_STRING_ELT(resultSEXP, 0, Rf_mkCharLen(contents.c_str(), contents.size()));
   UNPROTECT(1);
   return resultSEXP;
 }
