@@ -1,0 +1,3 @@
+^.*\.Rproj$
+^\.Rproj\.user$
+\.clang-format
