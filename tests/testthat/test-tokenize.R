@@ -34,6 +34,20 @@ test_that("Operators are tokenized correctly", {
   }
 })
 
+test_that("Numbers are tokenized correctly", {
+
+  numbers <- c("1", "1.0", "0.1", ".1", "0.1E1", "1L", "1.0L", "1.5L",
+               "1E1", "1E-1", "1E-1L", ".100E-105L")
+
+  for (number in numbers) {
+    tokens <- tokenize_string(number)
+    expect_true(length(tokens) == 1, paste("expected a single token ('", number, "')"))
+    token <- tokens[[1]]
+    expect_true(token$type == "NUMBER", paste("expected a number ('", token$type, "')"))
+  }
+
+})
+
 test_that("The tokenizer works correctly", {
 
   # TODO: Should newlines be absorbed as part of the comment string?
