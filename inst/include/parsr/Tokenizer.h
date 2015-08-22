@@ -39,7 +39,7 @@ public:
   void consumeUntil(TextCursor& cursor, char ch, TokenType type,
                     bool skipEscaped = false)
   {
-    TextCursor lookahead = cursor.clone();
+    TextCursor lookahead = cursor;
 
     bool success = false;
     std::size_t distance = 0;

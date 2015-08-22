@@ -4,38 +4,11 @@
 #include <vector>
 #include <string>
 
+#include <parsr/collections/Position.h>
 #include <parsr/cursors/TextCursor.h>
 
 namespace parsr {
 namespace tokens {
-
-template <typename T> class Stack {
-
-public:
-  Stack() : offset_(-1) { stack_.reserve(16); }
-
-  T& peek() { return stack_[offset_]; }
-
-  void push(const T& item)
-  {
-    stack_.push_back(item);
-    ++offset_;
-  }
-
-  void pop()
-  {
-    stack_.pop_back();
-    --offset_;
-  }
-
-  std::size_t size() { return stack_.size(); }
-
-  bool empty() { return offset_ == -1; }
-
-private:
-  std::vector<T> stack_;
-  int offset_;
-};
 
 enum class TokenType : char
 {
@@ -66,23 +39,27 @@ private:
 public:
   Token(const TextCursor& cursor, TokenType type, std::size_t tokenSize)
       : begin_(cursor.begin() + cursor.offset()),
-        end_(cursor.begin() + cursor.offset() + tokenSize), row_(cursor.row()),
-        column_(cursor.column()), type_(type)
+        end_(cursor.begin() + cursor.offset() + tokenSize),
+        position_(cursor.position()),
+        type_(type)
   {
   }
 
-  std::string content() const { return std::string(begin_, end_); }
-  std::size_t row() const { return row_; }
-  std::size_t column() const { return column_; }
+  std::string::const_iterator begin() const { return begin_; }
+  std::string::const_iterator end() const { return end_; }
+  std::string contents() const { return std::string(begin_, end_); }
+
+  const collections::Position& position() const { return position_; }
+  std::size_t row() const { return position_.row; }
+  std::size_t column() const { return position_.column; }
+
   TokenType type() const { return type_; }
 
 private:
   std::string::const_iterator begin_;
   std::string::const_iterator end_;
 
-  std::size_t row_;
-  std::size_t column_;
-
+  collections::Position position_;
   TokenType type_;
 };
 
@@ -129,7 +106,6 @@ inline std::string toString(tokens::TokenType type)
     return "ERR";
   }
 }
-
 
 } // namespace parsr
 

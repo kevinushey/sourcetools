@@ -6,7 +6,7 @@ SEXP asSEXP(const parsr::tokens::Token& token)
 {
   SEXP tokenSEXP;
   PROTECT(tokenSEXP = Rf_allocVector(VECSXP, 4));
-  SET_VECTOR_ELT(tokenSEXP, 0, Rf_mkString(token.content().c_str()));
+  SET_VECTOR_ELT(tokenSEXP, 0, Rf_mkString(token.contents().c_str()));
   SET_VECTOR_ELT(tokenSEXP, 1, Rf_ScalarInteger(token.row()));
   SET_VECTOR_ELT(tokenSEXP, 2, Rf_ScalarInteger(token.column()));
 

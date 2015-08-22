@@ -3,30 +3,22 @@
 
 #include <string>
 
+#include <parsr/Macros.h>
+#include <parsr/collections/Position.h>
+
 namespace parsr {
 namespace cursors {
 
 class TextCursor
 {
 public:
+
   TextCursor(const std::string& contents)
-      : contents_(contents), offset_(0), row_(0), column_(0),
+      : contents_(contents),
+        offset_(0),
+        position_(0, 0),
         size_(contents.size())
   {
-  }
-
-private:
-  TextCursor(const std::string& contents, std::size_t offset, std::size_t row,
-             std::size_t column, std::size_t size)
-      : contents_(contents), offset_(offset), row_(row), column_(column),
-        size_(size)
-  {
-  }
-
-public:
-  TextCursor clone()
-  {
-    return TextCursor(contents_, offset_, row_, column_, size_);
   }
 
   char peek(std::size_t offset = 0)
@@ -41,20 +33,22 @@ public:
   {
     for (std::size_t i = 0; i < times; ++i) {
       if (peek() == '\n') {
-        ++row_;
-        column_ = 0;
+        ++position_.row;
+        position_.column = 0;
       } else {
-        ++column_;
+        ++position_.column;
       }
       ++offset_;
     }
   }
 
-  bool isValid() { return offset_ < size_; }
+  bool isValid() { return LIKELY(offset_ < size_); }
 
   std::size_t offset() const { return offset_; }
-  std::size_t row() const { return row_; }
-  std::size_t column() const { return column_; }
+
+  const collections::Position& position() const { return position_; }
+  std::size_t row() const { return position_.row; }
+  std::size_t column() const { return position_.column; }
 
   std::string::const_iterator begin() const { return contents_.begin(); }
   std::string::const_iterator end() const { return contents_.end(); }
@@ -62,8 +56,7 @@ public:
 private:
   const std::string& contents_;
   std::size_t offset_;
-  std::size_t row_;
-  std::size_t column_;
+  collections::Position position_;
   std::size_t size_;
 };
 
