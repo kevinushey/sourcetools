@@ -2,7 +2,7 @@
 
 namespace {
 
-SEXP asSEXP(const parsr::Token& token)
+SEXP asSEXP(const parsr::tokens::Token& token)
 {
   SEXP tokenSEXP;
   PROTECT(tokenSEXP = Rf_allocVector(VECSXP, 4));
@@ -27,7 +27,7 @@ SEXP asSEXP(const parsr::Token& token)
   return tokenSEXP;
 }
 
-SEXP asSEXP(const std::vector<parsr::Token>& tokens)
+SEXP asSEXP(const std::vector<parsr::tokens::Token>& tokens)
 {
   SEXP resultSEXP;
   std::size_t n = tokens.size();
@@ -52,7 +52,7 @@ extern "C" SEXP parsr_tokenize_file(SEXP absolutePathSEXP)
   }
 
   parsr::Tokenizer tokenizer(contents);
-  const std::vector<parsr::Token>& tokens = tokenizer.tokens();
+  const std::vector<parsr::tokens::Token>& tokens = tokenizer.tokens();
   return asSEXP(tokens);
 }
 

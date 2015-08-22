@@ -3,6 +3,9 @@
 
 #include <string>
 
+namespace parsr {
+namespace cursors {
+
 class TextCursor
 {
 public:
@@ -56,7 +59,6 @@ public:
   std::size_t column() const { return column_; }
 
   std::string::const_iterator begin() const { return contents_.begin(); }
-
   std::string::const_iterator end() const { return contents_.end(); }
 
 private:
@@ -66,5 +68,8 @@ private:
   std::size_t column_;
   std::size_t size_;
 };
+
+} // namespace cursors
+} // namespace parsr
 
 #endif /* PARSR_CURSOR_TEXTCURSOR_H */
