@@ -88,7 +88,7 @@ public:
 private:
 
   operator const Position&() const {
-    return tokens_[offset_].position();
+    return tokens_[offset_].position;
   }
 
   const std::vector<TokenType>& tokens_;

@@ -1,8 +1,9 @@
 #include <parsr.h>
 
+namespace parsr {
 namespace {
 
-SEXP asSEXP(const parsr::tokens::Token& token)
+SEXP asSEXP(const tokens::Token& token)
 {
   SEXP tokenSEXP;
   PROTECT(tokenSEXP = Rf_allocVector(VECSXP, 4));
@@ -10,7 +11,7 @@ SEXP asSEXP(const parsr::tokens::Token& token)
   SET_VECTOR_ELT(tokenSEXP, 1, Rf_ScalarInteger(token.row()));
   SET_VECTOR_ELT(tokenSEXP, 2, Rf_ScalarInteger(token.column()));
 
-  std::string typeString = parsr::toString(token.type());
+  std::string typeString = toString(token.type());
   SET_VECTOR_ELT(tokenSEXP, 3, Rf_mkString(typeString.c_str()));
 
   SEXP namesSEXP;
@@ -27,7 +28,7 @@ SEXP asSEXP(const parsr::tokens::Token& token)
   return tokenSEXP;
 }
 
-SEXP asSEXP(const std::vector<parsr::tokens::Token>& tokens)
+SEXP asSEXP(const std::vector<tokens::Token>& tokens)
 {
   SEXP resultSEXP;
   std::size_t n = tokens.size();
@@ -40,6 +41,7 @@ SEXP asSEXP(const std::vector<parsr::tokens::Token>& tokens)
 }
 
 } // anonymous namespace
+} // namespace parsr
 
 extern "C" SEXP parsr_tokenize_file(SEXP absolutePathSEXP)
 {
@@ -53,7 +55,7 @@ extern "C" SEXP parsr_tokenize_file(SEXP absolutePathSEXP)
 
   parsr::Tokenizer tokenizer(contents);
   auto& tokens = tokenizer.tokens();
-  return asSEXP(tokens);
+  return parsr::asSEXP(tokens);
 }
 
 extern "C" SEXP parsr_tokenize_string(SEXP stringSEXP)
@@ -61,5 +63,5 @@ extern "C" SEXP parsr_tokenize_string(SEXP stringSEXP)
   const char* string = CHAR(STRING_ELT(stringSEXP, 0));
   parsr::Tokenizer tokenizer(string);
   auto& tokens = tokenizer.tokens();
-  return asSEXP(tokens);
+  return parsr::asSEXP(tokens);
 }
