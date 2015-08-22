@@ -232,10 +232,25 @@ public:
         consumeToken(cursor, TokenType::OPERATOR, 1 + (cursor.peek(1) == '&'));
       else if (ch == '*')  // **, *
         consumeToken(cursor, TokenType::OPERATOR, 1 + (cursor.peek(1) == '*'));
-      else if (ch == ':')  // ':', ':='
+      else if (ch == ':')  // ':::', '::', ':=', ':'
+      {
+        if (cursor.peek(1) == ':')
+          consumeToken(cursor, TokenType::OPERATOR, 2 + (cursor.peek(2) == ':'));
+        else
+          consumeToken(cursor, TokenType::OPERATOR, 1 + (cursor.peek(1) == '='));
+      }
+      else if (ch == '!')
         consumeToken(cursor, TokenType::OPERATOR, 1 + (cursor.peek(1) == '='));
-      else if (ch == '+' || ch == '-' || ch == '/' || ch == '~' || ch == '!' ||
-               ch == '@' || ch == '$' || ch == '^' || ch == '?')
+      else if (ch == '-') // '->>', '->', '-'
+      {
+        if (cursor.peek(1) == '>')
+          consumeToken(cursor, TokenType::OPERATOR, 2 + (cursor.peek(2) == '>'));
+        else
+          consumeToken(cursor, TokenType::OPERATOR, 1);
+      }
+      else if (ch == '+' || ch == '/' || ch == '~' ||
+               ch == '@' || ch == '$' || ch == '^' ||
+               ch == '?')
         consumeToken(cursor, TokenType::OPERATOR, 1);
 
       // User operators

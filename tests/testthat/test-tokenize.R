@@ -19,6 +19,21 @@ compare_tokens <- function(tokens, expected) {
 
 }
 
+test_that("Operators are tokenized correctly", {
+
+  operators <- c(
+    "::", ":::", "$", "@", "[", "[[", "^", "-", "+", ":",
+    "*", "/", "+", "-", "<", ">", "<=", ">=", "==", "!=",
+    "!", "&", "&&", "|", "||", "~", "->", "->>", "<-", "<<-",
+    "=", "?", "**"
+  )
+
+  for (operator in operators) {
+    tokens <- tokenize_string(operator)
+    expect_true(length(tokens) == 1, paste("expected a single token ('", operator, "')"))
+  }
+})
+
 test_that("The tokenizer works correctly", {
 
   # TODO: Should newlines be absorbed as part of the comment string?
