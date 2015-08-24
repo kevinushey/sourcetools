@@ -1,5 +1,9 @@
 #include <parsr.h>
 
+#define R_NO_REMAP
+#include <R.h>
+#include <Rinternals.h>
+
 extern "C" SEXP parsr_read(SEXP absolutePathSEXP)
 {
   const char* absolutePath = CHAR(STRING_ELT(absolutePathSEXP, 0));

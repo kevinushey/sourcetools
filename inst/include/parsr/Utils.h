@@ -5,6 +5,7 @@
 #include <cctype>
 
 namespace parsr {
+namespace utils {
 
 inline bool isValidForStartOfRSymbol(char ch)
 {
@@ -37,6 +38,7 @@ inline std::string escape(char ch)
   }
 }
 
-}  // namespace parsr
+} // namespace utils
+} // namespace parsr
 
 #endif  // PARSR_UTILS_H

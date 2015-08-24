@@ -3,26 +3,33 @@
 
 #include <algorithm>
 
+#include <parsr/collections/Position.h>
+
 #include <parsr/tokens/Token.h>
 
 namespace parsr {
 namespace cursors {
 
-template <typename TokenType>
 class TokenCursor {
+
+private:
+  typedef collections::Position Position;
+  typedef tokens::Token Token;
 
 public:
 
-  TokenCursor(const std::vector<TokenType>& tokens)
-    : token_(tokens),
+  TokenCursor(const std::vector<Token>& tokens)
+    : tokens_(tokens),
       offset_(0),
-      n_(tokens.size())
+      n_(tokens.size()),
+      noSuchToken_(tokens::TokenType::ERR)
   {}
 
   TokenCursor(const TokenCursor& other)
-    : tokens_(other.tokens),
+    : tokens_(other.tokens_),
       offset_(other.offset_),
-      n_(other.n_)
+      n_(other.n_),
+      noSuchToken_(other.noSuchToken_)
   {}
 
   bool moveToNextToken()
@@ -43,12 +50,12 @@ public:
     return true;
   }
 
-  operator const TokenType& const()
+  operator const tokens::Token&()
   {
     return tokens_[offset_];
   }
 
-  const TokenType& peekFwd(std::size_t offset = 1)
+  const tokens::Token& peekFwd(std::size_t offset = 1)
   {
     std::size_t index = offset_ + offset;
     if (UNLIKELY(index >= n_))
@@ -57,7 +64,7 @@ public:
     return tokens_[index];
   }
 
-  const TokenType& peekBwd(std::size_t offset = 1)
+  const tokens::Token& peekBwd(std::size_t offset = 1)
   {
     if (UNLIKELY(offset > offset_))
       return noSuchToken_;
@@ -66,7 +73,7 @@ public:
     return tokens_[index];
   }
 
-  const TokenType& currentToken()
+  const tokens::Token& currentToken() const
   {
     return tokens_[offset_];
   }
@@ -81,18 +88,26 @@ public:
     return std::binary_search(
       tokens_.begin(),
       tokens_.end(),
-      position
+      Token(position),
+      [](const Token& lhs, const Token& rhs)
+      {
+        return lhs.position() < rhs.position();
+      }
     );
   }
 
+  tokens::TokenType type() const { return currentToken().type(); }
+  collections::Position position() const { return currentToken().position(); }
+  std::size_t row() const { return currentToken().row(); }
+  std::size_t column() const { return currentToken().column(); }
+
+
 private:
 
-  operator const Position&() const {
-    return tokens_[offset_].position;
-  }
-
-  const std::vector<TokenType>& tokens_;
+  const std::vector<Token>& tokens_;
   std::size_t offset_;
+  std::size_t n_;
+  Token noSuchToken_;
 
 };
 

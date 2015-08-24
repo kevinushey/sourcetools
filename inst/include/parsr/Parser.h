@@ -1,28 +1,64 @@
 #ifndef PARSR_PARSER_H
 #define PARSR_PARSER_H
 
+#include <vector>
 #include <string>
+#include <memory>
 
+#include <parsr/Tokenizer.h>
+
+#include <parsr/tokens/Token.h>
+#include <parsr/cursors/TokenCursor.h>
 #include <parsr/collections/Position.h>
 
 namespace parsr {
-
-struct ParseItem
-{
-  std::string::const_iterator begin;
-  std::string::const_iterator end;
-};
+namespace parser {
 
 class ParseNode
 {
+private:
+  ParseNode* parent_;
+  std::vector<ParseNode> children_;
 };
 
 class Parser
 {
+private:
+  typedef cursors::TokenCursor Cursor;
+  typedef tokens::Token Token;
+  typedef tokens::TokenType TokenType;
+
 public:
-  explicit Parser()
+
+  Parser(const std::string& contents)
+    : contents_(contents)
+  {}
+
+private:
+
+  // TODO: 'handle*', 'parse*' for each type of expression
+public:
+
+  ParseNode parse()
+  {
+    Tokenizer tokenizer(contents_);
+    Cursor cursor(tokenizer.tokens());
+
+    ParseNode root;
+    do
+    {
+      // Parse expressions
+    }
+    while (cursor.moveToNextToken());
+    return root;
+  }
+
+private:
+
+  const std::string& contents_;
 };
 
-}  // namespace parsr
+} // namespace parser
+} // namespace parsr
 
 #endif

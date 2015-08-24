@@ -4,7 +4,7 @@
 #include <parsr/Macros.h>
 #include <parsr/Utils.h>
 
-#include <parsr/tokens/Tokens.h>
+#include <parsr/tokens/Token.h>
 
 #include <parsr/cursors/TextCursor.h>
 
@@ -30,6 +30,7 @@ public:
 
   const std::vector<Token>& tokens() const { return tokens_; }
 
+private:
   void consumeToken(TextCursor& cursor, TokenType type, std::size_t sz)
   {
     tokens_.push_back(Token(cursor, type, sz));
@@ -115,7 +116,7 @@ public:
 
   bool isStartOfSymbol(TextCursor& cursor)
   {
-    return isValidForStartOfRSymbol(cursor.peek());
+    return utils::isValidForStartOfRSymbol(cursor.peek());
   }
 
   void consumeNumber(TextCursor& cursor)
@@ -168,7 +169,7 @@ public:
   {
     std::size_t distance = 1;
     char ch = cursor.peek(distance);
-    while (isValidForRSymbol(ch)) {
+    while (utils::isValidForRSymbol(ch)) {
       ++distance;
       ch = cursor.peek(distance);
     }

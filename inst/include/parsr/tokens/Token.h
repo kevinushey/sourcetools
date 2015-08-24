@@ -37,6 +37,22 @@ private:
   typedef cursors::TextCursor TextCursor;
 
 public:
+
+  explicit Token(TokenType type)
+    : begin_(),
+      end_(),
+      position_(0, 0),
+      type_(type)
+  {
+  }
+
+  Token(const collections::Position& position)
+    : begin_(),
+      end_(),
+      position_(position),
+      type_(TokenType::ERR)
+  {}
+
   Token(const TextCursor& cursor, TokenType type, std::size_t tokenSize)
       : begin_(cursor.begin() + cursor.offset()),
         end_(cursor.begin() + cursor.offset() + tokenSize),
