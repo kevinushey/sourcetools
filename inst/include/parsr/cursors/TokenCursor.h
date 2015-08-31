@@ -25,16 +25,9 @@ public:
       noSuchToken_(tokens::TokenType::ERR)
   {}
 
-  TokenCursor(const TokenCursor& other)
-    : tokens_(other.tokens_),
-      offset_(other.offset_),
-      n_(other.n_),
-      noSuchToken_(other.noSuchToken_)
-  {}
-
   bool moveToNextToken()
   {
-    if (UNLIKELY(offset_ >= n_))
+    if (UNLIKELY(offset_ >= n_ - 1))
       return false;
 
     ++offset_;
@@ -83,7 +76,7 @@ public:
     while (isType(tokens::TokenType::WHITESPACE))
       if (!moveToNextToken())
         return false;
-          return true;
+    return true;
   }
 
   bool fwdOverComments()
@@ -91,17 +84,14 @@ public:
     while (isType(tokens::TokenType::COMMENT))
       if (!moveToNextToken())
         return false;
-          return true;
+    return true;
   }
 
   bool fwdOverWhitespaceAndComments()
   {
-    while (isType(tokens::TokenType::COMMENT) ||
-           isType(tokens::TokenType::WHITESPACE))
-    {
+    while (isType(tokens::TokenType::COMMENT) || isType(tokens::TokenType::WHITESPACE))
       if (!moveToNextToken())
         return false;
-    }
     return true;
   }
 
