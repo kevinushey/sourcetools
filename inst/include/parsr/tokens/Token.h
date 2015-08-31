@@ -79,6 +79,88 @@ private:
   TokenType type_;
 };
 
+namespace utils {
+
+inline bool isLeftBracket(const Token& token)
+{
+  switch (token.type()) {
+  case TokenType::LBRACE:
+  case TokenType::LPAREN:
+  case TokenType::LBRACKET:
+  case TokenType::LDBRACKET:
+    return true;
+  default:
+    return false;
+  }
+}
+
+inline bool isRightBracket(const Token& token)
+{
+  switch (token.type()) {
+  case TokenType::RBRACE:
+  case TokenType::RPAREN:
+  case TokenType::RBRACKET:
+  case TokenType::RDBRACKET:
+    return true;
+  default:
+    return false;
+  }
+}
+
+inline bool isSymbolic(const Token& token)
+{
+  switch (token.type()) {
+  case TokenType::SYMBOL:
+  case TokenType::STRING:
+  case TokenType::NUMBER:
+    return true;
+  default:
+    return false;
+  }
+}
+
+inline bool isComplement(TokenType lhs, TokenType rhs)
+{
+  switch (lhs)
+  {
+
+  case TokenType::LPAREN:    return rhs == TokenType::RPAREN;
+  case TokenType::LBRACE:    return rhs == TokenType::RBRACE;
+  case TokenType::LBRACKET:  return rhs == TokenType::RBRACKET;
+  case TokenType::LDBRACKET: return rhs == TokenType::RDBRACKET;
+
+  case TokenType::RPAREN:    return rhs == TokenType::LPAREN;
+  case TokenType::RBRACE:    return rhs == TokenType::LBRACE;
+  case TokenType::RBRACKET:  return rhs == TokenType::LBRACKET;
+  case TokenType::RDBRACKET: return rhs == TokenType::LDBRACKET;
+
+  default:
+    return false;
+  }
+}
+
+inline TokenType complement(TokenType type)
+{
+  switch (type)
+  {
+
+  case TokenType::LPAREN:    return TokenType::RPAREN;
+  case TokenType::LBRACE:    return TokenType::RBRACE;
+  case TokenType::LBRACKET:  return TokenType::RBRACKET;
+  case TokenType::LDBRACKET: return TokenType::RDBRACKET;
+
+  case TokenType::RPAREN:    return TokenType::LPAREN;
+  case TokenType::RBRACE:    return TokenType::LBRACE;
+  case TokenType::RBRACKET:  return TokenType::LBRACKET;
+  case TokenType::RDBRACKET: return TokenType::LDBRACKET;
+
+  default:
+    return TokenType::ERR;
+  }
+}
+
+} // namespace utils
+
 } // namespace tokens
 
 inline std::string toString(tokens::TokenType type)
@@ -87,39 +169,39 @@ inline std::string toString(tokens::TokenType type)
 
   switch (type) {
   case TokenType::LPAREN:
-    return "LPAREN";
+    return "(";
   case TokenType::RPAREN:
-    return "RPAREN";
+    return ")";
   case TokenType::LBRACE:
-    return "LBRACE";
+    return "{";
   case TokenType::RBRACE:
-    return "RBRACE";
+    return "}";
   case TokenType::LBRACKET:
-    return "LBRACKET";
+    return "[";
   case TokenType::RBRACKET:
-    return "RBRACKET";
+    return "]";
   case TokenType::LDBRACKET:
-    return "LDBRACKET";
+    return "[[";
   case TokenType::RDBRACKET:
-    return "RDBRACKET";
+    return "]]";
   case TokenType::SEMI:
-    return "SEMI";
+    return ";";
   case TokenType::COMMA:
-    return "COMMA";
+    return ",";
   case TokenType::NUMBER:
-    return "NUMBER";
+    return "<number>";
   case TokenType::STRING:
-    return "STRING";
+    return "<string>";
   case TokenType::WHITESPACE:
-    return "WHITESPACE";
+    return "<whitespace>";
   case TokenType::COMMENT:
-    return "COMMENT";
+    return "<comment>";
   case TokenType::SYMBOL:
-    return "SYMBOL";
+    return "<symbol>";
   case TokenType::OPERATOR:
-    return "OPERATOR";
+    return "<operator>";
   case TokenType::ERR:
-    return "ERR";
+    return "<err>";
   }
 }
 

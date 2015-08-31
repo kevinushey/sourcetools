@@ -78,6 +78,46 @@ public:
     return tokens_[offset_];
   }
 
+  bool fwdOverWhitespace()
+  {
+    while (isType(tokens::TokenType::WHITESPACE))
+      if (!moveToNextToken())
+        return false;
+          return true;
+  }
+
+  bool fwdOverComments()
+  {
+    while (isType(tokens::TokenType::COMMENT))
+      if (!moveToNextToken())
+        return false;
+          return true;
+  }
+
+  bool fwdOverWhitespaceAndComments()
+  {
+    while (isType(tokens::TokenType::COMMENT) ||
+           isType(tokens::TokenType::WHITESPACE))
+    {
+      if (!moveToNextToken())
+        return false;
+    }
+    return true;
+  }
+
+  const tokens::Token& nextSignificantToken()
+  {
+    TokenCursor clone(*this);
+
+    if (!clone.moveToNextToken())
+      return noSuchToken_;
+
+    if (!clone.fwdOverWhitespaceAndComments())
+      return noSuchToken_;
+
+    return clone;
+  }
+
   bool moveToPosition(std::size_t row, std::size_t column)
   {
     return moveToPosition(Position(row, column));
@@ -97,6 +137,7 @@ public:
   }
 
   tokens::TokenType type() const { return currentToken().type(); }
+  bool isType(tokens::TokenType type) const { return currentToken().type() == type; }
   collections::Position position() const { return currentToken().position(); }
   std::size_t row() const { return currentToken().row(); }
   std::size_t column() const { return currentToken().column(); }
