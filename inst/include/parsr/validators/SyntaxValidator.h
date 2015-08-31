@@ -59,6 +59,26 @@ private:
     errors_.push_back(SyntaxError(token.position(), message));
   }
 
+  void updateBracketStack(const Token& token, std::vector<TokenType>* pStack)
+  {
+    using namespace tokens::utils;
+
+    // Update brace state
+    if (isLeftBracket(token)) {
+      pStack->push_back(token.type());
+    } else if (isRightBracket(token)) {
+      std::size_t size = pStack->size();
+      auto last = pStack->at(size - 1);
+      if (size == 1) {
+        unexpectedToken(token);
+      } else {
+        if (!isComplement(token.type(), last))
+          unexpectedToken(token, toString(complement(last)));
+        pStack->pop_back();
+      }
+    }
+  }
+
 public:
 
   explicit SyntaxValidator(const std::vector<Token>& tokens)
@@ -80,20 +100,7 @@ public:
       TokenType currType = curr.type();
       TokenType nextType = next.type();
 
-      // Update brace state
-      if (isLeftBracket(curr)) {
-        stack.push_back(currType);
-      } else if (isRightBracket(curr)) {
-        std::size_t size = stack.size();
-        auto last = stack[size - 1];
-        if (size == 1) {
-          unexpectedToken(cursor);
-        } else {
-          if (!isComplement(currType, last))
-            unexpectedToken(cursor, toString(complement(last)));
-          stack.pop_back();
-        }
-      }
+      updateBracketStack(cursor, &stack);
 
       /* Check for syntax errors */
 

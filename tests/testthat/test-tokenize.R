@@ -43,7 +43,7 @@ test_that("Numbers are tokenized correctly", {
     tokens <- tokenize_string(number)
     expect_true(length(tokens) == 1, paste("expected a single token ('", number, "')"))
     token <- tokens[[1]]
-    expect_true(token$type == "NUMBER", paste("expected a number ('", token$type, "')"))
+    expect_true(token$type == "<number>", paste("expected a number ('", token$type, "')"))
   }
 
 })
