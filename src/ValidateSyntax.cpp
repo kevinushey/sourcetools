@@ -14,7 +14,6 @@ SEXP asSEXP(const parsr::validators::SyntaxError& error)
 
   UNPROTECT(1);
   return result;
-
 }
 
 extern "C" SEXP parsr_validate_syntax(SEXP contentsSEXP) {

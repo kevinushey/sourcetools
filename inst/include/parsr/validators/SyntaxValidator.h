@@ -50,8 +50,7 @@ private:
   typedef cursors::TokenCursor Cursor;
   typedef tokens::TokenType TokenType;
 
-  void unexpectedToken(const Token& token,
-                       const std::string& expected = std::string())
+  void unexpectedToken(const Token& token, const std::string& expected = std::string())
   {
     std::string message = "unexpected token '" + token.contents() + "'";
     if (!expected.empty())
@@ -99,10 +98,7 @@ public:
       /* Check for syntax errors */
 
       if (sameRow && isSymbolic(curr) && isSymbolic(next)) {
-        errors_.push_back(SyntaxError(
-          cursor.position(),
-          "unexpected token '" + next.contents() + "'"
-        ));
+        unexpectedToken(next);
       }
 
       else if (sameRow && isSymbolic(curr) && nextType == TokenType::LBRACE) {
@@ -110,17 +106,11 @@ public:
       }
 
       else if (currType == TokenType::COMMA && isRightBracket(next)) {
-        errors_.push_back(SyntaxError(
-          cursor.position(),
-          "unexpected closing bracket '" + next.contents() + "'"
-        ));
+        unexpectedToken(curr);
       }
 
       else if (currType == TokenType::OPERATOR && nextType == TokenType::OPERATOR) {
-        errors_.push_back(SyntaxError(
-          cursor.position(),
-          "unexpected operator '" + next.contents() + "'"
-        ));
+        unexpectedToken(next);
       }
 
       else if (currType == TokenType::SEMI) {
@@ -131,6 +121,14 @@ public:
       else if (currType == TokenType::COMMA) {
         if (bracketType == TokenType::LBRACE)
           unexpectedToken(curr, ";");
+      }
+
+      else if (currType == TokenType::ERR) {
+        unexpectedToken(curr);
+      }
+
+      else if (currType == TokenType::NUMBER && isLeftBracket(next)) {
+        unexpectedToken(next);
       }
 
     } while (cursor.moveToNextToken());
