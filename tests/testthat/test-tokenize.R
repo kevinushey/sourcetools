@@ -85,3 +85,19 @@ test_that("The tokenizer works correctly", {
   compare_tokens("x ** 2", c("x", " ", "**", " ", "2"))
 
 })
+
+test_that("`[[` and `[` are tokenized correctly", {
+
+  compare_tokens("x[[1]]", c("x", "[[", "1", "]]"))
+
+  # not really valid R code, but the tokenizer should still
+  # get it right
+  compare_tokens("[[[]]]", c("[[", "[", "]", "]]"))
+
+  compare_tokens(
+    "x[[a[b[[c[1]]]]]]",
+    c("x", "[[", "a", "[", "b", "[[", "c", "[", "1",
+      "]", "]]", "]", "]]")
+  )
+
+})

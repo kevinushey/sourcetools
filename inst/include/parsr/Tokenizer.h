@@ -206,8 +206,10 @@ private:
             consumeToken(cursor, TokenType::RDBRACKET, 2);
           else
             consumeToken(cursor, TokenType::ERR, 1);
+          tokenStack_.pop();
         } else {
           consumeToken(cursor, TokenType::RBRACKET, 1);
+          tokenStack_.pop();
         }
       }
 
