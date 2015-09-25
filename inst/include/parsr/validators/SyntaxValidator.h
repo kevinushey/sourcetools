@@ -104,39 +104,31 @@ public:
 
       /* Check for syntax errors */
 
-      if (sameRow && isSymbolic(curr) && isSymbolic(next)) {
+      if (sameRow && isSymbolic(curr) && isSymbolic(next))
         unexpectedToken(next);
-      }
 
-      else if (sameRow && isSymbolic(curr) && nextType == TokenType::LBRACE) {
+      else if (sameRow && isSymbolic(curr) && nextType == TokenType::LBRACE)
         unexpectedToken(next);
-      }
 
-      else if (currType == TokenType::COMMA && isRightBracket(next)) {
+      else if (currType == TokenType::COMMA && isRightBracket(next))
         unexpectedToken(curr);
-      }
 
-      else if (currType == TokenType::OPERATOR && nextType == TokenType::OPERATOR) {
+      else if (currType == TokenType::OPERATOR &&
+               nextType == TokenType::OPERATOR &&
+               !tokens::utils::isUnaryOp(next))
         unexpectedToken(next);
-      }
 
-      else if (currType == TokenType::SEMI) {
-        if (bracketType != TokenType::LBRACE)
-          unexpectedToken(curr, ",");
-      }
+      else if (currType == TokenType::SEMI && bracketType != TokenType::LBRACE)
+        unexpectedToken(curr, ",");
 
-      else if (currType == TokenType::COMMA) {
-        if (bracketType == TokenType::LBRACE)
+      else if (currType == TokenType::COMMA && bracketType == TokenType::LBRACE)
           unexpectedToken(curr, ";");
-      }
 
-      else if (currType == TokenType::ERR) {
+      else if (currType == TokenType::ERR)
         unexpectedToken(curr);
-      }
 
-      else if (currType == TokenType::NUMBER && isLeftBracket(next)) {
+      else if (currType == TokenType::NUMBER && isLeftBracket(next))
         unexpectedToken(next);
-      }
 
     } while (cursor.moveToNextToken());
 

@@ -159,6 +159,20 @@ inline TokenType complement(TokenType type)
   }
 }
 
+inline bool isUnaryOp(const Token& token)
+{
+  if (token.type() != TokenType::OPERATOR)
+    return false;
+
+  const std::string& contents = token.contents();
+  return
+    contents == "-" ||
+    contents == "+" ||
+    contents == "~" ||
+    contents == "?" ||
+    contents == "!";
+}
+
 } // namespace utils
 
 } // namespace tokens
