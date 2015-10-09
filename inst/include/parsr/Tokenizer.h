@@ -121,6 +121,7 @@ private:
 
   void consumeNumber(TextCursor& cursor)
   {
+    bool success = true;
     std::size_t distance = 0;
 
     // NOTE: A leading `-` is not consumed as part of
@@ -134,6 +135,7 @@ private:
     // Note: '.5' is a valid specification for a number
     if (cursor.peek(distance) == '.') {
       ++distance;
+      success = std::isdigit(cursor.peek(distance));
       while (std::isdigit(cursor.peek(distance)))
         ++distance;
     }
@@ -147,22 +149,16 @@ private:
         ++distance;
 
       // Parse another set of numbers following the E
+      success = std::isdigit(cursor.peek(distance));
       while (std::isdigit(cursor.peek(distance)))
         ++distance;
-
-      // Consume a decimal + numbers
-      if (cursor.peek(distance) == '.') {
-        ++distance;
-        while (std::isdigit(cursor.peek(distance)))
-          ++distance;
-      }
     }
 
     // Consume a final 'L' for integer literals
     if (cursor.peek(distance) == 'L')
       ++distance;
 
-    consumeToken(cursor, TokenType::NUMBER, distance);
+    consumeToken(cursor, success ? TokenType::NUMBER : TokenType::ERR, distance);
   }
 
   void consumeSymbol(TextCursor& cursor)
@@ -227,7 +223,7 @@ private:
 
       else if (ch == '>')  // >=, >
         consumeToken(cursor, TokenType::OPERATOR, 1 + (cursor.peek(1) == '='));
-      else if (ch == '=')  // '=', '=='
+      else if (ch == '=')  // '==', '='
         consumeToken(cursor, TokenType::OPERATOR, 1 + (cursor.peek(1) == '='));
       else if (ch == '|')  // '||', '|'
         consumeToken(cursor, TokenType::OPERATOR, 1 + (cursor.peek(1) == '|'));
