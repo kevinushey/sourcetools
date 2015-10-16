@@ -24,8 +24,8 @@ extern "C" SEXP parsr_validate_syntax(SEXP contentsSEXP) {
   using namespace parsr::tokens;
   using namespace parsr::validators;
 
-  Tokenizer tokenizer(contents);
-  SyntaxValidator validator(tokenizer.tokens());
+  const auto& tokens = parsr::tokenize(contents);
+  SyntaxValidator validator(tokens);
   const std::vector<SyntaxError>& errors = validator.errors();
   std::size_t n = errors.size();
 

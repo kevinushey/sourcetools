@@ -87,7 +87,7 @@ public:
 
     Cursor cursor(tokens);
     std::vector<TokenType> stack;
-    stack.push_back(TokenType::LBRACE);
+    stack.push_back(tokens::LBRACE);
 
     do
     {
@@ -107,27 +107,27 @@ public:
       if (sameRow && isSymbolic(curr) && isSymbolic(next))
         unexpectedToken(next);
 
-      else if (sameRow && isSymbolic(curr) && nextType == TokenType::LBRACE)
+      else if (sameRow && isSymbolic(curr) && nextType == tokens::LBRACE)
         unexpectedToken(next);
 
-      else if (currType == TokenType::COMMA && isRightBracket(next))
+      else if (currType == tokens::COMMA && isRightBracket(next))
         unexpectedToken(curr);
 
-      else if (currType == TokenType::OPERATOR &&
-               nextType == TokenType::OPERATOR &&
-               !tokens::utils::isUnaryOp(next))
+      else if (currType == tokens::OPERATOR &&
+               nextType == tokens::OPERATOR &&
+               !tokens::utils::isValidAsUnaryOp(next))
         unexpectedToken(next);
 
-      else if (currType == TokenType::SEMI && bracketType != TokenType::LBRACE)
+      else if (currType == tokens::SEMI && bracketType != tokens::LBRACE)
         unexpectedToken(curr, ",");
 
-      else if (currType == TokenType::COMMA && bracketType == TokenType::LBRACE)
+      else if (currType == tokens::COMMA && bracketType == tokens::LBRACE)
           unexpectedToken(curr, ";");
 
-      else if (currType == TokenType::ERR)
+      else if (currType == tokens::ERR)
         unexpectedToken(curr);
 
-      else if (currType == TokenType::NUMBER && isLeftBracket(next))
+      else if (currType == tokens::NUMBER && isLeftBracket(next))
         unexpectedToken(next);
 
     } while (cursor.moveToNextToken());

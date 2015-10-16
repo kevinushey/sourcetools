@@ -22,13 +22,7 @@ private:
   typedef tokens::TokenType TokenType;
 
 public:
-  explicit Tokenizer(const std::string& contents)
-  {
-    TextCursor cursor(contents);
-    tokenize(cursor);
-  }
-
-  const std::vector<Token>& tokens() const { return tokens_; }
+  Tokenizer() {}
 
 private:
   void consumeToken(TextCursor& cursor, TokenType type, std::size_t sz)
@@ -64,33 +58,33 @@ private:
     if (success) {
       consumeToken(cursor, type, distance + 1);
     } else {
-      consumeToken(cursor, TokenType::ERR, distance + 1);
+      consumeToken(cursor, tokens::ERR, distance + 1);
     }
   }
 
   void consumeOperator(TextCursor& cursor)
   {
-    consumeUntil(cursor, '%', TokenType::OPERATOR);
+    consumeUntil(cursor, '%', tokens::OPERATOR);
   }
 
   void consumeComment(TextCursor& cursor)
   {
-    consumeUntil(cursor, '\n', TokenType::COMMENT);
+    consumeUntil(cursor, '\n', tokens::COMMENT);
   }
 
   void consumeQuotedSymbol(TextCursor& cursor)
   {
-    consumeUntil(cursor, '`', TokenType::SYMBOL, true);
+    consumeUntil(cursor, '`', tokens::SYMBOL, true);
   }
 
   void consumeQString(TextCursor& cursor)
   {
-    consumeUntil(cursor, '\'', TokenType::STRING, true);
+    consumeUntil(cursor, '\'', tokens::STRING, true);
   }
 
   void consumeQQString(TextCursor& cursor)
   {
-    consumeUntil(cursor, '"', TokenType::STRING, true);
+    consumeUntil(cursor, '"', tokens::STRING, true);
   }
 
   void consumeWhitespace(TextCursor& cursor)
@@ -99,7 +93,7 @@ private:
     while (std::isspace(cursor.peek(distance)))
       ++distance;
 
-    consumeToken(cursor, TokenType::WHITESPACE, distance);
+    consumeToken(cursor, tokens::WHITESPACE, distance);
   }
 
   // NOTE: Don't tokenize '-' as part of number; instead
@@ -152,13 +146,23 @@ private:
       success = std::isdigit(cursor.peek(distance));
       while (std::isdigit(cursor.peek(distance)))
         ++distance;
+
+      // Consume '.' and following numbers. Note that this is
+      // not really a valid number for R but it's better to tokenize
+      // this is a single entity (and then report failure later)
+      if (cursor.peek(distance) == '.') {
+        success = false;
+        ++distance;
+        while (std::isdigit(cursor.peek(distance)))
+          ++distance;
+      }
     }
 
     // Consume a final 'L' for integer literals
     if (cursor.peek(distance) == 'L')
       ++distance;
 
-    consumeToken(cursor, success ? TokenType::NUMBER : TokenType::ERR, distance);
+    consumeToken(cursor, success ? tokens::NUMBER : tokens::ERR, distance);
   }
 
   void consumeSymbol(TextCursor& cursor)
@@ -169,42 +173,48 @@ private:
       ++distance;
       ch = cursor.peek(distance);
     }
-    consumeToken(cursor, TokenType::SYMBOL, distance);
+
+    const char* ptr = &*(cursor.begin() + cursor.offset());
+    consumeToken(cursor, tokens::symbolType(ptr, distance), distance);
   }
 
-  void tokenize(TextCursor& cursor)
+public:
+
+  const std::vector<Token>& tokenize(const std::string& code)
   {
+    TextCursor cursor(code);
+
     while (cursor.isValid()) {
       char ch = cursor.peek();
 
       // Block-related tokens
       if (ch == '{')
-        consumeToken(cursor, TokenType::LBRACE, 1);
+        consumeToken(cursor, tokens::LBRACE, 1);
       else if (ch == '}')
-        consumeToken(cursor, TokenType::RBRACE, 1);
+        consumeToken(cursor, tokens::RBRACE, 1);
       else if (ch == '(')
-        consumeToken(cursor, TokenType::LPAREN, 1);
+        consumeToken(cursor, tokens::LPAREN, 1);
       else if (ch == ')')
-        consumeToken(cursor, TokenType::RPAREN, 1);
+        consumeToken(cursor, tokens::RPAREN, 1);
       else if (ch == '[') {
         if (cursor.peek(1) == '[') {
-          consumeToken(cursor, TokenType::LDBRACKET, 2);
-          tokenStack_.push(TokenType::LDBRACKET);
+          consumeToken(cursor, tokens::LDBRACKET, 2);
+          tokenStack_.push(tokens::LDBRACKET);
         } else {
-          consumeToken(cursor, TokenType::LBRACKET, 1);
-          tokenStack_.push(TokenType::LBRACKET);
+          consumeToken(cursor, tokens::LBRACKET, 1);
+          tokenStack_.push(tokens::LBRACKET);
         }
       } else if (ch == ']') {
         if (tokenStack_.empty()) {
-          consumeToken(cursor, TokenType::ERR, 1);
-        } else if (tokenStack_.top() == TokenType::LDBRACKET) {
+          consumeToken(cursor, tokens::ERR, 1);
+        } else if (tokenStack_.top() == tokens::LDBRACKET) {
           if (cursor.peek(1) == ']')
-            consumeToken(cursor, TokenType::RDBRACKET, 2);
+            consumeToken(cursor, tokens::RDBRACKET, 2);
           else
-            consumeToken(cursor, TokenType::ERR, 1);
+            consumeToken(cursor, tokens::ERR, 1);
           tokenStack_.pop();
         } else {
-          consumeToken(cursor, TokenType::RBRACKET, 1);
+          consumeToken(cursor, tokens::RBRACKET, 1);
           tokenStack_.pop();
         }
       }
@@ -214,43 +224,49 @@ private:
       {
         char next = cursor.peek(1);
         if (next == '-' || next == '=')
-          consumeToken(cursor, TokenType::OPERATOR, 2);
+          consumeToken(cursor, tokens::OPERATOR, 2);
         else if (next == '<' && cursor.peek(2) == '-')
-          consumeToken(cursor, TokenType::OPERATOR, 3);
+          consumeToken(cursor, tokens::OPERATOR, 3);
         else
-          consumeToken(cursor, TokenType::OPERATOR, 1);
+          consumeToken(cursor, tokens::OPERATOR, 1);
       }
 
       else if (ch == '>')  // >=, >
-        consumeToken(cursor, TokenType::OPERATOR, 1 + (cursor.peek(1) == '='));
+        consumeToken(cursor, tokens::OPERATOR, 1 + (cursor.peek(1) == '='));
       else if (ch == '=')  // '==', '='
-        consumeToken(cursor, TokenType::OPERATOR, 1 + (cursor.peek(1) == '='));
+        consumeToken(cursor, tokens::OPERATOR, 1 + (cursor.peek(1) == '='));
       else if (ch == '|')  // '||', '|'
-        consumeToken(cursor, TokenType::OPERATOR, 1 + (cursor.peek(1) == '|'));
+        consumeToken(cursor, tokens::OPERATOR, 1 + (cursor.peek(1) == '|'));
       else if (ch == '&')  // '&&', '&'
-        consumeToken(cursor, TokenType::OPERATOR, 1 + (cursor.peek(1) == '&'));
+        consumeToken(cursor, tokens::OPERATOR, 1 + (cursor.peek(1) == '&'));
       else if (ch == '*')  // **, *
-        consumeToken(cursor, TokenType::OPERATOR, 1 + (cursor.peek(1) == '*'));
+        consumeToken(cursor, tokens::OPERATOR, 1 + (cursor.peek(1) == '*'));
       else if (ch == ':')  // ':::', '::', ':=', ':'
       {
         if (cursor.peek(1) == ':')
-          consumeToken(cursor, TokenType::OPERATOR, 2 + (cursor.peek(2) == ':'));
+          consumeToken(cursor, tokens::OPERATOR, 2 + (cursor.peek(2) == ':'));
         else
-          consumeToken(cursor, TokenType::OPERATOR, 1 + (cursor.peek(1) == '='));
+          consumeToken(cursor, tokens::OPERATOR, 1 + (cursor.peek(1) == '='));
       }
       else if (ch == '!')
-        consumeToken(cursor, TokenType::OPERATOR, 1 + (cursor.peek(1) == '='));
+      {
+        if (cursor.peek(1) == '=')
+          consumeToken(cursor, tokens::OPERATOR, 2);
+        else
+          consumeToken(cursor, tokens::OPERATOR_CAN_BE_UNARY, 1);
+      }
       else if (ch == '-') // '->>', '->', '-'
       {
         if (cursor.peek(1) == '>')
-          consumeToken(cursor, TokenType::OPERATOR, 2 + (cursor.peek(2) == '>'));
+          consumeToken(cursor, tokens::OPERATOR, 2 + (cursor.peek(2) == '>'));
         else
-          consumeToken(cursor, TokenType::OPERATOR, 1);
+          consumeToken(cursor, tokens::OPERATOR_CAN_BE_UNARY, 1);
       }
-      else if (ch == '+' || ch == '/' || ch == '~' ||
-               ch == '@' || ch == '$' || ch == '^' ||
-               ch == '?')
-        consumeToken(cursor, TokenType::OPERATOR, 1);
+      else if (ch == '+' || ch == '~' || ch == '?')
+        consumeToken(cursor, tokens::OPERATOR_CAN_BE_UNARY, 1);
+      else if (ch == '/' || ch == '@' || ch == '$' ||
+               ch == '^' || ch == '?')
+        consumeToken(cursor, tokens::OPERATOR, 1);
 
       // User operators
       else if (ch == '%')
@@ -258,9 +274,9 @@ private:
 
       // Punctuation-related tokens
       else if (ch == ',')
-        consumeToken(cursor, TokenType::COMMA, 1);
+        consumeToken(cursor, tokens::COMMA, 1);
       else if (ch == ';')
-        consumeToken(cursor, TokenType::SEMI, 1);
+        consumeToken(cursor, tokens::SEMI, 1);
 
       // Whitespace
       else if (std::isspace(ch))
@@ -288,14 +304,21 @@ private:
 
       // Nothing matched -- error
       else
-        consumeToken(cursor, TokenType::ERR, 1);
+        consumeToken(cursor, tokens::ERR, 1);
     }
+    return tokens_;
   }
 
 private:
   std::vector<Token> tokens_;
   std::stack<TokenType, std::vector<TokenType>> tokenStack_;
 };
+
+inline std::vector<tokens::Token> tokenize(const std::string& code)
+{
+  Tokenizer tokenizer;
+  return tokenizer.tokenize(code);
+}
 
 }  // namespace parsr
 

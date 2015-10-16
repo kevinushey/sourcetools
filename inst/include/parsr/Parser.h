@@ -41,8 +41,8 @@ public:
 
   ParseNode parse()
   {
-    Tokenizer tokenizer(contents_);
-    Cursor cursor(tokenizer.tokens());
+    const auto& tokens = tokenize(contents_);
+    Cursor cursor(tokens);
 
     ParseNode root;
     do

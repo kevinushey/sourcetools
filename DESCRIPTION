@@ -11,3 +11,5 @@ LazyData: TRUE
 SystemRequirements: C++11
 Suggests:
     testthat
+LinkingTo:
+    testthat

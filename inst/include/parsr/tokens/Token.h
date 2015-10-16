@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <string>
+#include <cstring>
 
 #include <parsr/collections/Position.h>
 #include <parsr/cursors/TextCursor.h>
@@ -10,31 +11,85 @@
 namespace parsr {
 namespace tokens {
 
-enum class TokenType : char
+inline namespace types {
+
+typedef unsigned char TokenType;
+
+inline bool hasType(TokenType self, TokenType other)
 {
-  LPAREN,
-  RPAREN,
-  LBRACE,
-  RBRACE,
-  LBRACKET,
-  RBRACKET,
-  LDBRACKET,
-  RDBRACKET,
-  SEMI,
-  COMMA,
-  NUMBER,
-  STRING,
-  WHITESPACE,
-  COMMENT,
-  SYMBOL,
-  OPERATOR,
-  ERR
-};
+  return (self & other) != 0;
+}
+
+/* Non-nestable types */
+static const TokenType ERR         = 0;
+static const TokenType SEMI        = 1;
+static const TokenType COMMA       = 2;
+static const TokenType SYMBOL      = 3;
+static const TokenType COMMENT     = 4;
+static const TokenType WHITESPACE  = 5;
+static const TokenType STRING      = 6;
+static const TokenType NUMBER      = 7;
+
+/* Nestable types */
+static const TokenType BRACKET   = 1 << 4;
+static const TokenType LPAREN    = BRACKET | 1;
+static const TokenType LBRACE    = BRACKET | 2;
+static const TokenType LBRACKET  = BRACKET | 3;
+static const TokenType LDBRACKET = BRACKET | 4;
+static const TokenType RDBRACKET = BRACKET | 5;
+static const TokenType RPAREN    = BRACKET | 6;
+static const TokenType RBRACE    = BRACKET | 7;
+static const TokenType RBRACKET  = BRACKET | 8;
+
+static const TokenType OPERATOR               = 1 << 5;
+static const TokenType OPERATOR_CAN_BE_UNARY  = OPERATOR | 1;
+
+static const TokenType KEYWORD          = 1 << 6;
+static const TokenType KEYWORD_FOR      = KEYWORD | 1;
+static const TokenType KEYWORD_IN       = KEYWORD | 2;
+static const TokenType KEYWORD_WHILE    = KEYWORD | 3;
+static const TokenType KEYWORD_REPEAT   = KEYWORD | 4;
+static const TokenType KEYWORD_BREAK    = KEYWORD | 5;
+static const TokenType KEYWORD_NEXT     = KEYWORD | 6;
+static const TokenType KEYWORD_IF       = KEYWORD | 7;
+static const TokenType KEYWORD_ELSE     = KEYWORD | 8;
+static const TokenType KEYWORD_FUNCTION = KEYWORD | 9;
+
+inline TokenType symbolType(const char* string, std::size_t n)
+{
+  // TODO: Is this insanity really an optimization or am I just silly?
+  if (n == 2) {
+    if (!std::memcmp(string, "in", n)) return KEYWORD_IN;
+    if (!std::memcmp(string, "if", n)) return KEYWORD_IF;
+  } else if (n == 3) {
+    if (!std::memcmp(string, "for", n)) return KEYWORD_FOR;
+  } else if (n == 4) {
+    if (!std::memcmp(string, "else", n)) return KEYWORD_ELSE;
+    if (!std::memcmp(string, "next", n)) return KEYWORD_NEXT;
+  } else if (n == 5) {
+    if (!std::memcmp(string, "while", n)) return KEYWORD_WHILE;
+    if (!std::memcmp(string, "break", n)) return KEYWORD_BREAK;
+  } else if (n == 6) {
+    if (!std::memcmp(string, "repeat", n)) return KEYWORD_REPEAT;
+  } else if (n == 8) {
+    if (!std::memcmp(string, "function", n)) return KEYWORD_FUNCTION;
+  }
+
+  return SYMBOL;
+}
+
+inline TokenType symbolType(const std::string& symbol)
+{
+  return symbolType(symbol.c_str(), symbol.length());
+}
+
+} // namespace types
 
 class Token
 {
 private:
   typedef cursors::TextCursor TextCursor;
+  typedef collections::Position Position;
 
 public:
 
@@ -46,11 +101,11 @@ public:
   {
   }
 
-  Token(const collections::Position& position)
+  Token(const Position& position)
     : begin_(),
       end_(),
       position_(position),
-      type_(TokenType::ERR)
+      type_(ERR)
   {}
 
   Token(const TextCursor& cursor, TokenType type, std::size_t tokenSize)
@@ -65,7 +120,7 @@ public:
   std::string::const_iterator end() const { return end_; }
   std::string contents() const { return std::string(begin_, end_); }
 
-  const collections::Position& position() const { return position_; }
+  const Position& position() const { return position_; }
   std::size_t row() const { return position_.row; }
   std::size_t column() const { return position_.column; }
 
@@ -75,7 +130,7 @@ private:
   std::string::const_iterator begin_;
   std::string::const_iterator end_;
 
-  collections::Position position_;
+  Position position_;
   TokenType type_;
 };
 
@@ -83,94 +138,87 @@ namespace utils {
 
 inline bool isLeftBracket(const Token& token)
 {
-  switch (token.type()) {
-  case TokenType::LBRACE:
-  case TokenType::LPAREN:
-  case TokenType::LBRACKET:
-  case TokenType::LDBRACKET:
-    return true;
-  default:
-    return false;
-  }
+  const auto& type = token.type();
+  return hasType(type, BRACKET) && (
+      type == LBRACE ||
+      type == LPAREN ||
+      type == LBRACKET ||
+      type == LDBRACKET
+    );
 }
 
 inline bool isRightBracket(const Token& token)
 {
-  switch (token.type()) {
-  case TokenType::RBRACE:
-  case TokenType::RPAREN:
-  case TokenType::RBRACKET:
-  case TokenType::RDBRACKET:
-    return true;
-  default:
-    return false;
-  }
+  const auto& type = token.type();
+  return hasType(type, BRACKET) && (
+      type == RBRACE ||
+      type == RPAREN ||
+      type == RBRACKET ||
+      type == RDBRACKET
+    );
 }
 
 inline bool isSymbolic(const Token& token)
 {
-  switch (token.type()) {
-  case TokenType::SYMBOL:
-  case TokenType::STRING:
-  case TokenType::NUMBER:
-    return true;
-  default:
-    return false;
-  }
+  const auto& type = token.type();
+  return
+    (type & SYMBOL) ||
+    (type & STRING) ||
+    (type & NUMBER);
 }
 
 inline bool isComplement(TokenType lhs, TokenType rhs)
 {
-  switch (lhs)
-  {
+  if ((BRACKET & lhs) == 0 || (BRACKET & rhs) == 0) return false;
 
-  case TokenType::LPAREN:    return rhs == TokenType::RPAREN;
-  case TokenType::LBRACE:    return rhs == TokenType::RBRACE;
-  case TokenType::LBRACKET:  return rhs == TokenType::RBRACKET;
-  case TokenType::LDBRACKET: return rhs == TokenType::RDBRACKET;
+  else if (lhs == LPAREN)    return rhs == RPAREN;
+  else if (lhs == LBRACE)    return rhs == RBRACE;
+  else if (lhs == LBRACKET)  return rhs == RBRACKET;
+  else if (lhs == LDBRACKET) return rhs == RDBRACKET;
 
-  case TokenType::RPAREN:    return rhs == TokenType::LPAREN;
-  case TokenType::RBRACE:    return rhs == TokenType::LBRACE;
-  case TokenType::RBRACKET:  return rhs == TokenType::LBRACKET;
-  case TokenType::RDBRACKET: return rhs == TokenType::LDBRACKET;
+  else if (lhs == RPAREN)    return rhs == LPAREN;
+  else if (lhs == RBRACE)    return rhs == LBRACE;
+  else if (lhs == RBRACKET)  return rhs == LBRACKET;
+  else if (lhs == RDBRACKET) return rhs == LDBRACKET;
 
-  default:
-    return false;
-  }
+  return ERR;
 }
 
 inline TokenType complement(TokenType type)
 {
-  switch (type)
-  {
+  if ((OPERATOR & type) == 0) return ERR;
 
-  case TokenType::LPAREN:    return TokenType::RPAREN;
-  case TokenType::LBRACE:    return TokenType::RBRACE;
-  case TokenType::LBRACKET:  return TokenType::RBRACKET;
-  case TokenType::LDBRACKET: return TokenType::RDBRACKET;
+  else if (type == LPAREN)    return RPAREN;
+  else if (type == LBRACE)    return RBRACE;
+  else if (type == LBRACKET)  return RBRACKET;
+  else if (type == LDBRACKET) return RDBRACKET;
 
-  case TokenType::RPAREN:    return TokenType::LPAREN;
-  case TokenType::RBRACE:    return TokenType::LBRACE;
-  case TokenType::RBRACKET:  return TokenType::LBRACKET;
-  case TokenType::RDBRACKET: return TokenType::LDBRACKET;
+  else if (type == RPAREN)    return LPAREN;
+  else if (type == RBRACE)    return LBRACE;
+  else if (type == RBRACKET)  return LBRACKET;
+  else if (type == RDBRACKET) return LDBRACKET;
 
-  default:
-    return TokenType::ERR;
-  }
+  return ERR;
 }
 
-inline bool isUnaryOp(const Token& token)
+inline bool isKeyword(const Token& token)
 {
-  if (token.type() != TokenType::OPERATOR)
-    return false;
+  return (token.type() & KEYWORD) != 0;
+}
 
-  const std::string& contents = token.contents();
-  return
-    contents == "-" ||
-    contents == "+" ||
-    contents == "~" ||
-    contents == "?" ||
-    contents == "!";
+inline bool isWhitespace(const Token& token)
+{
+  return token.type() == WHITESPACE;
+}
+
+inline bool isOperator(const Token& token)
+{
+  return (token.type() & OPERATOR) != 0;
+}
+
+inline bool isValidAsUnaryOp(const Token& token)
+{
+  return token.type() == OPERATOR_CAN_BE_UNARY;
 }
 
 } // namespace utils
@@ -181,42 +229,62 @@ inline std::string toString(tokens::TokenType type)
 {
   using namespace tokens;
 
-  switch (type) {
-  case TokenType::LPAREN:
+  if (type == LPAREN)
     return "(";
-  case TokenType::RPAREN:
+  else if (type == RPAREN)
     return ")";
-  case TokenType::LBRACE:
+  else if (type == LBRACE)
     return "{";
-  case TokenType::RBRACE:
+  else if (type == RBRACE)
     return "}";
-  case TokenType::LBRACKET:
+  else if (type == LBRACKET)
     return "[";
-  case TokenType::RBRACKET:
+  else if (type == RBRACKET)
     return "]";
-  case TokenType::LDBRACKET:
+  else if (type == LDBRACKET)
     return "[[";
-  case TokenType::RDBRACKET:
+  else if (type == RDBRACKET)
     return "]]";
-  case TokenType::SEMI:
+  else if (type == SEMI)
     return ";";
-  case TokenType::COMMA:
+  else if (type == COMMA)
     return ",";
-  case TokenType::NUMBER:
+  else if (type == NUMBER)
     return "<number>";
-  case TokenType::STRING:
-    return "<string>";
-  case TokenType::WHITESPACE:
+  else if (type == WHITESPACE)
     return "<whitespace>";
-  case TokenType::COMMENT:
+  else if (type == COMMENT)
     return "<comment>";
-  case TokenType::SYMBOL:
-    return "<symbol>";
-  case TokenType::OPERATOR:
+  else if (type == OPERATOR_CAN_BE_UNARY)
+    return "<operator:unary>";
+  else if (type == OPERATOR)
     return "<operator>";
-  case TokenType::ERR:
+  else if (type == KEYWORD_BREAK)
+    return "<keyword:break>";
+  else if (type == KEYWORD_ELSE)
+    return "<keyword:else>";
+  else if (type == KEYWORD_FOR)
+    return "<keyword:for>";
+  else if (type == KEYWORD_FUNCTION)
+    return "<keyword:function>";
+  else if (type == KEYWORD_IF)
+    return "<keyword:if>";
+  else if (type == KEYWORD_IN)
+    return "<keyword:in>";
+  else if (type == KEYWORD_NEXT)
+    return "<keyword:next>";
+  else if (type == KEYWORD_REPEAT)
+    return "<keyword:repeat>";
+  else if (type == KEYWORD_WHILE)
+    return "<keyword:while>";
+  else if (type == SYMBOL)
+    return "<symbol>";
+  else if (type == STRING)
+    return "<string>";
+  else if (type == ERR)
     return "<err>";
-  }
+
+  return "<unknown>";
 }
 
 } // namespace parsr

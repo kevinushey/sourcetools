@@ -57,15 +57,13 @@ extern "C" SEXP parsr_tokenize_file(SEXP absolutePathSEXP)
     return R_NilValue;
   }
 
-  parsr::Tokenizer tokenizer(contents);
-  auto& tokens = tokenizer.tokens();
+  const auto& tokens = parsr::tokenize(contents);
   return parsr::asSEXP(tokens);
 }
 
 extern "C" SEXP parsr_tokenize_string(SEXP stringSEXP)
 {
   const char* string = CHAR(STRING_ELT(stringSEXP, 0));
-  parsr::Tokenizer tokenizer(string);
-  auto& tokens = tokenizer.tokens();
+  const auto& tokens = parsr::tokenize(string);
   return parsr::asSEXP(tokens);
 }

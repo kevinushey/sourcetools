@@ -22,7 +22,7 @@ public:
     : tokens_(tokens),
       offset_(0),
       n_(tokens.size()),
-      noSuchToken_(tokens::TokenType::ERR)
+      noSuchToken_(tokens::ERR)
   {}
 
   bool moveToNextToken()
@@ -73,7 +73,7 @@ public:
 
   bool fwdOverWhitespace()
   {
-    while (isType(tokens::TokenType::WHITESPACE))
+    while (isType(tokens::WHITESPACE))
       if (!moveToNextToken())
         return false;
     return true;
@@ -81,7 +81,7 @@ public:
 
   bool fwdOverComments()
   {
-    while (isType(tokens::TokenType::COMMENT))
+    while (isType(tokens::COMMENT))
       if (!moveToNextToken())
         return false;
     return true;
@@ -89,7 +89,7 @@ public:
 
   bool fwdOverWhitespaceAndComments()
   {
-    while (isType(tokens::TokenType::COMMENT) || isType(tokens::TokenType::WHITESPACE))
+    while (isType(tokens::COMMENT) || isType(tokens::WHITESPACE))
       if (!moveToNextToken())
         return false;
     return true;
