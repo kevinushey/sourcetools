@@ -50,3 +50,13 @@ print.RTokens <- function(x, ...) {
   result <- do.call(base::rbind, x)
   print(result)
 }
+
+#' @export
+parse_string <- function(string) {
+  .Call("parsr_parse_string", string, PACKAGE = "parsr")
+}
+
+#' @export
+parse_file <- function(file) {
+  parse_string(read(file))
+}

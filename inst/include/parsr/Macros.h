@@ -13,12 +13,12 @@
 
 #include <iostream>
 
-#define DEBUG(x) std::cerr << x << std::endl
+#define LOG(x) std::cerr << x << std::endl
 #define DEBUG_BLOCK(x)
 
 #else
 
-#define DEBUG(x)
+#define LOG(x)
 #define DEBUG_BLOCK(x) if (false)
 
 #endif

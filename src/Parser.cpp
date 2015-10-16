@@ -4,12 +4,9 @@
 #include <R.h>
 #include <Rinternals.h>
 
-extern "C" SEXP parsr_parse_string(const std::string& string)
+extern "C" SEXP parsr_parse_string(SEXP stringSEXP)
 {
-  using namespace parsr::parser;
-
-  Parser parser(string);
-  ParseNode node = parser.parse();
-
+  const char* string = CHAR(STRING_ELT(stringSEXP, 0));
+  auto root = parsr::parse(string);
   return R_NilValue;
 }

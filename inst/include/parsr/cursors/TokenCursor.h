@@ -43,12 +43,12 @@ public:
     return true;
   }
 
-  operator const tokens::Token&()
+  operator const Token&()
   {
     return tokens_[offset_];
   }
 
-  const tokens::Token& peekFwd(std::size_t offset = 1)
+  const Token& peekFwd(std::size_t offset = 1)
   {
     std::size_t index = offset_ + offset;
     if (UNLIKELY(index >= n_))
@@ -57,7 +57,7 @@ public:
     return tokens_[index];
   }
 
-  const tokens::Token& peekBwd(std::size_t offset = 1)
+  const Token& peekBwd(std::size_t offset = 1)
   {
     if (UNLIKELY(offset > offset_))
       return noSuchToken_;
@@ -66,7 +66,7 @@ public:
     return tokens_[index];
   }
 
-  const tokens::Token& currentToken() const
+  const Token& currentToken() const
   {
     return tokens_[offset_];
   }
@@ -95,7 +95,7 @@ public:
     return true;
   }
 
-  const tokens::Token& nextSignificantToken()
+  const Token& nextSignificantToken()
   {
     TokenCursor clone(*this);
 
@@ -126,9 +126,15 @@ public:
     );
   }
 
+  friend std::ostream& operator<<(std::ostream& os, const TokenCursor& cursor)
+  {
+    return os << toString(cursor.currentToken());
+  }
+
   tokens::TokenType type() const { return currentToken().type(); }
   bool isType(tokens::TokenType type) const { return currentToken().type() == type; }
   collections::Position position() const { return currentToken().position(); }
+  std::size_t offset() const { return offset_; }
   std::size_t row() const { return currentToken().row(); }
   std::size_t column() const { return currentToken().column(); }
 
@@ -143,6 +149,12 @@ private:
 };
 
 } // namespace cursors
+
+inline std::string toString(const cursors::TokenCursor& cursor)
+{
+  return toString(cursor.currentToken());
+}
+
 } // namespace parsr
 
 #endif /* PARSR_CURSORS_TOKEN_CURSOR_H */

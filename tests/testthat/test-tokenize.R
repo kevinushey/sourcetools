@@ -127,3 +127,4 @@ test_that("keywords are tokenized as keywords", {
   expected <- paste("<keyword:", keywords, ">", sep = "")
   expect_true(all(types == expected))
 })
+

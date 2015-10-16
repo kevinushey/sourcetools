@@ -1,6 +1,8 @@
 #ifndef PARSR_H
 #define PARSR_H
 
+#define PARSR_ENABLE_DEBUG_LOGGING
+
 #include <vector>
 #include <string>
 

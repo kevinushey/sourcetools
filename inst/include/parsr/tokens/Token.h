@@ -1,9 +1,11 @@
 #ifndef PARSR_TOKENS_TOKENS_H
 #define PARSR_TOKENS_TOKENS_H
 
+#include <cstring>
+
 #include <vector>
 #include <string>
-#include <cstring>
+#include <sstream>
 
 #include <parsr/collections/Position.h>
 #include <parsr/cursors/TextCursor.h>
@@ -285,6 +287,25 @@ inline std::string toString(tokens::TokenType type)
     return "<err>";
 
   return "<unknown>";
+}
+
+inline std::string toString(const tokens::Token& token)
+{
+  std::stringstream ss;
+  ss << "[" << token.row() << ":" << token.column() << "]: " << token.contents();
+  return ss.str();
+}
+
+inline std::ostream& operator<<(std::ostream& os, const tokens::Token& token)
+{
+  return os << toString(token);
+}
+
+inline std::ostream& operator<<(std::ostream& os, const std::vector<tokens::Token>& tokens)
+{
+  for (auto& token : tokens)
+    os << token << std::endl;
+  return os;
 }
 
 } // namespace parsr
