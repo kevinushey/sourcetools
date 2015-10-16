@@ -2,3 +2,4 @@
 ^\.Rproj\.user$
 ^\.clang-format$
 ^\.gitignore$
+^benchmarks/
