@@ -83,55 +83,6 @@ public:
 
   explicit SyntaxValidator(const std::vector<Token>& tokens)
   {
-    using namespace tokens::utils;
-
-    Cursor cursor(tokens);
-    std::vector<TokenType> stack;
-    stack.push_back(tokens::LBRACE);
-
-    do
-    {
-      const Token& curr = cursor.currentToken();
-      const Token& next = cursor.nextSignificantToken();
-
-      bool sameRow = curr.row() == next.row();
-      TokenType bracketType = stack[stack.size() - 1];
-
-      TokenType currType = curr.type();
-      TokenType nextType = next.type();
-
-      updateBracketStack(cursor, &stack);
-
-      /* Check for syntax errors */
-
-      if (sameRow && isSymbolic(curr) && isSymbolic(next))
-        unexpectedToken(next);
-
-      else if (sameRow && isSymbolic(curr) && nextType == tokens::LBRACE)
-        unexpectedToken(next);
-
-      else if (currType == tokens::COMMA && isRightBracket(next))
-        unexpectedToken(curr);
-
-      else if (currType == tokens::OPERATOR &&
-               nextType == tokens::OPERATOR &&
-               !tokens::utils::isValidAsUnaryOp(next))
-        unexpectedToken(next);
-
-      else if (currType == tokens::SEMI && bracketType != tokens::LBRACE)
-        unexpectedToken(curr, ",");
-
-      else if (currType == tokens::COMMA && bracketType == tokens::LBRACE)
-          unexpectedToken(curr, ";");
-
-      else if (currType == tokens::ERR)
-        unexpectedToken(curr);
-
-      else if (currType == tokens::NUMBER && isLeftBracket(next))
-        unexpectedToken(next);
-
-    } while (cursor.moveToNextToken());
-
   }
 
   const std::vector<SyntaxError>& errors() const { return errors_; }

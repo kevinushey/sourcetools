@@ -5,6 +5,7 @@
 
 #include <vector>
 #include <string>
+#include <map>
 #include <sstream>
 
 #include <parsr/collections/Position.h>
@@ -13,54 +14,157 @@
 namespace parsr {
 namespace tokens {
 
-inline namespace types {
-
 typedef unsigned char TokenType;
 
-inline bool hasType(TokenType self, TokenType other)
-{
-  return (self & other) != 0;
-}
+inline namespace types {
 
-/* Non-nestable types */
-static const TokenType ERR         = 0;
-static const TokenType SEMI        = 1;
-static const TokenType COMMA       = 2;
-static const TokenType SYMBOL      = 3;
-static const TokenType COMMENT     = 4;
-static const TokenType WHITESPACE  = 5;
-static const TokenType STRING      = 6;
-static const TokenType NUMBER      = 7;
+// Simple, non-nestable types.
+#define PARSR_REGISTER_SIMPLE_TYPE(__NAME__, __TYPE__)         \
+  static const TokenType __NAME__ = __TYPE__
 
-/* Nestable types */
-static const TokenType BRACKET   = 1 << 4;
-static const TokenType LPAREN    = BRACKET | 1;
-static const TokenType LBRACE    = BRACKET | 2;
-static const TokenType LBRACKET  = BRACKET | 3;
-static const TokenType LDBRACKET = BRACKET | 4;
-static const TokenType RDBRACKET = BRACKET | 5;
-static const TokenType RPAREN    = BRACKET | 6;
-static const TokenType RBRACE    = BRACKET | 7;
-static const TokenType RBRACKET  = BRACKET | 8;
+PARSR_REGISTER_SIMPLE_TYPE(ERR,        0);
+PARSR_REGISTER_SIMPLE_TYPE(SEMI,       1);
+PARSR_REGISTER_SIMPLE_TYPE(COMMA,      2);
+PARSR_REGISTER_SIMPLE_TYPE(SYMBOL,     3);
+PARSR_REGISTER_SIMPLE_TYPE(COMMENT,    4);
+PARSR_REGISTER_SIMPLE_TYPE(WHITESPACE, 5);
+PARSR_REGISTER_SIMPLE_TYPE(STRING,     6);
+PARSR_REGISTER_SIMPLE_TYPE(NUMBER,     7);
 
-static const TokenType OPERATOR               = 1 << 5;
-static const TokenType OPERATOR_CAN_BE_UNARY  = OPERATOR | 1;
+// Nestable types. We use the higher order bits to distinguish
+// various language keywords / tokens, e.g.
+//
+//     x x x x x x x x
+//     ---------------
+//     | |   ^         - bracket
+//     | ^             - keyword
+//     ^               - operator
+//
 
-static const TokenType KEYWORD          = 1 << 6;
-static const TokenType KEYWORD_FOR      = KEYWORD | 1;
-static const TokenType KEYWORD_IN       = KEYWORD | 2;
-static const TokenType KEYWORD_WHILE    = KEYWORD | 3;
-static const TokenType KEYWORD_REPEAT   = KEYWORD | 4;
-static const TokenType KEYWORD_BREAK    = KEYWORD | 5;
-static const TokenType KEYWORD_NEXT     = KEYWORD | 6;
-static const TokenType KEYWORD_IF       = KEYWORD | 7;
-static const TokenType KEYWORD_ELSE     = KEYWORD | 8;
-static const TokenType KEYWORD_FUNCTION = KEYWORD | 9;
+#define PARSR_CHECK_MASK(__SELF__, __MASK__)                   \
+  ((__MASK__ & __SELF__) == __MASK__)
+
+/* Brackets */
+#define PARSR_BRACKET_BIT        (1 << 4)
+#define PARSR_BRACKET_RIGHT_BIT  (1 << 3)
+#define PARSR_BRACKET_LEFT_BIT   (1 << 2)
+#define PARSR_BRACKET_MASK       PARSR_BRACKET_BIT
+#define PARSR_BRACKET_LEFT_MASK  (PARSR_BRACKET_BIT | PARSR_BRACKET_LEFT_BIT)
+#define PARSR_BRACKET_RIGHT_MASK (PARSR_BRACKET_BIT | PARSR_BRACKET_RIGHT_BIT)
+
+#define PARSR_REGISTER_BRACKET(__NAME__, __SIDE__, __INDEX__)  \
+  static const TokenType __NAME__ =                            \
+    PARSR_BRACKET_BIT | __SIDE__ | __INDEX__
+
+PARSR_REGISTER_BRACKET(LPAREN,    PARSR_BRACKET_LEFT_BIT, 0);  // 00010100
+PARSR_REGISTER_BRACKET(LBRACE,    PARSR_BRACKET_LEFT_BIT, 1);  // 00010101
+PARSR_REGISTER_BRACKET(LBRACKET,  PARSR_BRACKET_LEFT_BIT, 2);  // 00010110
+PARSR_REGISTER_BRACKET(LDBRACKET, PARSR_BRACKET_LEFT_BIT, 3);  // 00010111
+
+PARSR_REGISTER_BRACKET(RPAREN,    PARSR_BRACKET_RIGHT_BIT, 0); // 00011000
+PARSR_REGISTER_BRACKET(RBRACE,    PARSR_BRACKET_RIGHT_BIT, 1); // 00011001
+PARSR_REGISTER_BRACKET(RBRACKET,  PARSR_BRACKET_RIGHT_BIT, 2); // 00011010
+PARSR_REGISTER_BRACKET(RDBRACKET, PARSR_BRACKET_RIGHT_BIT, 3); // 00011011
+
+/* Operators */
+#define PARSR_OPERATOR_BIT        (1 << 6)
+#define PARSR_OPERATOR_UNARY_BIT  (1 << 5)
+#define PARSR_OPERATOR_MASK       PARSR_OPERATOR_BIT
+#define PARSR_OPERATOR_UNARY_MASK (PARSR_OPERATOR_MASK | PARSR_OPERATOR_UNARY_BIT)
+
+#define PARSR_REGISTER_OPERATOR(__NAME__, __STRING__, __MASKS__) \
+                                                                 \
+  static const TokenType OPERATOR_ ## __NAME__ =                 \
+    PARSR_OPERATOR_BIT | __MASKS__;                              \
+                                                                 \
+  static const char* const                                       \
+    OPERATOR_ ## __NAME__ ## _STRING = __STRING__
+
+#define PARSR_REGISTER_UNARY_OPERATOR(__NAME__, __STRING__, __INDEX__)    \
+  PARSR_REGISTER_OPERATOR(__NAME__, __STRING__, PARSR_OPERATOR_UNARY_BIT | __INDEX__)
+
+// See ?"Syntax" for details on R's operators.
+// Note: All operators registered work in a binary context, but only
+// some will work as unary operators. (Occurring to the left of the token).
+//
+// In other words, -1 is parsed as `-`(1).
+//
+// Note that although brackets are operators we parsed them separately
+// since they need enclosing complements.
+PARSR_REGISTER_UNARY_OPERATOR(PLUS,          "+",    0);
+PARSR_REGISTER_UNARY_OPERATOR(MINUS,         "-",    1);
+PARSR_REGISTER_UNARY_OPERATOR(HELP,          "?",    2);
+PARSR_REGISTER_UNARY_OPERATOR(NEGATION,      "!",    3);
+PARSR_REGISTER_UNARY_OPERATOR(FORMULA,       "~",    4);
+
+PARSR_REGISTER_OPERATOR(NAMESPACE_EXPORTS,   "::",   5);
+PARSR_REGISTER_OPERATOR(NAMESPACE_ALL,       ":::",  6);
+PARSR_REGISTER_OPERATOR(DOLLAR,              "$",    7);
+PARSR_REGISTER_OPERATOR(AT,                  "@",    8);
+PARSR_REGISTER_OPERATOR(HAT,                 "^",    9);
+PARSR_REGISTER_OPERATOR(EXPONENTATION_STARS, "**",  10);
+PARSR_REGISTER_OPERATOR(SEQUENCE,            ":",   11);
+PARSR_REGISTER_OPERATOR(MULTIPLY,            "*",   12);
+PARSR_REGISTER_OPERATOR(DIVIDE,              "/",   13);
+PARSR_REGISTER_OPERATOR(LESS,                "<",   14);
+PARSR_REGISTER_OPERATOR(LESS_OR_EQUAL,       "<=",  15);
+PARSR_REGISTER_OPERATOR(GREATER,             ">",   16);
+PARSR_REGISTER_OPERATOR(GREATER_OR_EQUAL,    ">=",  17);
+PARSR_REGISTER_OPERATOR(EQUAL,               "==",  18);
+PARSR_REGISTER_OPERATOR(NOT_EQUAL,           "!=",  19);
+PARSR_REGISTER_OPERATOR(AND_VECTOR,          "&",   20);
+PARSR_REGISTER_OPERATOR(AND_SCALAR,          "&&",  21);
+PARSR_REGISTER_OPERATOR(OR_VECTOR,           "|",   22);
+PARSR_REGISTER_OPERATOR(OR_SCALAR,           "||",  23);
+PARSR_REGISTER_OPERATOR(ASSIGN_LEFT,         "<-",  24);
+PARSR_REGISTER_OPERATOR(ASSIGN_LEFT_PARENT,  "<<-", 25);
+PARSR_REGISTER_OPERATOR(ASSIGN_RIGHT,        "->",  26);
+PARSR_REGISTER_OPERATOR(ASSIGN_RIGHT_PARENT, "->>", 27);
+PARSR_REGISTER_OPERATOR(ASSIGN_LEFT_EQUALS,  "=",   28);
+PARSR_REGISTER_OPERATOR(ASSIGN_LEFT_COLON,   ":=",  29);
+PARSR_REGISTER_OPERATOR(USER,                "%%",  30);
+
+/* Keywords and symbols */
+#define PARSR_KEYWORD_BIT               (1 << 7)
+#define PARSR_KEYWORD_CONTROL_FLOW_BIT  (1 << 6)
+#define PARSR_KEYWORD_MASK              PARSR_KEYWORD_BIT
+#define PARSR_KEYWORD_CONTROL_FLOW_MASK (PARSR_KEYWORD_MASK | PARSR_KEYWORD_CONTROL_FLOW_BIT)
+
+#define PARSR_REGISTER_KEYWORD(__NAME__, __MASKS__)            \
+  static const TokenType KEYWORD_ ## __NAME__ =                \
+    __MASKS__ | PARSR_KEYWORD_MASK
+
+#define PARSR_REGISTER_CONTROL_FLOW_KEYWORD(__NAME__, __MASKS__) \
+  PARSR_REGISTER_KEYWORD(__NAME__, __MASKS__ | PARSR_KEYWORD_CONTROL_FLOW_MASK)
+
+// See '?Reserved' for a list of reversed R symbols.
+PARSR_REGISTER_CONTROL_FLOW_KEYWORD(IF,       1);
+PARSR_REGISTER_CONTROL_FLOW_KEYWORD(ELSE,     2);
+PARSR_REGISTER_CONTROL_FLOW_KEYWORD(REPEAT,   3);
+PARSR_REGISTER_CONTROL_FLOW_KEYWORD(WHILE,    4);
+PARSR_REGISTER_CONTROL_FLOW_KEYWORD(FUNCTION, 5);
+PARSR_REGISTER_CONTROL_FLOW_KEYWORD(FOR,      6);
+PARSR_REGISTER_CONTROL_FLOW_KEYWORD(IN,       7);
+PARSR_REGISTER_CONTROL_FLOW_KEYWORD(NEXT,     8);
+PARSR_REGISTER_CONTROL_FLOW_KEYWORD(BREAK,    9);
+
+PARSR_REGISTER_KEYWORD(TRUE,                 10);
+PARSR_REGISTER_KEYWORD(FALSE,                11);
+PARSR_REGISTER_KEYWORD(NULL,                 12);
+PARSR_REGISTER_KEYWORD(Inf,                  13);
+PARSR_REGISTER_KEYWORD(NaN,                  14);
+PARSR_REGISTER_KEYWORD(NA,                   15);
+PARSR_REGISTER_KEYWORD(NA_integer_,          16);
+PARSR_REGISTER_KEYWORD(NA_real_,             17);
+PARSR_REGISTER_KEYWORD(NA_complex_,          18);
+PARSR_REGISTER_KEYWORD(NA_character_,        19);
 
 inline TokenType symbolType(const char* string, std::size_t n)
 {
   // TODO: Is this insanity really an optimization or am I just silly?
-  if (n == 2) {
+  if (n < 2 || n > 8) {
+    return SYMBOL;
+  } else if (n == 2) {
     if (!std::memcmp(string, "in", n)) return KEYWORD_IN;
     if (!std::memcmp(string, "if", n)) return KEYWORD_IF;
   } else if (n == 3) {
@@ -85,7 +189,7 @@ inline TokenType symbolType(const std::string& symbol)
   return symbolType(symbol.c_str(), symbol.length());
 }
 
-} // namespace types
+}; // types
 
 class Token
 {
@@ -127,6 +231,7 @@ public:
   std::size_t column() const { return position_.column; }
 
   TokenType type() const { return type_; }
+  bool isType(TokenType type) const { return PARSR_CHECK_MASK(type_, type); }
 
 private:
   std::string::const_iterator begin_;
@@ -136,76 +241,59 @@ private:
   TokenType type_;
 };
 
-namespace utils {
+inline namespace utils {
+
+inline bool isBracket(const Token& token)
+{
+  return PARSR_CHECK_MASK(token.type(), PARSR_BRACKET_MASK);
+}
 
 inline bool isLeftBracket(const Token& token)
 {
-  const auto& type = token.type();
-  return hasType(type, BRACKET) && (
-      type == LBRACE ||
-      type == LPAREN ||
-      type == LBRACKET ||
-      type == LDBRACKET
-    );
+  return PARSR_CHECK_MASK(token.type(), PARSR_BRACKET_LEFT_MASK);
 }
 
 inline bool isRightBracket(const Token& token)
 {
-  const auto& type = token.type();
-  return hasType(type, BRACKET) && (
-      type == RBRACE ||
-      type == RPAREN ||
-      type == RBRACKET ||
-      type == RDBRACKET
-    );
-}
-
-inline bool isSymbolic(const Token& token)
-{
-  const auto& type = token.type();
-  return
-    (type & SYMBOL) ||
-    (type & STRING) ||
-    (type & NUMBER);
+  return PARSR_CHECK_MASK(token.type(), PARSR_BRACKET_RIGHT_MASK);
 }
 
 inline bool isComplement(TokenType lhs, TokenType rhs)
 {
-  if ((BRACKET & lhs) == 0 || (BRACKET & rhs) == 0) return false;
+  static const TokenType mask =
+    PARSR_BRACKET_BIT | PARSR_BRACKET_LEFT_BIT | PARSR_BRACKET_RIGHT_BIT;
 
-  else if (lhs == LPAREN)    return rhs == RPAREN;
-  else if (lhs == LBRACE)    return rhs == RBRACE;
-  else if (lhs == LBRACKET)  return rhs == RBRACKET;
-  else if (lhs == LDBRACKET) return rhs == RDBRACKET;
+  if (PARSR_CHECK_MASK((lhs | rhs), mask))
+    return PARSR_LOWER_BITS(lhs, 2) == PARSR_LOWER_BITS(rhs, 2);
 
-  else if (lhs == RPAREN)    return rhs == LPAREN;
-  else if (lhs == RBRACE)    return rhs == LBRACE;
-  else if (lhs == RBRACKET)  return rhs == LBRACKET;
-  else if (lhs == RDBRACKET) return rhs == LDBRACKET;
-
-  return ERR;
+  return false;
 }
 
 inline TokenType complement(TokenType type)
 {
-  if ((OPERATOR & type) == 0) return ERR;
-
-  else if (type == LPAREN)    return RPAREN;
-  else if (type == LBRACE)    return RBRACE;
-  else if (type == LBRACKET)  return RBRACKET;
-  else if (type == LDBRACKET) return RDBRACKET;
-
-  else if (type == RPAREN)    return LPAREN;
-  else if (type == RBRACE)    return LBRACE;
-  else if (type == RBRACKET)  return LBRACKET;
-  else if (type == RDBRACKET) return LDBRACKET;
-
-  return ERR;
+  static const TokenType mask =
+    PARSR_BRACKET_LEFT_BIT | PARSR_BRACKET_RIGHT_BIT;
+  return type ^ mask;
 }
 
 inline bool isKeyword(const Token& token)
 {
-  return (token.type() & KEYWORD) != 0;
+  return PARSR_CHECK_MASK(token.type(), PARSR_KEYWORD_MASK);
+}
+
+inline bool isControlFlowKeyword(const Token& token)
+{
+  return PARSR_CHECK_MASK(token.type(), PARSR_KEYWORD_CONTROL_FLOW_MASK);
+}
+
+inline bool isOperator(const Token& token)
+{
+  return PARSR_CHECK_MASK(token.type(), PARSR_OPERATOR_MASK);
+}
+
+inline bool isUnaryOperator(const Token& token)
+{
+  return PARSR_CHECK_MASK(token.type(), PARSR_OPERATOR_UNARY_MASK);
 }
 
 inline bool isWhitespace(const Token& token)
@@ -213,78 +301,28 @@ inline bool isWhitespace(const Token& token)
   return token.type() == WHITESPACE;
 }
 
-inline bool isOperator(const Token& token)
-{
-  return (token.type() & OPERATOR) != 0;
-}
-
-inline bool isValidAsUnaryOp(const Token& token)
-{
-  return token.type() == OPERATOR_CAN_BE_UNARY;
-}
-
 } // namespace utils
-
 } // namespace tokens
 
 inline std::string toString(tokens::TokenType type)
 {
   using namespace tokens;
 
-  if (type == LPAREN)
-    return "(";
-  else if (type == RPAREN)
-    return ")";
-  else if (type == LBRACE)
-    return "{";
-  else if (type == RBRACE)
-    return "}";
-  else if (type == LBRACKET)
-    return "[";
-  else if (type == RBRACKET)
-    return "]";
-  else if (type == LDBRACKET)
-    return "[[";
-  else if (type == RDBRACKET)
-    return "]]";
-  else if (type == SEMI)
-    return ";";
-  else if (type == COMMA)
-    return ",";
-  else if (type == NUMBER)
-    return "<number>";
-  else if (type == WHITESPACE)
-    return "<whitespace>";
-  else if (type == COMMENT)
-    return "<comment>";
-  else if (type == OPERATOR_CAN_BE_UNARY)
-    return "<operator:unary>";
-  else if (type == OPERATOR)
+       if (type == ERR)        return "<err>";
+  else if (type == SEMI)       return "<semi>";
+  else if (type == COMMA)      return "<comma>";
+  else if (type == SYMBOL)     return "<symbol>";
+  else if (type == COMMENT)    return "<comment>";
+  else if (type == WHITESPACE) return "<whitespace>";
+  else if (type == STRING)     return "<string>";
+  else if (type == NUMBER)     return "<number>";
+
+  else if (PARSR_CHECK_MASK(type, PARSR_BRACKET_MASK))
+    return "<bracket>";
+  else if (PARSR_CHECK_MASK(type, PARSR_KEYWORD_MASK))
+    return "<keyword>";
+  else if (PARSR_CHECK_MASK(type, PARSR_OPERATOR_MASK))
     return "<operator>";
-  else if (type == KEYWORD_BREAK)
-    return "<keyword:break>";
-  else if (type == KEYWORD_ELSE)
-    return "<keyword:else>";
-  else if (type == KEYWORD_FOR)
-    return "<keyword:for>";
-  else if (type == KEYWORD_FUNCTION)
-    return "<keyword:function>";
-  else if (type == KEYWORD_IF)
-    return "<keyword:if>";
-  else if (type == KEYWORD_IN)
-    return "<keyword:in>";
-  else if (type == KEYWORD_NEXT)
-    return "<keyword:next>";
-  else if (type == KEYWORD_REPEAT)
-    return "<keyword:repeat>";
-  else if (type == KEYWORD_WHILE)
-    return "<keyword:while>";
-  else if (type == SYMBOL)
-    return "<symbol>";
-  else if (type == STRING)
-    return "<string>";
-  else if (type == ERR)
-    return "<err>";
 
   return "<unknown>";
 }

@@ -76,7 +76,16 @@ private:
   }
 
 #define CHECK_TYPE(__CURSOR__, __TYPE__)                       \
-  checkType(__CURSOR__, __TYPE__, __FILE__, __LINE__)
+  do                                                           \
+  {                                                            \
+    checkType(__CURSOR__, __TYPE__, __FILE__, __LINE__);       \
+  } while (0)
+
+#define CHECK_TYPE_NOT(__CURSOR__, __TYPE__)                   \
+  do                                                           \
+  {                                                            \
+    !checkType(__CURSOR__, __TYPE__, __FILE__, __LINE__);      \
+  } while (0)
 
 #define PARSE_ACTION(__CURSOR__, __ACTION__)                   \
   do {                                                         \
@@ -87,14 +96,92 @@ private:
 #define MOVE_TO_NEXT_TOKEN(__CURSOR__)                         \
   PARSE_ACTION(__CURSOR__, moveToNextToken)
 
+#define MOVE_TO_NEXT_SIGNIFICANT_TOKEN(__CURSOR__)             \
+  PARSE_ACTION(__CURSOR__, moveToNextSignificantToken)
+
 #define FWD_OVER_WHITESPACE_AND_COMMENTS(__CURSOR__)           \
   PARSE_ACTION(__CURSOR__, fwdOverWhitespaceAndComments)
+
+  void parseFunctionArgumentList(TokenCursor* pCursor, std::shared_ptr<ParseNode>& pNode)
+  {
+  }
+
+  void parseFunction(TokenCursor* pCursor, std::shared_ptr<ParseNode>& pNode)
+  {
+    CHECK_TYPE(pCursor, tokens::KEYWORD_FUNCTION);
+    MOVE_TO_NEXT_SIGNIFICANT_TOKEN(pCursor);
+    CHECK_TYPE(pCursor, tokens::LPAREN);
+    MOVE_TO_NEXT_SIGNIFICANT_TOKEN(pCursor);
+    parseFunctionArgumentList(pCursor, pNode);
+    CHECK_TYPE(pCursor, tokens::RPAREN);
+    MOVE_TO_NEXT_SIGNIFICANT_TOKEN(pCursor);
+    parseTopLevelExpression(pCursor, pNode);
+  }
+
+  void parseFor(TokenCursor* pCursor, std::shared_ptr<ParseNode>& pNode)
+  {
+    CHECK_TYPE(pCursor, tokens::KEYWORD_FOR);
+    MOVE_TO_NEXT_SIGNIFICANT_TOKEN(pCursor);
+    CHECK_TYPE(pCursor, tokens::LPAREN);
+    MOVE_TO_NEXT_SIGNIFICANT_TOKEN(pCursor);
+    CHECK_TYPE(pCursor, tokens::SYMBOL);
+  }
+  void parseWhile(TokenCursor* pCursor, std::shared_ptr<ParseNode>& pNode)
+  {
+    CHECK_TYPE(pCursor, tokens::KEYWORD_WHILE);
+    MOVE_TO_NEXT_SIGNIFICANT_TOKEN(pCursor);
+    CHECK_TYPE(pCursor, tokens::LPAREN);
+    MOVE_TO_NEXT_SIGNIFICANT_TOKEN(pCursor);
+    parseTopLevelExpression(pCursor, pNode);
+    CHECK_TYPE(pCursor, tokens::RPAREN);
+    MOVE_TO_NEXT_SIGNIFICANT_TOKEN(pCursor);
+    parseTopLevelExpression(pCursor, pNode);
+  }
+
+  void parseRepeat(TokenCursor* pCursor, std::shared_ptr<ParseNode>& pNode)
+  {
+    CHECK_TYPE(pCursor, tokens::KEYWORD_REPEAT);
+    MOVE_TO_NEXT_SIGNIFICANT_TOKEN(pCursor);
+    parseTopLevelExpression(pCursor, pNode);
+  }
+
+  void parseIf(TokenCursor* pCursor, std::shared_ptr<ParseNode>& pNode)
+  {
+    CHECK_TYPE(pCursor, tokens::KEYWORD_IF);
+    MOVE_TO_NEXT_SIGNIFICANT_TOKEN(pCursor);
+    CHECK_TYPE(pCursor, tokens::LPAREN);
+    MOVE_TO_NEXT_SIGNIFICANT_TOKEN(pCursor);
+    parseTopLevelExpression(pCursor, pNode);
+    CHECK_TYPE(pCursor, tokens::RPAREN);
+    MOVE_TO_NEXT_SIGNIFICANT_TOKEN(pCursor);
+    parseTopLevelExpression(pCursor, pNode);
+    if (pCursor->isType(tokens::KEYWORD_ELSE)) {
+      MOVE_TO_NEXT_SIGNIFICANT_TOKEN(pCursor);
+      parseTopLevelExpression(pCursor, pNode);
+    }
+  }
 
   void parseTopLevelExpression(TokenCursor* pCursor, std::shared_ptr<ParseNode>& pNode)
   {
     FWD_OVER_WHITESPACE_AND_COMMENTS(pCursor);
 
-    if (pCursor->type() == tokens::LBRACE)
+    if (tokens::isKeyword(pCursor->currentToken()))
+    {
+      using namespace tokens::types;
+      TokenType type = pCursor->type();
+      if (type == KEYWORD_IF)
+        parseIf(pCursor, pNode);
+      else if (type == KEYWORD_REPEAT)
+        parseRepeat(pCursor, pNode);
+      else if (type == KEYWORD_FUNCTION)
+        parseFunction(pCursor, pNode);
+      else if (type == KEYWORD_FOR)
+        parseFor(pCursor, pNode);
+      else if (type == KEYWORD_WHILE)
+        parseWhile(pCursor, pNode);
+    }
+
+    else if (pCursor->type() == tokens::LBRACE)
     {
       MOVE_TO_NEXT_TOKEN(pCursor);
       FWD_OVER_WHITESPACE_AND_COMMENTS(pCursor);

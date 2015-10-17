@@ -62,9 +62,9 @@ private:
     }
   }
 
-  void consumeOperator(TextCursor& cursor)
+  void consumeUserOperator(TextCursor& cursor)
   {
-    consumeUntil(cursor, '%', tokens::OPERATOR);
+    consumeUntil(cursor, '%', tokens::OPERATOR_USER);
   }
 
   void consumeComment(TextCursor& cursor)
@@ -223,54 +223,102 @@ public:
       else if (ch == '<')  // <<-, <=, <-, <
       {
         char next = cursor.peek(1);
-        if (next == '-' || next == '=')
-          consumeToken(cursor, tokens::OPERATOR, 2);
+        if (next == '-') // <-
+          consumeToken(cursor, tokens::OPERATOR_ASSIGN_LEFT, 2);
+        else if (next == '=') // <=
+          consumeToken(cursor, tokens::OPERATOR_LESS_OR_EQUAL, 2);
         else if (next == '<' && cursor.peek(2) == '-')
-          consumeToken(cursor, tokens::OPERATOR, 3);
+          consumeToken(cursor, tokens::OPERATOR_ASSIGN_LEFT_PARENT, 3);
         else
-          consumeToken(cursor, tokens::OPERATOR, 1);
+          consumeToken(cursor, tokens::OPERATOR_LESS, 1);
       }
 
       else if (ch == '>')  // >=, >
-        consumeToken(cursor, tokens::OPERATOR, 1 + (cursor.peek(1) == '='));
+      {
+        if (cursor.peek(1) == '=')
+          consumeToken(cursor, tokens::OPERATOR_GREATER_OR_EQUAL, 2);
+        else
+          consumeToken(cursor, tokens::OPERATOR_GREATER, 1);
+      }
       else if (ch == '=')  // '==', '='
-        consumeToken(cursor, tokens::OPERATOR, 1 + (cursor.peek(1) == '='));
+      {
+        if (cursor.peek(1) == '=')
+          consumeToken(cursor, tokens::OPERATOR_EQUAL, 2);
+        else
+          consumeToken(cursor, tokens::OPERATOR_ASSIGN_LEFT_EQUALS, 1);
+      }
       else if (ch == '|')  // '||', '|'
-        consumeToken(cursor, tokens::OPERATOR, 1 + (cursor.peek(1) == '|'));
+      {
+        if (cursor.peek(1) == '|')
+          consumeToken(cursor, tokens::OPERATOR_OR_SCALAR, 2);
+        else
+          consumeToken(cursor, tokens::OPERATOR_OR_VECTOR, 1);
+      }
       else if (ch == '&')  // '&&', '&'
-        consumeToken(cursor, tokens::OPERATOR, 1 + (cursor.peek(1) == '&'));
+      {
+        if (cursor.peek(1) == '&')
+          consumeToken(cursor, tokens::OPERATOR_AND_SCALAR, 2);
+        else
+          consumeToken(cursor, tokens::OPERATOR_AND_VECTOR, 1);
+      }
       else if (ch == '*')  // **, *
-        consumeToken(cursor, tokens::OPERATOR, 1 + (cursor.peek(1) == '*'));
+      {
+        if (cursor.peek(1) == '*')
+          consumeToken(cursor, tokens::OPERATOR_EXPONENTATION_STARS, 2);
+        else
+          consumeToken(cursor, tokens::OPERATOR_MULTIPLY, 1);
+      }
       else if (ch == ':')  // ':::', '::', ':=', ':'
       {
         if (cursor.peek(1) == ':')
-          consumeToken(cursor, tokens::OPERATOR, 2 + (cursor.peek(2) == ':'));
+        {
+          if (cursor.peek(2) == ':')
+            consumeToken(cursor, tokens::OPERATOR_NAMESPACE_ALL, 3);
+          else
+            consumeToken(cursor, tokens::OPERATOR_NAMESPACE_EXPORTS, 2);
+        }
+        else if (cursor.peek(1) == '=')
+          consumeToken(cursor, tokens::OPERATOR_ASSIGN_LEFT_COLON, 2);
         else
-          consumeToken(cursor, tokens::OPERATOR, 1 + (cursor.peek(1) == '='));
+          consumeToken(cursor, tokens::OPERATOR_SEQUENCE, 1);
       }
       else if (ch == '!')
       {
         if (cursor.peek(1) == '=')
-          consumeToken(cursor, tokens::OPERATOR, 2);
+          consumeToken(cursor, tokens::OPERATOR_NOT_EQUAL, 2);
         else
-          consumeToken(cursor, tokens::OPERATOR_CAN_BE_UNARY, 1);
+          consumeToken(cursor, tokens::OPERATOR_NEGATION, 1);
       }
       else if (ch == '-') // '->>', '->', '-'
       {
         if (cursor.peek(1) == '>')
-          consumeToken(cursor, tokens::OPERATOR, 2 + (cursor.peek(2) == '>'));
+        {
+          if (cursor.peek(2) == '>')
+            consumeToken(cursor, tokens::OPERATOR_ASSIGN_RIGHT_PARENT, 3);
+          else
+            consumeToken(cursor, tokens::OPERATOR_ASSIGN_RIGHT, 2);
+        }
         else
-          consumeToken(cursor, tokens::OPERATOR_CAN_BE_UNARY, 1);
+          consumeToken(cursor, tokens::OPERATOR_MINUS, 1);
       }
-      else if (ch == '+' || ch == '~' || ch == '?')
-        consumeToken(cursor, tokens::OPERATOR_CAN_BE_UNARY, 1);
-      else if (ch == '/' || ch == '@' || ch == '$' ||
-               ch == '^' || ch == '?')
-        consumeToken(cursor, tokens::OPERATOR, 1);
+      else if (ch == '+')
+        consumeToken(cursor, tokens::OPERATOR_PLUS, 1);
+      else if (ch == '~')
+        consumeToken(cursor, tokens::OPERATOR_FORMULA, 1);
+      else if (ch == '?')
+        consumeToken(cursor, tokens::OPERATOR_HELP, 1);
+      else if (ch == '/')
+        consumeToken(cursor, tokens::OPERATOR_DIVIDE, 1);
+      else if (ch == '@')
+        consumeToken(cursor, tokens::OPERATOR_AT, 1);
+      else if (ch == '$')
+        consumeToken(cursor, tokens::OPERATOR_DOLLAR, 1);
+      else if (ch == '^')
+        consumeToken(cursor, tokens::OPERATOR_HAT, 1);
 
       // User operators
       else if (ch == '%')
-        consumeOperator(cursor);
+        consumeUserOperator(cursor);
 
       // Punctuation-related tokens
       else if (ch == ',')

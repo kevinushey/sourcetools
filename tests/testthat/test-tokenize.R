@@ -28,6 +28,8 @@ test_that("Operators are tokenized correctly", {
     "=", "?", "**", "%%", "%for%"
   )
 
+  tokenized <- tokenize_string(paste(operators, collapse = " "))
+
   for (operator in operators) {
     tokens <- tokenize_string(operator)
     expect_true(length(tokens) == 1, paste("expected a single token ('", operator, "')"))
@@ -123,8 +125,5 @@ test_that("keywords are tokenized as keywords", {
   types <- unlist(lapply(filtered, `[[`, "type"))
 
   expect_true(all(grepl("keyword", types)))
-
-  expected <- paste("<keyword:", keywords, ">", sep = "")
-  expect_true(all(types == expected))
 })
 
