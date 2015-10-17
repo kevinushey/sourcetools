@@ -14,7 +14,7 @@
 namespace parsr {
 namespace tokens {
 
-typedef unsigned char TokenType;
+typedef uint32_t TokenType;
 
 inline namespace types {
 
@@ -22,30 +22,17 @@ inline namespace types {
 #define PARSR_REGISTER_SIMPLE_TYPE(__NAME__, __TYPE__)         \
   static const TokenType __NAME__ = __TYPE__
 
-PARSR_REGISTER_SIMPLE_TYPE(ERR,        0);
-PARSR_REGISTER_SIMPLE_TYPE(SEMI,       1);
-PARSR_REGISTER_SIMPLE_TYPE(COMMA,      2);
-PARSR_REGISTER_SIMPLE_TYPE(SYMBOL,     3);
-PARSR_REGISTER_SIMPLE_TYPE(COMMENT,    4);
-PARSR_REGISTER_SIMPLE_TYPE(WHITESPACE, 5);
-PARSR_REGISTER_SIMPLE_TYPE(STRING,     6);
-PARSR_REGISTER_SIMPLE_TYPE(NUMBER,     7);
-
-// Nestable types. We use the higher order bits to distinguish
-// various language keywords / tokens, e.g.
-//
-//     x x x x x x x x
-//     ---------------
-//     | |   ^         - bracket
-//     | ^             - keyword
-//     ^               - operator
-//
-
-#define PARSR_CHECK_MASK(__SELF__, __MASK__)                   \
-  ((__MASK__ & __SELF__) == __MASK__)
+PARSR_REGISTER_SIMPLE_TYPE(ERR,        (1 <<  8));
+PARSR_REGISTER_SIMPLE_TYPE(SEMI,       (1 <<  9));
+PARSR_REGISTER_SIMPLE_TYPE(COMMA,      (1 << 10));
+PARSR_REGISTER_SIMPLE_TYPE(SYMBOL,     (1 << 11));
+PARSR_REGISTER_SIMPLE_TYPE(COMMENT,    (1 << 12));
+PARSR_REGISTER_SIMPLE_TYPE(WHITESPACE, (1 << 13));
+PARSR_REGISTER_SIMPLE_TYPE(STRING,     (1 << 14));
+PARSR_REGISTER_SIMPLE_TYPE(NUMBER,     (1 << 15));
 
 /* Brackets */
-#define PARSR_BRACKET_BIT        (1 << 4)
+#define PARSR_BRACKET_BIT        (1 << 16)
 #define PARSR_BRACKET_RIGHT_BIT  (1 << 3)
 #define PARSR_BRACKET_LEFT_BIT   (1 << 2)
 #define PARSR_BRACKET_MASK       PARSR_BRACKET_BIT
@@ -67,7 +54,7 @@ PARSR_REGISTER_BRACKET(RBRACKET,  PARSR_BRACKET_RIGHT_BIT, 2); // 00011010
 PARSR_REGISTER_BRACKET(RDBRACKET, PARSR_BRACKET_RIGHT_BIT, 3); // 00011011
 
 /* Operators */
-#define PARSR_OPERATOR_BIT        (1 << 6)
+#define PARSR_OPERATOR_BIT        (1 << 17)
 #define PARSR_OPERATOR_UNARY_BIT  (1 << 5)
 #define PARSR_OPERATOR_MASK       PARSR_OPERATOR_BIT
 #define PARSR_OPERATOR_UNARY_MASK (PARSR_OPERATOR_MASK | PARSR_OPERATOR_UNARY_BIT)
@@ -89,8 +76,8 @@ PARSR_REGISTER_BRACKET(RDBRACKET, PARSR_BRACKET_RIGHT_BIT, 3); // 00011011
 //
 // In other words, -1 is parsed as `-`(1).
 //
-// Note that although brackets are operators we parsed them separately
-// since they need enclosing complements.
+// Note that although brackets are operators we tokenize them separately,
+// since we need to later check for their paired complement.
 PARSR_REGISTER_UNARY_OPERATOR(PLUS,          "+",    0);
 PARSR_REGISTER_UNARY_OPERATOR(MINUS,         "-",    1);
 PARSR_REGISTER_UNARY_OPERATOR(HELP,          "?",    2);
@@ -125,8 +112,8 @@ PARSR_REGISTER_OPERATOR(ASSIGN_LEFT_COLON,   ":=",  29);
 PARSR_REGISTER_OPERATOR(USER,                "%%",  30);
 
 /* Keywords and symbols */
-#define PARSR_KEYWORD_BIT               (1 << 7)
-#define PARSR_KEYWORD_CONTROL_FLOW_BIT  (1 << 6)
+#define PARSR_KEYWORD_BIT               (1 << 18)
+#define PARSR_KEYWORD_CONTROL_FLOW_BIT  (1 << 5)
 #define PARSR_KEYWORD_MASK              PARSR_KEYWORD_BIT
 #define PARSR_KEYWORD_CONTROL_FLOW_MASK (PARSR_KEYWORD_MASK | PARSR_KEYWORD_CONTROL_FLOW_BIT)
 
@@ -162,23 +149,35 @@ PARSR_REGISTER_KEYWORD(NA_character_,        19);
 inline TokenType symbolType(const char* string, std::size_t n)
 {
   // TODO: Is this insanity really an optimization or am I just silly?
-  if (n < 2 || n > 8) {
+  if (n < 2 || n > 13) {
     return SYMBOL;
   } else if (n == 2) {
     if (!std::memcmp(string, "in", n)) return KEYWORD_IN;
     if (!std::memcmp(string, "if", n)) return KEYWORD_IF;
+    if (!std::memcmp(string, "NA", n)) return KEYWORD_NA;
   } else if (n == 3) {
     if (!std::memcmp(string, "for", n)) return KEYWORD_FOR;
+    if (!std::memcmp(string, "Inf", n)) return KEYWORD_Inf;
+    if (!std::memcmp(string, "NaN", n)) return KEYWORD_NaN;
   } else if (n == 4) {
     if (!std::memcmp(string, "else", n)) return KEYWORD_ELSE;
     if (!std::memcmp(string, "next", n)) return KEYWORD_NEXT;
+    if (!std::memcmp(string, "TRUE", n)) return KEYWORD_TRUE;
+    if (!std::memcmp(string, "NULL", n)) return KEYWORD_NULL;
   } else if (n == 5) {
     if (!std::memcmp(string, "while", n)) return KEYWORD_WHILE;
     if (!std::memcmp(string, "break", n)) return KEYWORD_BREAK;
+    if (!std::memcmp(string, "FALSE", n)) return KEYWORD_FALSE;
   } else if (n == 6) {
     if (!std::memcmp(string, "repeat", n)) return KEYWORD_REPEAT;
   } else if (n == 8) {
     if (!std::memcmp(string, "function", n)) return KEYWORD_FUNCTION;
+    if (!std::memcmp(string, "NA_real_", n)) return KEYWORD_NA_real_;
+  } else if (n == 11) {
+    if (!std::memcmp(string, "NA_integer_", n)) return KEYWORD_NA_integer_;
+    if (!std::memcmp(string, "NA_complex_", n)) return KEYWORD_NA_complex_;
+  } else if (n == 13) {
+    if (!std::memcmp(string, "NA_character_", n)) return KEYWORD_NA_character_;
   }
 
   return SYMBOL;
@@ -189,7 +188,7 @@ inline TokenType symbolType(const std::string& symbol)
   return symbolType(symbol.c_str(), symbol.length());
 }
 
-}; // types
+} // end namespace types
 
 class Token
 {

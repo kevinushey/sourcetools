@@ -127,9 +127,9 @@ private:
 
     // Consume a dot for decimals
     // Note: '.5' is a valid specification for a number
+    // So is '100.'; ie, with a trailing decimal.
     if (cursor.peek(distance) == '.') {
       ++distance;
-      success = std::isdigit(cursor.peek(distance));
       while (std::isdigit(cursor.peek(distance)))
         ++distance;
     }

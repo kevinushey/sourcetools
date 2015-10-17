@@ -10,6 +10,9 @@
 # define UNLIKELY(x) x
 #endif
 
+#define PARSR_CHECK_MASK(__SELF__, __MASK__)                   \
+  ((__MASK__ & __SELF__) == __MASK__)
+
 #define PARSR_LOWER_BITS(__VALUE__, __BITS__)                   \
   (((1 << __BITS__) - 1) & __VALUE__)
 

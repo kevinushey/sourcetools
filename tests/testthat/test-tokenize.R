@@ -39,7 +39,7 @@ test_that("Operators are tokenized correctly", {
 test_that("Numbers are tokenized correctly", {
 
   numbers <- c("1", "1.0", "0.1", ".1", "0.1E1", "1L", "1.0L", "1.5L",
-               "1E1", "1E-1", "1E-1L", ".100E-105L")
+               "1E1", "1E-1", "1E-1L", ".100E-105L", "0.", "100.")
 
   for (number in numbers) {
     tokens <- tokenize_string(number)
@@ -116,14 +116,37 @@ test_that("invalid number e.g. 1E1.5 tokenized as single entity", {
 })
 
 test_that("keywords are tokenized as keywords", {
+
   keywords <- c("if", "else", "repeat", "while", "function",
-                "for", "in", "next", "break")
+                "for", "in", "next", "break",
+                "TRUE", "FALSE", "NULL", "Inf", "NaN", "NA",
+                "NA_integer_", "NA_real_", "NA_complex_", "NA_character_")
+
   tokens <- tokenize_string(paste(keywords, collapse = " "))
+
   filtered <- Filter(function(x) {
     x$type != "<whitespace>"
   }, tokens)
+
   types <- unlist(lapply(filtered, `[[`, "type"))
 
   expect_true(all(grepl("keyword", types)))
 })
 
+test_that("files in packages are tokenized without errors", {
+  skip_on_cran()
+
+  paths <- list.dirs("~/git", full.names = TRUE, recursive = FALSE)
+  packages <- paths[file.exists(file.path(paths, "DESCRIPTION"))]
+  R <- file.path(packages, "R")
+
+  for (dir in R) {
+    files <- list.files(dir, pattern = "R$", full.names = TRUE)
+    for (file in files) {
+      tokens <- tokenize_file(file)
+      errors <- Filter(function(x) x$type == "<err>", tokens)
+      expect_true(length(errors) == 0)
+    }
+  }
+
+})
