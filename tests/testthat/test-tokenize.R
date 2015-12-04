@@ -123,15 +123,12 @@ test_that("keywords are tokenized as keywords", {
                 "TRUE", "FALSE", "NULL", "Inf", "NaN", "NA",
                 "NA_integer_", "NA_real_", "NA_complex_", "NA_character_")
 
-  tokens <- tokenize_string(paste(keywords, collapse = " "))
-
-  filtered <- Filter(function(x) {
-    x$type != "whitespace"
-  }, tokens)
+  tokens <- lapply(keywords, function(keyword) {
+    tokenize_string(keyword)[[1]]
+  })
 
   types <- unlist(lapply(filtered, `[[`, "type"))
-
-  expect_true(all(grepl("keyword", types)))
+  expect_true(all(types == "keyword"))
 })
 
 test_that("files in packages are tokenized without errors", {
