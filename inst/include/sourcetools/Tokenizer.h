@@ -96,7 +96,7 @@ private:
     consumeToken(cursor, tokens::WHITESPACE, distance);
   }
 
-  // NOTE: Don't tokenize '-' as part of number; instead
+  // NOTE: Don't tokenize '-' or '+' as part of number; instead
   // it's parsed as a unary operator.
   bool isStartOfNumber(TextCursor& cursor)
   {
@@ -118,7 +118,7 @@ private:
     bool success = true;
     std::size_t distance = 0;
 
-    // NOTE: A leading `-` is not consumed as part of
+    // NOTE: A leading '-' or '+' is not consumed as part of
     // the number.
 
     // Consume digits
@@ -138,8 +138,8 @@ private:
     if (cursor.peek(distance) == 'e' || cursor.peek(distance) == 'E') {
       ++distance;
 
-      // Consume a '-' for a negative number
-      if (cursor.peek(distance) == '-')
+      // Consume a '-' or a '+' for a negative number
+      if (cursor.peek(distance) == '-' || cursor.peek(distance) == '+')
         ++distance;
 
       // Parse another set of numbers following the E

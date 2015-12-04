@@ -307,23 +307,23 @@ inline std::string toString(tokens::TokenType type)
 {
   using namespace tokens;
 
-       if (type == ERR)        return "<err>";
-  else if (type == SEMI)       return "<semi>";
-  else if (type == COMMA)      return "<comma>";
-  else if (type == SYMBOL)     return "<symbol>";
-  else if (type == COMMENT)    return "<comment>";
-  else if (type == WHITESPACE) return "<whitespace>";
-  else if (type == STRING)     return "<string>";
-  else if (type == NUMBER)     return "<number>";
+       if (type == ERR)        return "err";
+  else if (type == SEMI)       return "semi";
+  else if (type == COMMA)      return "comma";
+  else if (type == SYMBOL)     return "symbol";
+  else if (type == COMMENT)    return "comment";
+  else if (type == WHITESPACE) return "whitespace";
+  else if (type == STRING)     return "string";
+  else if (type == NUMBER)     return "number";
 
   else if (SOURCE_TOOLS_CHECK_MASK(type, SOURCE_TOOLS_BRACKET_MASK))
-    return "<bracket>";
+    return "bracket";
   else if (SOURCE_TOOLS_CHECK_MASK(type, SOURCE_TOOLS_KEYWORD_MASK))
-    return "<keyword>";
+    return "keyword";
   else if (SOURCE_TOOLS_CHECK_MASK(type, SOURCE_TOOLS_OPERATOR_MASK))
-    return "<operator>";
+    return "operator";
 
-  return "<unknown>";
+  return "unknown";
 }
 
 inline std::string toString(const tokens::Token& token)

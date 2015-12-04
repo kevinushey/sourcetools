@@ -39,13 +39,14 @@ test_that("Operators are tokenized correctly", {
 test_that("Numbers are tokenized correctly", {
 
   numbers <- c("1", "1.0", "0.1", ".1", "0.1E1", "1L", "1.0L", "1.5L",
-               "1E1", "1E-1", "1E-1L", ".100E-105L", "0.", "100.")
+               "1E1", "1E-1", "1E-1L", ".100E-105L", "0.", "100.",
+               "1e+09", "1e+90", "1e-90", "1e-00000000000000009")
 
   for (number in numbers) {
     tokens <- tokenize_string(number)
-    expect_true(length(tokens) == 1, paste("expected a single token ('", number, "')"))
+    expect_true(length(tokens) == 1, paste("expected a single token ('", number, "')", sep = ""))
     token <- tokens[[1]]
-    expect_true(token$type == "<number>", paste("expected a number ('", token$type, "')"))
+    expect_true(token$type == "number", paste("expected a number ('", token$type, "')", sep = ""))
   }
 
 })
@@ -106,13 +107,13 @@ test_that("`[[` and `[` are tokenized correctly", {
 
 test_that("Failures during number tokenization is detected", {
   tokens <- tokenize_string("1.5E---")
-  expect_true(tokens[[1]]$type == "<err>")
+  expect_true(tokens[[1]]$type == "err")
 })
 
 test_that("invalid number e.g. 1E1.5 tokenized as single entity", {
   tokens <- tokenize_string("1E1.5")
   expect_true(length(tokens) == 1)
-  expect_true(tokens[[1]]$type == "<err>")
+  expect_true(tokens[[1]]$type == "err")
 })
 
 test_that("keywords are tokenized as keywords", {
@@ -125,7 +126,7 @@ test_that("keywords are tokenized as keywords", {
   tokens <- tokenize_string(paste(keywords, collapse = " "))
 
   filtered <- Filter(function(x) {
-    x$type != "<whitespace>"
+    x$type != "whitespace"
   }, tokens)
 
   types <- unlist(lapply(filtered, `[[`, "type"))
@@ -144,7 +145,7 @@ test_that("files in packages are tokenized without errors", {
     files <- list.files(dir, pattern = "R$", full.names = TRUE)
     for (file in files) {
       tokens <- tokenize_file(file)
-      errors <- Filter(function(x) x$type == "<err>", tokens)
+      errors <- Filter(function(x) x$type == "err", tokens)
       expect_true(length(errors) == 0)
     }
   }
