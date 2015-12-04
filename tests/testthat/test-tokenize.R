@@ -127,7 +127,7 @@ test_that("keywords are tokenized as keywords", {
     tokenize_string(keyword)[[1]]
   })
 
-  types <- unlist(lapply(filtered, `[[`, "type"))
+  types <- unlist(lapply(tokens, `[[`, "type"))
   expect_true(all(types == "keyword"))
 })
 

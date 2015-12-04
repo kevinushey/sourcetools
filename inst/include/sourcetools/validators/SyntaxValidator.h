@@ -14,6 +14,8 @@ namespace validators {
 class SyntaxError {
 private:
   typedef collections::Position Position;
+  typedef cursors::TokenCursor TokenCursor;
+  typedef tokens::Token Token;
 
 public:
 
@@ -45,9 +47,8 @@ private:
 class SyntaxValidator {
 
 private:
-
   typedef tokens::Token Token;
-  typedef cursors::TokenCursor Cursor;
+  typedef cursors::TokenCursor TokenCursor;
   typedef tokens::TokenType TokenType;
 
   void unexpectedToken(const Token& token, const std::string& expected = std::string())
@@ -83,11 +84,58 @@ public:
 
   explicit SyntaxValidator(const std::vector<Token>& tokens)
   {
+    TokenCursor cursor(tokens);
+    std::vector<TokenType> stack;
+    stack.push_back(tokens::ERR);
+
+    const Token* pThisToken = &(cursor.currentToken());
+    const Token* pPrevToken = pThisToken;
+
+    while (cursor.moveToNextSignificantToken()) {
+
+      pPrevToken = pThisToken;
+      pThisToken = &(cursor.currentToken());
+
+      updateBracketStack(cursor.currentToken(), &stack);
+      executeValidators(*pPrevToken, *pThisToken);
+
+    }
   }
 
   const std::vector<SyntaxError>& errors() const { return errors_; }
 
 private:
+
+  void executeValidators(const tokens::Token& prevToken,
+                         const tokens::Token& thisToken)
+  {
+    using namespace tokens::utils;
+
+    if (isOperator(prevToken)) {
+
+      // Operator followed non-unary operator.
+      if (isNonUnaryOperator(thisToken))
+        unexpectedToken(thisToken);
+
+      // Operator (other than =) followed by any kind of right bracket.
+      // We need to allow e.g. 'parse(text = )'.
+      if (isRightBracket(thisToken) && !prevToken.isType(tokens::OPERATOR_ASSIGN_LEFT_EQUALS))
+        unexpectedToken(thisToken);
+
+      // Operator followed by '[' or '[['.
+      if (thisToken.isType(tokens::LBRACKET) ||
+          thisToken.isType(tokens::LDBRACKET))
+        unexpectedToken(thisToken);
+    }
+
+    else if (isSymbolic(prevToken)) {
+
+      // Two symbols on the same line.
+      if (isSymbolic(thisToken) && prevToken.row() < thisToken.row())
+        unexpectedToken(thisToken);
+    }
+
+  }
 
   std::vector<SyntaxError> errors_;
 

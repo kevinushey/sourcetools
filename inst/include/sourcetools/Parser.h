@@ -65,9 +65,9 @@ private:
   {
     if (!pCursor->isType(type))
     {
-      std::string file(fileName);
-      std::string shortFile = file.substr(file.rfind("/") + 1);
       DEBUG_BLOCK() {
+        std::string file(fileName);
+        std::string shortFile = file.substr(file.rfind("/") + 1);
         std::cerr << "(" << shortFile << ":" << lineNumber << "): Expected type "
                   << "'" << sourcetools::toString(type) << "'" << "; got "
                   << "'" << sourcetools::toString(pCursor->type()) << "'" << std::endl;
