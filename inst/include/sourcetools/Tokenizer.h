@@ -113,6 +113,66 @@ private:
     return utils::isValidForStartOfRSymbol(cursor.peek());
   }
 
+  bool isHexDigit(char c)
+  {
+    return
+      (c >= '0' && c <= '9') ||
+      (c >= 'A' && c <= 'F') ||
+      (c >= 'a' && c <= 'f');
+  }
+
+  bool consumeHexadecimalNumber(TextCursor& cursor)
+  {
+    std::size_t distance = 0;
+
+    // Detect the leading '0'.
+    if (cursor.peek(distance) != '0')
+      return false;
+    ++distance;
+
+    // Detect a 'x' or 'X'.
+    if (!(cursor.peek(distance) == 'x' || cursor.peek(distance) == 'X'))
+      return false;
+    ++distance;
+
+    // Check and consume all non-whitespace characters.
+    // The number is valid if the characters are valid
+    // hexadecimal characters (0-9, a-f, A-F). The number
+    // can also end with an 'i' (for an imaginary number)
+    // or with an 'L' for an integer.
+    if (!isHexDigit(cursor.peek(distance)))
+    {
+      consumeToken(cursor, tokens::ERR, distance);
+      return false;
+    }
+
+    bool success = true;
+    char peek = cursor.peek(distance);
+    while (!std::isspace(peek) && peek != '\0') {
+
+      // If we encounter an 'i' or an 'L', check to
+      // see if this ends the identifier.
+      if (peek == 'i' || peek == 'L')
+      {
+        char next = cursor.peek(distance + 1);
+        if (std::isspace(next) || next == '\0')
+        {
+          ++distance;
+          break;
+        }
+      }
+
+      if (!isHexDigit(peek))
+        success = false;
+
+      ++distance;
+      peek = cursor.peek(distance);
+    }
+
+    consumeToken(cursor, success ? tokens::NUMBER : tokens::ERR, distance);
+    return true;
+  }
+
   void consumeNumber(TextCursor& cursor)
   {
     bool success = true;
@@ -120,6 +180,10 @@ private:
 
     // NOTE: A leading '-' or '+' is not consumed as part of
     // the number.
+
+    // Try parsing this as a hexadecimal number first (e.g. '0xabc').
+    if (consumeHexadecimalNumber(cursor))
+      return;
 
     // Consume digits
     while (std::isdigit(cursor.peek(distance)))

@@ -308,7 +308,7 @@ inline bool isWhitespace(const Token& token)
 inline bool isSymbolic(const Token& token)
 {
   static const TokenType mask = SYMBOL | NUMBER | STRING;
-  return SOURCE_TOOLS_CHECK_MASK(token.type(), mask);
+  return (token.type() & mask) != 0;
 }
 
 } // namespace utils

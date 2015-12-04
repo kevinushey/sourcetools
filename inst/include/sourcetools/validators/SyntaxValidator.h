@@ -84,6 +84,9 @@ public:
 
   explicit SyntaxValidator(const std::vector<Token>& tokens)
   {
+    if (tokens.empty())
+      return;
+
     TokenCursor cursor(tokens);
     std::vector<TokenType> stack;
     stack.push_back(tokens::ERR);
@@ -131,7 +134,7 @@ private:
     else if (isSymbolic(prevToken)) {
 
       // Two symbols on the same line.
-      if (isSymbolic(thisToken) && prevToken.row() < thisToken.row())
+      if (isSymbolic(thisToken) && prevToken.row() == thisToken.row())
         unexpectedToken(thisToken);
     }
 
