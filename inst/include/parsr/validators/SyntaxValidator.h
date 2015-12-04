@@ -1,14 +1,14 @@
-#ifndef PARSR_VALIDATORS_SYNTAX_VALIDATOR_H
-#define PARSR_VALIDATORS_SYNTAX_VALIDATOR_H
+#ifndef SOURCE_TOOLS_VALIDATORS_SYNTAX_VALIDATOR_H
+#define SOURCE_TOOLS_VALIDATORS_SYNTAX_VALIDATOR_H
 
 #include <sstream>
 #include <vector>
 
-#include <parsr/collections/Position.h>
-#include <parsr/tokens/Token.h>
-#include <parsr/cursors/TokenCursor.h>
+#include <sourcetools/collections/Position.h>
+#include <sourcetools/tokens/Token.h>
+#include <sourcetools/cursors/TokenCursor.h>
 
-namespace parsr {
+namespace sourcetools {
 namespace validators {
 
 class SyntaxError {
@@ -94,6 +94,6 @@ private:
 };
 
 } // namespace validators
-} // namespace parsr
+} // namespace sourcetools
 
-#endif /* PARSR_VALIDATORS_SYNTAX_VALIDATOR_H */
+#endif /* SOURCE_TOOLS_VALIDATORS_SYNTAX_VALIDATOR_H */

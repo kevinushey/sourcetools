@@ -1,10 +1,10 @@
-#ifndef PARSR_UTILS_H
-#define PARSR_UTILS_H
+#ifndef SOURCE_TOOLS_UTILS_H
+#define SOURCE_TOOLS_UTILS_H
 
 #include <string>
 #include <cctype>
 
-namespace parsr {
+namespace sourcetools {
 namespace utils {
 
 inline bool isValidForStartOfRSymbol(char ch)
@@ -39,6 +39,6 @@ inline std::string escape(char ch)
 }
 
 } // namespace utils
-} // namespace parsr
+} // namespace sourcetools
 
-#endif  // PARSR_UTILS_H
+#endif  // SOURCE_TOOLS_UTILS_H

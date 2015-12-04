@@ -1,9 +1,9 @@
-#ifndef PARSR_COLLECTIONS_POSITION_H
-#define PARSR_COLLECTIONS_POSITION_H
+#ifndef SOURCE_TOOLS_COLLECTIONS_POSITION_H
+#define SOURCE_TOOLS_COLLECTIONS_POSITION_H
 
 #include <cstddef>
 
-namespace parsr {
+namespace sourcetools {
 namespace collections {
 
 struct Position
@@ -53,6 +53,6 @@ struct Position
 };
 
 } // namespace collections
-} // namespace parsr
+} // namespace sourcetools
 
-#endif /* PARSR_COLLECTIONS_POSITION_H */
+#endif /* SOURCE_TOOLS_COLLECTIONS_POSITION_H */

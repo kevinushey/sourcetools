@@ -1,6 +1,6 @@
-#ifndef PARSR_VALIDATORS_H
-#define PARSR_VALIDATORS_H
+#ifndef SOURCE_TOOLS_VALIDATORS_H
+#define SOURCE_TOOLS_VALIDATORS_H
 
-#include <parsr/validators/SyntaxValidator.h>
+#include <sourcetools/validators/SyntaxValidator.h>
 
-#endif /* PARSR_VALIDATORS_H */
+#endif /* SOURCE_TOOLS_VALIDATORS_H */

@@ -1,10 +1,10 @@
-#include <parsr.h>
+#include <sourcetools.h>
 
 #define R_NO_REMAP
 #include <R.h>
 #include <Rinternals.h>
 
-namespace parsr {
+namespace sourcetools {
 namespace {
 
 SEXP asSEXP(const tokens::Token& token)
@@ -45,25 +45,25 @@ SEXP asSEXP(const std::vector<tokens::Token>& tokens)
 }
 
 } // anonymous namespace
-} // namespace parsr
+} // namespace sourcetools
 
-extern "C" SEXP parsr_tokenize_file(SEXP absolutePathSEXP)
+extern "C" SEXP sourcetools_tokenize_file(SEXP absolutePathSEXP)
 {
   const char* absolutePath = CHAR(STRING_ELT(absolutePathSEXP, 0));
   std::string contents;
-  if (!parsr::read(absolutePath, &contents))
+  if (!sourcetools::read(absolutePath, &contents))
   {
     Rf_warning("Failed to read file");
     return R_NilValue;
   }
 
-  const auto& tokens = parsr::tokenize(contents);
-  return parsr::asSEXP(tokens);
+  const auto& tokens = sourcetools::tokenize(contents);
+  return sourcetools::asSEXP(tokens);
 }
 
-extern "C" SEXP parsr_tokenize_string(SEXP stringSEXP)
+extern "C" SEXP sourcetools_tokenize_string(SEXP stringSEXP)
 {
   const char* string = CHAR(STRING_ELT(stringSEXP, 0));
-  const auto& tokens = parsr::tokenize(string);
-  return parsr::asSEXP(tokens);
+  const auto& tokens = sourcetools::tokenize(string);
+  return sourcetools::asSEXP(tokens);
 }

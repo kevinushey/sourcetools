@@ -1,10 +1,10 @@
-#include <parsr.h>
+#include <sourcetools.h>
 
 #define R_NO_REMAP
 #include <R.h>
 #include <Rinternals.h>
 
-SEXP asSEXP(const parsr::validators::SyntaxError& error)
+SEXP asSEXP(const sourcetools::validators::SyntaxError& error)
 {
   SEXP result = PROTECT(Rf_allocVector(VECSXP, 3));
 
@@ -16,15 +16,15 @@ SEXP asSEXP(const parsr::validators::SyntaxError& error)
   return result;
 }
 
-extern "C" SEXP parsr_validate_syntax(SEXP contentsSEXP) {
+extern "C" SEXP sourcetools_validate_syntax(SEXP contentsSEXP) {
 
   const char* contents = CHAR(STRING_ELT(contentsSEXP, 0));
 
-  using namespace parsr;
-  using namespace parsr::tokens;
-  using namespace parsr::validators;
+  using namespace sourcetools;
+  using namespace sourcetools::tokens;
+  using namespace sourcetools::validators;
 
-  const auto& tokens = parsr::tokenize(contents);
+  const auto& tokens = sourcetools::tokenize(contents);
   SyntaxValidator validator(tokens);
   const std::vector<SyntaxError>& errors = validator.errors();
   std::size_t n = errors.size();

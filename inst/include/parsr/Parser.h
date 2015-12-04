@@ -1,18 +1,18 @@
-#ifndef PARSR_PARSER_H
-#define PARSR_PARSER_H
+#ifndef SOURCE_TOOLS_PARSER_H
+#define SOURCE_TOOLS_PARSER_H
 
 #include <vector>
 #include <string>
 #include <memory>
 #include <iostream>
 
-#include <parsr/Tokenizer.h>
+#include <sourcetools/Tokenizer.h>
 
-#include <parsr/tokens/Token.h>
-#include <parsr/cursors/TokenCursor.h>
-#include <parsr/collections/Position.h>
+#include <sourcetools/tokens/Token.h>
+#include <sourcetools/cursors/TokenCursor.h>
+#include <sourcetools/collections/Position.h>
 
-namespace parsr {
+namespace sourcetools {
 namespace parser {
 
 class ParseNode
@@ -69,8 +69,8 @@ private:
       std::string shortFile = file.substr(file.rfind("/") + 1);
       DEBUG_BLOCK() {
         std::cerr << "(" << shortFile << ":" << lineNumber << "): Expected type "
-                  << "'" << parsr::toString(type) << "'" << "; got "
-                  << "'" << parsr::toString(pCursor->type()) << "'" << std::endl;
+                  << "'" << sourcetools::toString(type) << "'" << "; got "
+                  << "'" << sourcetools::toString(pCursor->type()) << "'" << std::endl;
       }
     }
   }
@@ -229,6 +229,6 @@ inline std::shared_ptr<parser::ParseNode> parse(const std::string& contents)
   return parser.parse(contents);
 }
 
-} // namespace parsr
+} // namespace sourcetools
 
 #endif

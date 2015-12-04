@@ -1,4 +1,4 @@
-#' @useDynLib parsr
+#' @useDynLib sourcetools
 NULL
 
 #' Read a file
@@ -10,7 +10,7 @@ NULL
 #' @export
 read <- function(path) {
   path <- normalizePath(path, mustWork = TRUE)
-  .Call("parsr_read", path, PACKAGE = "parsr")
+  .Call("sourcetools_read", path, PACKAGE = "sourcetools")
 }
 
 #' Tokenize an R File
@@ -22,7 +22,7 @@ read <- function(path) {
 #' @export
 tokenize_file <- function(path) {
   path <- normalizePath(path, mustWork = TRUE)
-  .Call("parsr_tokenize_file", path, PACKAGE = "parsr")
+  .Call("sourcetools_tokenize_file", path, PACKAGE = "sourcetools")
 }
 
 #' Tokenize an R String
@@ -32,7 +32,7 @@ tokenize_file <- function(path) {
 #' @param string A character vector (of length one).
 #' @export
 tokenize_string <- function(string) {
-  .Call("parsr_tokenize_string", string, PACKAGE = "parsr")
+  .Call("sourcetools_tokenize_string", string, PACKAGE = "sourcetools")
 }
 
 #' Find Syntax Errors
@@ -42,7 +42,7 @@ tokenize_string <- function(string) {
 #' @param string A character vector (of length one).
 #' @export
 validate_syntax <- function(string) {
-  .Call("parsr_validate_syntax", string, PACKAGE = "parsr")
+  .Call("sourcetools_validate_syntax", string, PACKAGE = "sourcetools")
 }
 
 #' @export
@@ -53,7 +53,7 @@ print.RTokens <- function(x, ...) {
 
 #' @export
 parse_string <- function(string) {
-  .Call("parsr_parse_string", string, PACKAGE = "parsr")
+  .Call("sourcetools_parse_string", string, PACKAGE = "sourcetools")
 }
 
 #' @export

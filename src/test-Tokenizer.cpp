@@ -1,11 +1,11 @@
 #include <tests/testthat.h>
-#include <parsr.h>
+#include <sourcetools.h>
 
 context("Tokenizer") {
 
   test_that("Complements are detected correctly") {
 
-    using namespace parsr::tokens;
+    using namespace sourcetools::tokens;
 
     expect_true(utils::complement(LPAREN)    == RPAREN);
     expect_true(utils::complement(LBRACE)    == RBRACE);
@@ -30,11 +30,11 @@ context("Tokenizer") {
 
   test_that("Keywords are detected correctly") {
     std::string code = "if for while";
-    const auto& tokens = parsr::tokenize(code);
+    const auto& tokens = sourcetools::tokenize(code);
     for (auto& token : tokens) {
-      if (parsr::tokens::utils::isWhitespace(token))
+      if (sourcetools::tokens::utils::isWhitespace(token))
         continue;
-      expect_true(parsr::tokens::utils::isKeyword(token));
+      expect_true(sourcetools::tokens::utils::isKeyword(token));
     }
   }
 

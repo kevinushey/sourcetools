@@ -1,18 +1,18 @@
-#ifndef PARSR_TOKENIZER_H
-#define PARSR_TOKENIZER_H
+#ifndef SOURCE_TOOLS_TOKENIZER_H
+#define SOURCE_TOOLS_TOKENIZER_H
 
-#include <parsr/Macros.h>
-#include <parsr/Utils.h>
+#include <sourcetools/Macros.h>
+#include <sourcetools/Utils.h>
 
-#include <parsr/tokens/Token.h>
+#include <sourcetools/tokens/Token.h>
 
-#include <parsr/cursors/TextCursor.h>
+#include <sourcetools/cursors/TextCursor.h>
 
 #include <vector>
 #include <stack>
 #include <sstream>
 
-namespace parsr {
+namespace sourcetools {
 
 class Tokenizer
 {
@@ -368,6 +368,6 @@ inline std::vector<tokens::Token> tokenize(const std::string& code)
   return tokenizer.tokenize(code);
 }
 
-}  // namespace parsr
+}  // namespace sourcetools
 
 #endif

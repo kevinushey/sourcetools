@@ -1,12 +1,12 @@
-#ifndef PARSR_CURSOR_TEXTCURSOR_H
-#define PARSR_CURSOR_TEXTCURSOR_H
+#ifndef SOURCE_TOOLS_CURSOR_TEXTCURSOR_H
+#define SOURCE_TOOLS_CURSOR_TEXTCURSOR_H
 
 #include <string>
 
-#include <parsr/Macros.h>
-#include <parsr/collections/Position.h>
+#include <sourcetools/Macros.h>
+#include <sourcetools/collections/Position.h>
 
-namespace parsr {
+namespace sourcetools {
 namespace cursors {
 
 class TextCursor
@@ -61,6 +61,6 @@ private:
 };
 
 } // namespace cursors
-} // namespace parsr
+} // namespace sourcetools
 
-#endif /* PARSR_CURSOR_TEXTCURSOR_H */
+#endif /* SOURCE_TOOLS_CURSOR_TEXTCURSOR_H */

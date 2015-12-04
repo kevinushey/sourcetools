@@ -1,13 +1,13 @@
-#ifndef PARSR_CURSORS_TOKEN_CURSOR_H
-#define PARSR_CURSORS_TOKEN_CURSOR_H
+#ifndef SOURCE_TOOLS_CURSORS_TOKEN_CURSOR_H
+#define SOURCE_TOOLS_CURSORS_TOKEN_CURSOR_H
 
 #include <algorithm>
 
-#include <parsr/collections/Position.h>
+#include <sourcetools/collections/Position.h>
 
-#include <parsr/tokens/Token.h>
+#include <sourcetools/tokens/Token.h>
 
-namespace parsr {
+namespace sourcetools {
 namespace cursors {
 
 class TokenCursor {
@@ -203,6 +203,6 @@ inline std::string toString(const cursors::TokenCursor& cursor)
   return toString(cursor.currentToken());
 }
 
-} // namespace parsr
+} // namespace sourcetools
 
-#endif /* PARSR_CURSORS_TOKEN_CURSOR_H */
+#endif /* SOURCE_TOOLS_CURSORS_TOKEN_CURSOR_H */

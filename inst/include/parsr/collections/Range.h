@@ -1,7 +1,7 @@
-#ifndef PARSR_COLLECTIONS_RANGE_H
-#define PARSR_COLLECTIONS_RANGE_H
+#ifndef SOURCE_TOOLS_COLLECTIONS_RANGE_H
+#define SOURCE_TOOLS_COLLECTIONS_RANGE_H
 
-namespace parsr {
+namespace sourcetools {
 namespace collections {
 
 class Range
@@ -9,6 +9,6 @@ class Range
   // TODO: pair of positions
 };
 } // namespace collections
-} // namespace parsr
+} // namespace sourcetools
 
-#endif /* PARSR_COLLECTIONS_RANGE_H */
+#endif /* SOURCE_TOOLS_COLLECTIONS_RANGE_H */

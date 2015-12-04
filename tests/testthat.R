@@ -1,4 +1,4 @@
 library(testthat)
-library(parsr)
+library(sourcetools)
 
-test_check("parsr")
+test_check("sourcetools")

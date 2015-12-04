@@ -1,11 +1,11 @@
-#ifndef PARSR_READER_H
-#define PARSR_READER_H
+#ifndef SOURCE_TOOLS_READER_H
+#define SOURCE_TOOLS_READER_H
 
 #include <fstream>
 #include <string>
 #include <cerrno>
 
-namespace parsr {
+namespace sourcetools {
 
 inline bool read(const std::string& absolutePath, std::string* pContent)
 {
@@ -21,6 +21,6 @@ inline bool read(const std::string& absolutePath, std::string* pContent)
   return false;
 }
 
-}  // namespace parsr
+}  // namespace sourcetools
 
 #endif
