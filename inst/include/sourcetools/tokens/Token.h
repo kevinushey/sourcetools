@@ -198,20 +198,11 @@ private:
 
 public:
 
-  explicit Token(TokenType type)
-    : begin_(),
-      end_(),
-      position_(0, 0),
-      type_(type)
-  {
-  }
+  Token() : type_(ERR) {}
 
-  Token(const Position& position)
-    : begin_(),
-      end_(),
-      position_(position),
-      type_(ERR)
-  {}
+  explicit Token(TokenType type) : type_(type) {}
+
+  Token(const Position& position) : position_(position), type_(ERR) {}
 
   Token(const TextCursor& cursor, TokenType type, std::size_t tokenSize)
       : begin_(cursor.begin() + cursor.offset()),

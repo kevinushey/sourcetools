@@ -8,6 +8,8 @@ namespace collections {
 
 struct Position
 {
+  Position() : Position(0, 0) {}
+
   Position(std::size_t row, std::size_t column)
     : row(row), column(column)
   {}
