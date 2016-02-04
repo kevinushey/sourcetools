@@ -1,12 +1,17 @@
 library(microbenchmark)
 library(sourcetools)
 
+# Obviously not fair to compare R's parser to a tokenizer but it
+# helps establish a baseline for the tokenizer + how much 'wiggle
+# room' we have in our parser
 file <- "R/sourcetools.R"
-contents <- read(file)
-repeat {
-  tokenize_string(contents)
-}
+microbenchmark(
+  tokenize_file(file),
+  parse(file)
+)
 
-repeat {
-  tokenize_file(file)
-}
+contents <- read(file)
+microbenchmark(
+  tokenize_string(contents),
+  parse(text = contents)
+)
