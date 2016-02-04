@@ -20,6 +20,11 @@ read <- function(path) {
 #' @param path A file path.
 #' @param string \R code as a character vector of length one.
 #'
+#' @note New rows are determined by existence of the \code{\\n}
+#' line feed character, under the assumption that code being tokenized
+#' will use either \code{\\n} to indicate newlines (as on modern
+#' Linux and OS X systems), or \code{\\r\\n} as on Windows.
+#'
 #' @return A \code{data.frame} with the following columns:
 #'
 #' \tabular{ll}{
@@ -41,7 +46,7 @@ tokenize_file <- function(path) {
 #' @rdname tokenize-methods
 #' @export
 tokenize_string <- function(string) {
-  .Call("sourcetools_tokenize_string", string, PACKAGE = "sourcetools")
+  .Call("sourcetools_tokenize_string", as.character(string), PACKAGE = "sourcetools")
 }
 
 #' Find Syntax Errors
@@ -51,13 +56,12 @@ tokenize_string <- function(string) {
 #' @param string A character vector (of length one).
 #' @export
 validate_syntax <- function(string) {
-  .Call("sourcetools_validate_syntax", string, PACKAGE = "sourcetools")
+  .Call("sourcetools_validate_syntax", as.character(string), PACKAGE = "sourcetools")
 }
 
 #' @export
 print.RTokens <- function(x, ...) {
-  result <- do.call(base::rbind, x)
-  print(result)
+  print.data.frame(x, ...)
 }
 
 # parse_string <- function(string) {

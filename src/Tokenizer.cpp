@@ -29,8 +29,8 @@ SEXP asSEXP(const std::vector<tokens::Token>& tokens)
   SEXP valueSEXP = PROTECT(Rf_allocVector(STRSXP, n));
   SET_VECTOR_ELT(resultSEXP, 0, valueSEXP);
   for (std::size_t i = 0; i < n; ++i) {
-    std::string contents = tokens[i].contents();
-    SEXP charSEXP = PROTECT(Rf_mkChar(contents.c_str()));
+    const std::string& contents = tokens[i].contents();
+    SEXP charSEXP = PROTECT(Rf_mkCharLen(contents.c_str(), contents.size()));
     SET_STRING_ELT(valueSEXP, i, charSEXP);
   }
   UNPROTECT(n);
@@ -38,18 +38,18 @@ SEXP asSEXP(const std::vector<tokens::Token>& tokens)
   SEXP rowSEXP = PROTECT(Rf_allocVector(INTSXP, n));
   SET_VECTOR_ELT(resultSEXP, 1, rowSEXP);
   for (std::size_t i = 0; i < n; ++i)
-    INTEGER(rowSEXP)[i] = tokens[i].row();
+    INTEGER(rowSEXP)[i] = tokens[i].row() + 1;
 
   SEXP columnSEXP = PROTECT(Rf_allocVector(INTSXP, n));
   SET_VECTOR_ELT(resultSEXP, 2, columnSEXP);
   for (std::size_t i = 0; i < n; ++i)
-    INTEGER(columnSEXP)[i] = tokens[i].column();
+    INTEGER(columnSEXP)[i] = tokens[i].column() + 1;
 
   SEXP typeSEXP = PROTECT(Rf_allocVector(STRSXP, n));
   SET_VECTOR_ELT(resultSEXP, 3, typeSEXP);
   for (std::size_t i = 0; i < n; ++i) {
-    std::string type = toString(tokens[i].type());
-    SEXP charSEXP = PROTECT(Rf_mkChar(type.c_str()));
+    const std::string& type = toString(tokens[i].type());
+    SEXP charSEXP = PROTECT(Rf_mkCharLen(type.c_str(), type.size()));
     SET_STRING_ELT(typeSEXP, i, charSEXP);
   }
   UNPROTECT(n);

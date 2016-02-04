@@ -27,6 +27,12 @@ A \code{data.frame} with the following columns:
 \description{
 Tools for tokenizing \R code.
 }
+\note{
+New rows are determined by existence of the \code{\\n}
+line feed character, under the assumption that code being tokenized
+will use either \code{\\n} to indicate newlines (as on modern
+Linux and OS X systems), or \code{\\r\\n} as on Windows.
+}
 \examples{
 tokenize_string("x <- 1 + 2")
 }
