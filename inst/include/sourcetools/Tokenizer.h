@@ -22,16 +22,20 @@ private:
   typedef tokens::TokenType TokenType;
 
 private:
-  void consumeToken(TextCursor& cursor, TokenType type, std::size_t sz)
+  void consumeToken(TokenType type,
+                    std::size_t length,
+                    Token* pToken)
   {
-    tokens_.push_back(Token(cursor, type, sz));
-    cursor.moveForward(sz);
+    *pToken = Token(cursor_, type, length);
+    cursor_.moveForward(length);
   }
 
-  void consumeUntil(TextCursor& cursor, char ch, TokenType type,
+  void consumeUntil(char ch,
+                    TokenType type,
+                    Token* pToken,
                     bool skipEscaped = false)
   {
-    TextCursor lookahead = cursor;
+    TextCursor lookahead = cursor_;
 
     bool success = false;
     std::size_t distance = 0;
@@ -53,61 +57,61 @@ private:
     }
 
     if (success) {
-      consumeToken(cursor, type, distance + 1);
+      consumeToken(type, distance + 1, pToken);
     } else {
-      consumeToken(cursor, tokens::ERR, distance + 1);
+      consumeToken(tokens::ERR, distance + 1, pToken);
     }
   }
 
-  void consumeUserOperator(TextCursor& cursor)
+  void consumeUserOperator(Token* pToken)
   {
-    consumeUntil(cursor, '%', tokens::OPERATOR_USER);
+    consumeUntil('%', tokens::OPERATOR_USER, pToken);
   }
 
-  void consumeComment(TextCursor& cursor)
+  void consumeComment(Token* pToken)
   {
-    consumeUntil(cursor, '\n', tokens::COMMENT);
+    consumeUntil('\n', tokens::COMMENT, pToken);
   }
 
-  void consumeQuotedSymbol(TextCursor& cursor)
+  void consumeQuotedSymbol(Token* pToken)
   {
-    consumeUntil(cursor, '`', tokens::SYMBOL, true);
+    consumeUntil('`', tokens::SYMBOL, pToken, true);
   }
 
-  void consumeQString(TextCursor& cursor)
+  void consumeQString(Token* pToken)
   {
-    consumeUntil(cursor, '\'', tokens::STRING, true);
+    consumeUntil('\'', tokens::STRING, pToken, true);
   }
 
-  void consumeQQString(TextCursor& cursor)
+  void consumeQQString(Token* pToken)
   {
-    consumeUntil(cursor, '"', tokens::STRING, true);
+    consumeUntil('"', tokens::STRING, pToken, true);
   }
 
-  void consumeWhitespace(TextCursor& cursor)
+  void consumeWhitespace(Token* pToken)
   {
     std::size_t distance = 1;
-    while (std::isspace(cursor.peek(distance)))
+    while (std::isspace(cursor_.peek(distance)))
       ++distance;
 
-    consumeToken(cursor, tokens::WHITESPACE, distance);
+    consumeToken(tokens::WHITESPACE, distance, pToken);
   }
 
   // NOTE: Don't tokenize '-' or '+' as part of number; instead
   // it's parsed as a unary operator.
-  bool isStartOfNumber(TextCursor& cursor)
+  bool isStartOfNumber()
   {
-    char ch = cursor.peek();
+    char ch = cursor_.peek();
     if (std::isdigit(ch))
       return true;
     if (ch == '.')
-      return std::isdigit(cursor.peek(1));
+      return std::isdigit(cursor_.peek(1));
     return false;
   }
 
-  bool isStartOfSymbol(TextCursor& cursor)
+  bool isStartOfSymbol()
   {
-    return utils::isValidForStartOfRSymbol(cursor.peek());
+    return utils::isValidForStartOfRSymbol(cursor_.peek());
   }
 
   bool isHexDigit(char c)
@@ -118,17 +122,17 @@ private:
       (c >= 'a' && c <= 'f');
   }
 
-  bool consumeHexadecimalNumber(TextCursor& cursor)
+  bool consumeHexadecimalNumber(Token* pToken)
   {
     std::size_t distance = 0;
 
     // Detect the leading '0'.
-    if (cursor.peek(distance) != '0')
+    if (cursor_.peek(distance) != '0')
       return false;
     ++distance;
 
     // Detect a 'x' or 'X'.
-    if (!(cursor.peek(distance) == 'x' || cursor.peek(distance) == 'X'))
+    if (!(cursor_.peek(distance) == 'x' || cursor_.peek(distance) == 'X'))
       return false;
     ++distance;
 
@@ -137,14 +141,14 @@ private:
     // hexadecimal characters (0-9, a-f, A-F). The number
     // can also end with an 'i' (for an imaginary number)
     // or with an 'L' for an integer.
-    if (!isHexDigit(cursor.peek(distance)))
+    if (!isHexDigit(cursor_.peek(distance)))
     {
-      consumeToken(cursor, tokens::ERR, distance);
+      consumeToken(tokens::ERR, distance, pToken);
       return false;
     }
 
     bool success = true;
-    char peek = cursor.peek(distance);
+    char peek = cursor_.peek(distance);
     while (std::isalnum(peek) && peek != '\0') {
 
       // If we encounter an 'i' or an 'L', assume
@@ -159,14 +163,14 @@ private:
         success = false;
 
       ++distance;
-      peek = cursor.peek(distance);
+      peek = cursor_.peek(distance);
     }
 
-    consumeToken(cursor, success ? tokens::NUMBER : tokens::ERR, distance);
+    consumeToken(success ? tokens::NUMBER : tokens::ERR, distance, pToken);
     return true;
   }
 
-  void consumeNumber(TextCursor& cursor)
+  void consumeNumber(Token* pToken)
   {
     bool success = true;
     std::size_t distance = 0;
@@ -175,259 +179,268 @@ private:
     // the number.
 
     // Try parsing this as a hexadecimal number first (e.g. '0xabc').
-    if (consumeHexadecimalNumber(cursor))
+    if (consumeHexadecimalNumber(pToken))
       return;
 
     // Consume digits
-    while (std::isdigit(cursor.peek(distance)))
+    while (std::isdigit(cursor_.peek(distance)))
       ++distance;
 
     // Consume a dot for decimals
     // Note: '.5' is a valid specification for a number
     // So is '100.'; ie, with a trailing decimal.
-    if (cursor.peek(distance) == '.') {
+    if (cursor_.peek(distance) == '.') {
       ++distance;
-      while (std::isdigit(cursor.peek(distance)))
+      while (std::isdigit(cursor_.peek(distance)))
         ++distance;
     }
 
     // Consume 'e', 'E' for exponential notation
-    if (cursor.peek(distance) == 'e' || cursor.peek(distance) == 'E') {
+    if (cursor_.peek(distance) == 'e' || cursor_.peek(distance) == 'E') {
       ++distance;
 
       // Consume a '-' or a '+' for a negative number
-      if (cursor.peek(distance) == '-' || cursor.peek(distance) == '+')
+      if (cursor_.peek(distance) == '-' || cursor_.peek(distance) == '+')
         ++distance;
 
       // Parse another set of numbers following the E
-      success = std::isdigit(cursor.peek(distance));
-      while (std::isdigit(cursor.peek(distance)))
+      success = std::isdigit(cursor_.peek(distance));
+      while (std::isdigit(cursor_.peek(distance)))
         ++distance;
 
       // Consume '.' and following numbers. Note that this is
       // not really a valid number for R but it's better to tokenize
       // this is a single entity (and then report failure later)
-      if (cursor.peek(distance) == '.') {
+      if (cursor_.peek(distance) == '.') {
         success = false;
         ++distance;
-        while (std::isdigit(cursor.peek(distance)))
+        while (std::isdigit(cursor_.peek(distance)))
           ++distance;
       }
     }
 
     // Consume a final 'L' for integer literals
-    if (cursor.peek(distance) == 'L')
+    if (cursor_.peek(distance) == 'L')
       ++distance;
 
-    consumeToken(cursor, success ? tokens::NUMBER : tokens::ERR, distance);
+    consumeToken(success ? tokens::NUMBER : tokens::ERR, distance, pToken);
   }
 
-  void consumeSymbol(TextCursor& cursor)
+  void consumeSymbol(Token* pToken)
   {
     std::size_t distance = 1;
-    char ch = cursor.peek(distance);
+    char ch = cursor_.peek(distance);
     while (utils::isValidForRSymbol(ch)) {
       ++distance;
-      ch = cursor.peek(distance);
+      ch = cursor_.peek(distance);
     }
 
-    const char* ptr = &*(cursor.begin() + cursor.offset());
-    consumeToken(cursor, tokens::symbolType(ptr, distance), distance);
+    const char* ptr = &*(cursor_.begin() + cursor_.offset());
+    consumeToken(tokens::symbolType(ptr, distance), distance, pToken);
   }
 
 public:
 
-  const std::vector<Token>& tokenize(const std::string& code)
+  Tokenizer(const std::string& code)
+    : code_(code),
+      cursor_(code_)
   {
-    // Reserve some extra space in our tokens_ vector
-    tokens_.reserve(code.size() / 5);
+  }
 
-    TextCursor cursor(code);
+  bool tokenize(Token* pToken)
+  {
+    char ch = cursor_.peek();
 
-    while (cursor.isValid()) {
-      char ch = cursor.peek();
-
-      // Block-related tokens
-      if (ch == '{')
-        consumeToken(cursor, tokens::LBRACE, 1);
-      else if (ch == '}')
-        consumeToken(cursor, tokens::RBRACE, 1);
-      else if (ch == '(')
-        consumeToken(cursor, tokens::LPAREN, 1);
-      else if (ch == ')')
-        consumeToken(cursor, tokens::RPAREN, 1);
-      else if (ch == '[') {
-        if (cursor.peek(1) == '[') {
-          consumeToken(cursor, tokens::LDBRACKET, 2);
-          tokenStack_.push(tokens::LDBRACKET);
-        } else {
-          consumeToken(cursor, tokens::LBRACKET, 1);
-          tokenStack_.push(tokens::LBRACKET);
-        }
-      } else if (ch == ']') {
-        if (tokenStack_.empty()) {
-          consumeToken(cursor, tokens::ERR, 1);
-        } else if (tokenStack_.top() == tokens::LDBRACKET) {
-          if (cursor.peek(1) == ']')
-            consumeToken(cursor, tokens::RDBRACKET, 2);
-          else
-            consumeToken(cursor, tokens::ERR, 1);
-          tokenStack_.pop();
-        } else {
-          consumeToken(cursor, tokens::RBRACKET, 1);
-          tokenStack_.pop();
-        }
+    // Block-related tokens
+    if (ch == '{')
+      consumeToken(tokens::LBRACE, 1, pToken);
+    else if (ch == '}')
+      consumeToken(tokens::RBRACE, 1, pToken);
+    else if (ch == '(')
+      consumeToken(tokens::LPAREN, 1, pToken);
+    else if (ch == ')')
+      consumeToken(tokens::RPAREN, 1, pToken);
+    else if (ch == '[') {
+      if (cursor_.peek(1) == '[') {
+        tokenStack_.push(tokens::LDBRACKET);
+        consumeToken(tokens::LDBRACKET, 2, pToken);
+      } else {
+        tokenStack_.push(tokens::LBRACKET);
+        consumeToken(tokens::LBRACKET, 1, pToken);
       }
-
-      // Operators
-      else if (ch == '<')  // <<-, <=, <-, <
-      {
-        char next = cursor.peek(1);
-        if (next == '-') // <-
-          consumeToken(cursor, tokens::OPERATOR_ASSIGN_LEFT, 2);
-        else if (next == '=') // <=
-          consumeToken(cursor, tokens::OPERATOR_LESS_OR_EQUAL, 2);
-        else if (next == '<' && cursor.peek(2) == '-')
-          consumeToken(cursor, tokens::OPERATOR_ASSIGN_LEFT_PARENT, 3);
+    } else if (ch == ']') {
+      if (tokenStack_.empty()) {
+        consumeToken(tokens::ERR, 1, pToken);
+      } else if (tokenStack_.top() == tokens::LDBRACKET) {
+        tokenStack_.pop();
+        if (cursor_.peek(1) == ']')
+          consumeToken(tokens::RDBRACKET, 2, pToken);
         else
-          consumeToken(cursor, tokens::OPERATOR_LESS, 1);
+          consumeToken(tokens::ERR, 1, pToken);
+      } else {
+        tokenStack_.pop();
+        consumeToken(tokens::RBRACKET, 1, pToken);
       }
-
-      else if (ch == '>')  // >=, >
-      {
-        if (cursor.peek(1) == '=')
-          consumeToken(cursor, tokens::OPERATOR_GREATER_OR_EQUAL, 2);
-        else
-          consumeToken(cursor, tokens::OPERATOR_GREATER, 1);
-      }
-      else if (ch == '=')  // '==', '='
-      {
-        if (cursor.peek(1) == '=')
-          consumeToken(cursor, tokens::OPERATOR_EQUAL, 2);
-        else
-          consumeToken(cursor, tokens::OPERATOR_ASSIGN_LEFT_EQUALS, 1);
-      }
-      else if (ch == '|')  // '||', '|'
-      {
-        if (cursor.peek(1) == '|')
-          consumeToken(cursor, tokens::OPERATOR_OR_SCALAR, 2);
-        else
-          consumeToken(cursor, tokens::OPERATOR_OR_VECTOR, 1);
-      }
-      else if (ch == '&')  // '&&', '&'
-      {
-        if (cursor.peek(1) == '&')
-          consumeToken(cursor, tokens::OPERATOR_AND_SCALAR, 2);
-        else
-          consumeToken(cursor, tokens::OPERATOR_AND_VECTOR, 1);
-      }
-      else if (ch == '*')  // **, *
-      {
-        if (cursor.peek(1) == '*')
-          consumeToken(cursor, tokens::OPERATOR_EXPONENTATION_STARS, 2);
-        else
-          consumeToken(cursor, tokens::OPERATOR_MULTIPLY, 1);
-      }
-      else if (ch == ':')  // ':::', '::', ':=', ':'
-      {
-        if (cursor.peek(1) == ':')
-        {
-          if (cursor.peek(2) == ':')
-            consumeToken(cursor, tokens::OPERATOR_NAMESPACE_ALL, 3);
-          else
-            consumeToken(cursor, tokens::OPERATOR_NAMESPACE_EXPORTS, 2);
-        }
-        else if (cursor.peek(1) == '=')
-          consumeToken(cursor, tokens::OPERATOR_ASSIGN_LEFT_COLON, 2);
-        else
-          consumeToken(cursor, tokens::OPERATOR_SEQUENCE, 1);
-      }
-      else if (ch == '!')
-      {
-        if (cursor.peek(1) == '=')
-          consumeToken(cursor, tokens::OPERATOR_NOT_EQUAL, 2);
-        else
-          consumeToken(cursor, tokens::OPERATOR_NEGATION, 1);
-      }
-      else if (ch == '-') // '->>', '->', '-'
-      {
-        if (cursor.peek(1) == '>')
-        {
-          if (cursor.peek(2) == '>')
-            consumeToken(cursor, tokens::OPERATOR_ASSIGN_RIGHT_PARENT, 3);
-          else
-            consumeToken(cursor, tokens::OPERATOR_ASSIGN_RIGHT, 2);
-        }
-        else
-          consumeToken(cursor, tokens::OPERATOR_MINUS, 1);
-      }
-      else if (ch == '+')
-        consumeToken(cursor, tokens::OPERATOR_PLUS, 1);
-      else if (ch == '~')
-        consumeToken(cursor, tokens::OPERATOR_FORMULA, 1);
-      else if (ch == '?')
-        consumeToken(cursor, tokens::OPERATOR_HELP, 1);
-      else if (ch == '/')
-        consumeToken(cursor, tokens::OPERATOR_DIVIDE, 1);
-      else if (ch == '@')
-        consumeToken(cursor, tokens::OPERATOR_AT, 1);
-      else if (ch == '$')
-        consumeToken(cursor, tokens::OPERATOR_DOLLAR, 1);
-      else if (ch == '^')
-        consumeToken(cursor, tokens::OPERATOR_HAT, 1);
-
-      // User operators
-      else if (ch == '%')
-        consumeUserOperator(cursor);
-
-      // Punctuation-related tokens
-      else if (ch == ',')
-        consumeToken(cursor, tokens::COMMA, 1);
-      else if (ch == ';')
-        consumeToken(cursor, tokens::SEMI, 1);
-
-      // Whitespace
-      else if (std::isspace(ch))
-        consumeWhitespace(cursor);
-
-      // Strings and symbols
-      else if (ch == '\'')
-        consumeQString(cursor);
-      else if (ch == '"')
-        consumeQQString(cursor);
-      else if (ch == '`')
-        consumeQuotedSymbol(cursor);
-
-      // Comments
-      else if (ch == '#')
-        consumeComment(cursor);
-
-      // Number
-      else if (isStartOfNumber(cursor))
-        consumeNumber(cursor);
-
-      // Symbol
-      else if (isStartOfSymbol(cursor))
-        consumeSymbol(cursor);
-
-      // Nothing matched -- error
-      else
-        consumeToken(cursor, tokens::ERR, 1);
     }
 
-    tokens_.shrink_to_fit();
-    return tokens_;
+    // Operators
+    else if (ch == '<')  // <<-, <=, <-, <
+    {
+      char next = cursor_.peek(1);
+      if (next == '-') // <-
+        consumeToken(tokens::OPERATOR_ASSIGN_LEFT, 2, pToken);
+      else if (next == '=') // <=
+        consumeToken(tokens::OPERATOR_LESS_OR_EQUAL, 2, pToken);
+      else if (next == '<' && cursor_.peek(2) == '-')
+        consumeToken(tokens::OPERATOR_ASSIGN_LEFT_PARENT, 3, pToken);
+      else
+        consumeToken(tokens::OPERATOR_LESS, 1, pToken);
+    }
+
+    else if (ch == '>')  // >=, >
+    {
+      if (cursor_.peek(1) == '=')
+        consumeToken(tokens::OPERATOR_GREATER_OR_EQUAL, 2, pToken);
+      else
+        consumeToken(tokens::OPERATOR_GREATER, 1, pToken);
+    }
+    else if (ch == '=')  // '==', '='
+    {
+      if (cursor_.peek(1) == '=')
+        consumeToken(tokens::OPERATOR_EQUAL, 2, pToken);
+      else
+        consumeToken(tokens::OPERATOR_ASSIGN_LEFT_EQUALS, 1, pToken);
+    }
+    else if (ch == '|')  // '||', '|'
+    {
+      if (cursor_.peek(1) == '|')
+        consumeToken(tokens::OPERATOR_OR_SCALAR, 2, pToken);
+      else
+        consumeToken(tokens::OPERATOR_OR_VECTOR, 1, pToken);
+    }
+    else if (ch == '&')  // '&&', '&'
+    {
+      if (cursor_.peek(1) == '&')
+        consumeToken(tokens::OPERATOR_AND_SCALAR, 2, pToken);
+      else
+        consumeToken(tokens::OPERATOR_AND_VECTOR, 1, pToken);
+    }
+    else if (ch == '*')  // **, *
+    {
+      if (cursor_.peek(1) == '*')
+        consumeToken(tokens::OPERATOR_EXPONENTATION_STARS, 2, pToken);
+      else
+        consumeToken(tokens::OPERATOR_MULTIPLY, 1, pToken);
+    }
+    else if (ch == ':')  // ':::', '::', ':=', ':'
+    {
+      if (cursor_.peek(1) == ':')
+      {
+        if (cursor_.peek(2) == ':')
+          consumeToken(tokens::OPERATOR_NAMESPACE_ALL, 3, pToken);
+        else
+          consumeToken(tokens::OPERATOR_NAMESPACE_EXPORTS, 2, pToken);
+      }
+      else if (cursor_.peek(1) == '=')
+        consumeToken(tokens::OPERATOR_ASSIGN_LEFT_COLON, 2, pToken);
+      else
+        consumeToken(tokens::OPERATOR_SEQUENCE, 1, pToken);
+    }
+    else if (ch == '!')
+    {
+      if (cursor_.peek(1) == '=')
+        consumeToken(tokens::OPERATOR_NOT_EQUAL, 2, pToken);
+      else
+        consumeToken(tokens::OPERATOR_NEGATION, 1, pToken);
+    }
+    else if (ch == '-') // '->>', '->', '-'
+    {
+      if (cursor_.peek(1) == '>')
+      {
+        if (cursor_.peek(2) == '>')
+          consumeToken(tokens::OPERATOR_ASSIGN_RIGHT_PARENT, 3, pToken);
+        else
+          consumeToken(tokens::OPERATOR_ASSIGN_RIGHT, 2, pToken);
+      }
+      else
+        consumeToken(tokens::OPERATOR_MINUS, 1, pToken);
+    }
+    else if (ch == '+')
+      consumeToken(tokens::OPERATOR_PLUS, 1, pToken);
+    else if (ch == '~')
+      consumeToken(tokens::OPERATOR_FORMULA, 1, pToken);
+    else if (ch == '?')
+      consumeToken(tokens::OPERATOR_HELP, 1, pToken);
+    else if (ch == '/')
+      consumeToken(tokens::OPERATOR_DIVIDE, 1, pToken);
+    else if (ch == '@')
+      consumeToken(tokens::OPERATOR_AT, 1, pToken);
+    else if (ch == '$')
+      consumeToken(tokens::OPERATOR_DOLLAR, 1, pToken);
+    else if (ch == '^')
+      consumeToken(tokens::OPERATOR_HAT, 1, pToken);
+
+    // User operators
+    else if (ch == '%')
+      consumeUserOperator(pToken);
+
+    // Punctuation-related tokens
+    else if (ch == ',')
+      consumeToken(tokens::COMMA, 1, pToken);
+    else if (ch == ';')
+      consumeToken(tokens::SEMI, 1, pToken);
+
+    // Whitespace
+    else if (std::isspace(ch))
+      consumeWhitespace(pToken);
+
+    // Strings and symbols
+    else if (ch == '\'')
+      consumeQString(pToken);
+    else if (ch == '"')
+      consumeQQString(pToken);
+    else if (ch == '`')
+      consumeQuotedSymbol(pToken);
+
+    // Comments
+    else if (ch == '#')
+      consumeComment(pToken);
+
+    // Number
+    else if (isStartOfNumber())
+      consumeNumber(pToken);
+
+    // Symbol
+    else if (isStartOfSymbol())
+      consumeSymbol(pToken);
+
+    // Nothing matched -- error
+    else
+      consumeToken(tokens::ERR, 1, pToken);
+
+    return cursor_.isValid();
   }
 
 private:
-  std::vector<Token> tokens_;
+  const std::string& code_;
+  TextCursor cursor_;
   std::stack<TokenType, std::vector<TokenType>> tokenStack_;
 };
 
 inline std::vector<tokens::Token> tokenize(const std::string& code)
 {
-  Tokenizer tokenizer;
-  return tokenizer.tokenize(code);
+  std::vector<tokens::Token> tokens;
+  if (code.empty())
+    return tokens;
+
+  Tokenizer tokenizer(code);
+
+  tokens::Token token;
+  while (tokenizer.tokenize(&token))
+    tokens.push_back(token);
+  tokens.push_back(token);
+
+  return tokens;
 }
 
 }  // namespace sourcetools
