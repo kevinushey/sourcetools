@@ -2,7 +2,7 @@
 % Please edit documentation in R/sourcetools.R
 \name{read}
 \alias{read}
-\title{Read a file}
+\title{Read the Contents of a File}
 \usage{
 read(path)
 }

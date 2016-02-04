@@ -1,7 +1,7 @@
 #' @useDynLib sourcetools
 NULL
 
-#' Read a file
+#' Read the Contents of a File
 #'
 #' Read the contents of a file into a string.
 #'
@@ -13,23 +13,32 @@ read <- function(path) {
   .Call("sourcetools_read", path, PACKAGE = "sourcetools")
 }
 
-#' Tokenize an R File
+#' Tokenize R Code
 #'
-#' Read and tokenize an R file.
+#' Tools for tokenizing \R code.
 #'
 #' @param path A file path.
+#' @param string \R code as a character vector of length one.
 #'
+#' @return A \code{data.frame} with the following columns:
+#'
+#' \tabular{ll}{
+#' \code{value}  \tab The token's contents, as a string.     \cr
+#' \code{row}    \tab The row where the token is located.    \cr
+#' \code{column} \tab The column where the token is located. \cr
+#' \code{type}   \tab The token type, as a string.           \cr
+#' }
+#'
+#' @rdname tokenize-methods
 #' @export
+#' @examples
+#' tokenize_string("x <- 1 + 2")
 tokenize_file <- function(path) {
   path <- normalizePath(path, mustWork = TRUE)
   .Call("sourcetools_tokenize_file", path, PACKAGE = "sourcetools")
 }
 
-#' Tokenize an R String
-#'
-#' Read and tokenize an R string.
-#'
-#' @param string A character vector (of length one).
+#' @rdname tokenize-methods
 #' @export
 tokenize_string <- function(string) {
   .Call("sourcetools_tokenize_string", string, PACKAGE = "sourcetools")
@@ -51,10 +60,10 @@ print.RTokens <- function(x, ...) {
   print(result)
 }
 
-parse_string <- function(string) {
-  .Call("sourcetools_parse_string", string, PACKAGE = "sourcetools")
-}
-
-parse_file <- function(file) {
-  parse_string(read(file))
-}
+# parse_string <- function(string) {
+#   .Call("sourcetools_parse_string", string, PACKAGE = "sourcetools")
+# }
+#
+# parse_file <- function(file) {
+#   parse_string(read(file))
+# }
