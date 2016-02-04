@@ -6,14 +6,14 @@ compare_tokens <- function(tokens, expected) {
     tokens <- tokenize_string(tokens)
 
   expect_true(
-    length(tokens) == length(expected),
+    nrow(tokens) == length(expected),
     "different number of tokens"
   )
 
-  for (i in seq_along(tokens)) {
+  for (i in 1:nrow(tokens)) {
     expect_true(
-      tokens[[i]][[1]] == expected[[i]],
-      paste0("expected token '", tokens[[i]][[1]], "'; got '", expected[[i]], "'")
+      tokens$value[[i]] == expected[[i]],
+      paste0("expected token '", tokens$value[[i]], "'; got '", expected[[i]], "'")
     )
   }
 
@@ -32,7 +32,7 @@ test_that("Operators are tokenized correctly", {
 
   for (operator in operators) {
     tokens <- tokenize_string(operator)
-    expect_true(length(tokens) == 1, paste("expected a single token ('", operator, "')"))
+    expect_true(nrow(tokens) == 1, paste("expected a single token ('", operator, "')"))
   }
 })
 
@@ -44,23 +44,24 @@ test_that("Numbers are tokenized correctly", {
 
   for (number in numbers) {
     tokens <- tokenize_string(number)
-    expect_true(length(tokens) == 1, paste("expected a single token ('", number, "')", sep = ""))
-    token <- tokens[[1]]
+    expect_true(nrow(tokens) == 1, paste("expected a single token ('", number, "')", sep = ""))
+    token <- as.list(tokens[1, ])
     expect_true(token$type == "number", paste("expected a number ('", token$type, "')", sep = ""))
   }
 
 })
 
 test_that("The tokenizer accepts UTF-8 symbols", {
-  expect_true(length(tokenize_string("å√∂")) == 1)
-  expect_true(length(tokenize_string("¡™£¢∞§¶•ªº≠åß∂ƒ©˙∆˚¬…æΩ≈ç√∫˜µ≤≥÷")) == 1)
+  expect_true(nrow(tokenize_string("å√∂")) == 1)
+  expect_true(nrow(tokenize_string("¡™£¢∞§¶•ªº≠åß∂ƒ©˙∆˚¬…æΩ≈ç√∫˜µ≤≥÷")) == 1)
 })
 
 test_that("The tokenizer works correctly", {
 
   # TODO: Should newlines be absorbed as part of the comment string?
   tokens <- tokenize_string("# A Comment\n")
-  compare_tokens(tokens, "# A Comment\n")
+  expected <- "# A Comment\n"
+  compare_tokens(tokens, expected)
 
   tokens <- tokenize_string("a <- 1 + 2\n")
   compare_tokens(
@@ -107,13 +108,13 @@ test_that("`[[` and `[` are tokenized correctly", {
 
 test_that("Failures during number tokenization is detected", {
   tokens <- tokenize_string("1.5E---")
-  expect_true(tokens[[1]]$type == "err")
+  expect_true(tokens$type[[1]] == "err")
 })
 
 test_that("invalid number e.g. 1E1.5 tokenized as single entity", {
   tokens <- tokenize_string("1E1.5")
-  expect_true(length(tokens) == 1)
-  expect_true(tokens[[1]]$type == "err")
+  expect_true(nrow(tokens) == 1)
+  expect_true(tokens$type[[1]] == "err")
 })
 
 test_that("keywords are tokenized as keywords", {
@@ -124,7 +125,7 @@ test_that("keywords are tokenized as keywords", {
                 "NA_integer_", "NA_real_", "NA_complex_", "NA_character_")
 
   tokens <- lapply(keywords, function(keyword) {
-    tokenize_string(keyword)[[1]]
+    tokenize_string(keyword)[1, ]
   })
 
   types <- unlist(lapply(tokens, `[[`, "type"))
@@ -142,8 +143,8 @@ test_that("files in packages are tokenized without errors", {
     files <- list.files(dir, pattern = "R$", full.names = TRUE)
     for (file in files) {
       tokens <- tokenize_file(file)
-      errors <- Filter(function(x) x$type == "err", tokens)
-      expect_true(length(errors) == 0)
+      errors <- tokens$type == "err"
+      expect_true(all(errors == FALSE))
     }
   }
 

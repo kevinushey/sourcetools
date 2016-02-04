@@ -1,6 +1,7 @@
 context("Syntax")
 
 test_that("no syntax errors are detected in R code in packages", {
+  skip_on_cran()
 
   packages <- list.files("~/git", full.names = TRUE)
   rFolders <- file.path(packages, "R")

@@ -7,40 +7,66 @@
 namespace sourcetools {
 namespace {
 
-SEXP asSEXP(const tokens::Token& token)
+void asDataFrame(SEXP listSEXP, int n)
 {
-  SEXP tokenSEXP;
-  PROTECT(tokenSEXP = Rf_allocVector(VECSXP, 4));
-  SET_VECTOR_ELT(tokenSEXP, 0, Rf_mkString(token.contents().c_str()));
-  SET_VECTOR_ELT(tokenSEXP, 1, Rf_ScalarInteger(token.row()));
-  SET_VECTOR_ELT(tokenSEXP, 2, Rf_ScalarInteger(token.column()));
+  SEXP classSEXP = PROTECT(Rf_mkString("data.frame"));
+  Rf_setAttrib(listSEXP, R_ClassSymbol, classSEXP);
 
-  std::string typeString = toString(token.type());
-  SET_VECTOR_ELT(tokenSEXP, 3, Rf_mkString(typeString.c_str()));
+  SEXP rownamesSEXP = PROTECT(Rf_allocVector(INTSXP, 2));
+  INTEGER(rownamesSEXP)[0] = NA_INTEGER;
+  INTEGER(rownamesSEXP)[1] = -n;
+  Rf_setAttrib(listSEXP, R_RowNamesSymbol, rownamesSEXP);
 
-  SEXP namesSEXP;
-  PROTECT(namesSEXP = Rf_allocVector(STRSXP, 4));
+  UNPROTECT(2);
+}
+
+SEXP asSEXP(const std::vector<tokens::Token>& tokens)
+{
+  std::size_t n = tokens.size();
+  SEXP resultSEXP = PROTECT(Rf_allocVector(VECSXP, 4));
+
+  // Set vector elements
+  SEXP valueSEXP = PROTECT(Rf_allocVector(STRSXP, n));
+  SET_VECTOR_ELT(resultSEXP, 0, valueSEXP);
+  for (std::size_t i = 0; i < n; ++i) {
+    std::string contents = tokens[i].contents();
+    SEXP charSEXP = PROTECT(Rf_mkChar(contents.c_str()));
+    SET_STRING_ELT(valueSEXP, i, charSEXP);
+  }
+  UNPROTECT(n);
+
+  SEXP rowSEXP = PROTECT(Rf_allocVector(INTSXP, n));
+  SET_VECTOR_ELT(resultSEXP, 1, rowSEXP);
+  for (std::size_t i = 0; i < n; ++i)
+    INTEGER(rowSEXP)[i] = tokens[i].row();
+
+  SEXP columnSEXP = PROTECT(Rf_allocVector(INTSXP, n));
+  SET_VECTOR_ELT(resultSEXP, 2, columnSEXP);
+  for (std::size_t i = 0; i < n; ++i)
+    INTEGER(columnSEXP)[i] = tokens[i].column();
+
+  SEXP typeSEXP = PROTECT(Rf_allocVector(STRSXP, n));
+  SET_VECTOR_ELT(resultSEXP, 3, typeSEXP);
+  for (std::size_t i = 0; i < n; ++i) {
+    std::string type = toString(tokens[i].type());
+    SEXP charSEXP = PROTECT(Rf_mkChar(type.c_str()));
+    SET_STRING_ELT(typeSEXP, i, charSEXP);
+  }
+  UNPROTECT(n);
+
+  // Set names
+  SEXP namesSEXP = PROTECT(Rf_allocVector(STRSXP, 4));
 
   SET_STRING_ELT(namesSEXP, 0, Rf_mkChar("value"));
   SET_STRING_ELT(namesSEXP, 1, Rf_mkChar("row"));
   SET_STRING_ELT(namesSEXP, 2, Rf_mkChar("column"));
   SET_STRING_ELT(namesSEXP, 3, Rf_mkChar("type"));
 
-  Rf_setAttrib(tokenSEXP, R_NamesSymbol, namesSEXP);
+  Rf_setAttrib(resultSEXP, R_NamesSymbol, namesSEXP);
 
-  UNPROTECT(2);
-  return tokenSEXP;
-}
+  asDataFrame(resultSEXP, n);
 
-SEXP asSEXP(const std::vector<tokens::Token>& tokens)
-{
-  SEXP resultSEXP;
-  std::size_t n = tokens.size();
-  PROTECT(resultSEXP = Rf_allocVector(VECSXP, n));
-  for (std::size_t i = 0; i < n; ++i)
-    SET_VECTOR_ELT(resultSEXP, i, asSEXP(tokens[i]));
-  UNPROTECT(1);
-  Rf_setAttrib(resultSEXP, R_ClassSymbol, Rf_mkString("RTokens"));
+  UNPROTECT(6);
   return resultSEXP;
 }
 
@@ -63,7 +89,7 @@ extern "C" SEXP sourcetools_tokenize_file(SEXP absolutePathSEXP)
 
 extern "C" SEXP sourcetools_tokenize_string(SEXP stringSEXP)
 {
-  const char* string = CHAR(STRING_ELT(stringSEXP, 0));
+  std::string string(CHAR(STRING_ELT(stringSEXP, 0)));
   const auto& tokens = sourcetools::tokenize(string);
   return sourcetools::asSEXP(tokens);
 }

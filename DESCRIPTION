@@ -11,5 +11,5 @@ LazyData: TRUE
 SystemRequirements: C++11
 Suggests:
     testthat
-LinkingTo:
-    testthat
+LinkingTo: testthat
+RoxygenNote: 5.0.1

@@ -1,11 +1,12 @@
 library(microbenchmark)
+library(sourcetools)
 
-files <- list.files("~/git/dplyr/R/", full.names = TRUE)
-lapply(files, function(file) {
-  contents <- readChar(file, file.size(file), TRUE)
-  microbenchmark(
-    tokenize_string(contents),
-    parse(text = contents),
-    times = 10
-  )
-})
+file <- "R/sourcetools.R"
+contents <- read(file)
+repeat {
+  tokenize_string(contents)
+}
+
+repeat {
+  tokenize_file(file)
+}

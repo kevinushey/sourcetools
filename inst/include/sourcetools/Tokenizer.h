@@ -21,9 +21,6 @@ private:
   typedef cursors::TextCursor TextCursor;
   typedef tokens::TokenType TokenType;
 
-public:
-  Tokenizer() {}
-
 private:
   void consumeToken(TextCursor& cursor, TokenType type, std::size_t sz)
   {
@@ -135,7 +132,7 @@ private:
       return false;
     ++distance;
 
-    // Check and consume all non-whitespace characters.
+    // Check and consume all alphanumeric characters.
     // The number is valid if the characters are valid
     // hexadecimal characters (0-9, a-f, A-F). The number
     // can also end with an 'i' (for an imaginary number)
@@ -148,18 +145,14 @@ private:
 
     bool success = true;
     char peek = cursor.peek(distance);
-    while (!std::isspace(peek) && peek != '\0') {
+    while (std::isalnum(peek) && peek != '\0') {
 
-      // If we encounter an 'i' or an 'L', check to
-      // see if this ends the identifier.
+      // If we encounter an 'i' or an 'L', assume
+      // that this ends the identifier.
       if (peek == 'i' || peek == 'L')
       {
-        char next = cursor.peek(distance + 1);
-        if (std::isspace(next) || next == '\0')
-        {
-          ++distance;
-          break;
-        }
+        ++distance;
+        break;
       }
 
       if (!isHexDigit(peek))
@@ -246,6 +239,9 @@ public:
 
   const std::vector<Token>& tokenize(const std::string& code)
   {
+    // Reserve some extra space in our tokens_ vector
+    tokens_.reserve(code.size() / 5);
+
     TextCursor cursor(code);
 
     while (cursor.isValid()) {
@@ -418,6 +414,8 @@ public:
       else
         consumeToken(cursor, tokens::ERR, 1);
     }
+
+    tokens_.shrink_to_fit();
     return tokens_;
   }
 

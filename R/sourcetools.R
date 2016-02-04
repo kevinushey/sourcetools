@@ -51,12 +51,10 @@ print.RTokens <- function(x, ...) {
   print(result)
 }
 
-#' @export
 parse_string <- function(string) {
   .Call("sourcetools_parse_string", string, PACKAGE = "sourcetools")
 }
 
-#' @export
 parse_file <- function(file) {
   parse_string(read(file))
 }
