@@ -249,6 +249,9 @@ public:
 
   bool tokenize(Token* pToken)
   {
+    if (!cursor_.isValid())
+      return false;
+
     char ch = cursor_.peek();
 
     // Block-related tokens
@@ -418,7 +421,7 @@ public:
     else
       consumeToken(tokens::ERR, 1, pToken);
 
-    return cursor_.isValid();
+    return true;
   }
 
 private:
@@ -438,7 +441,6 @@ inline std::vector<tokens::Token> tokenize(const std::string& code)
   tokens::Token token;
   while (tokenizer.tokenize(&token))
     tokens.push_back(token);
-  tokens.push_back(token);
 
   return tokens;
 }
