@@ -53,5 +53,5 @@ validate_syntax("{1 + 2)")
 
 ```
 ##   row column                error
-## 1   0      6 unexpected token ')'
+## 1   1      7 unexpected token ')'
 ```

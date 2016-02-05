@@ -19,13 +19,13 @@ extern "C" SEXP sourcetools_validate_syntax(SEXP contentsSEXP) {
 
   auto rowFn = [](SEXP dataSEXP, std::size_t i, const SyntaxError& error)
   {
-    INTEGER(dataSEXP)[i] = error.row();
+    INTEGER(dataSEXP)[i] = error.row() + 1;
   };
   SET_VECTOR_ELT(resultSEXP, 0, factory.create(INTSXP, errors, rowFn));
 
   auto colFn = [](SEXP dataSEXP, std::size_t i, const SyntaxError& error)
   {
-    INTEGER(dataSEXP)[i] = error.column();
+    INTEGER(dataSEXP)[i] = error.column() + 1;
   };
   SET_VECTOR_ELT(resultSEXP, 1, factory.create(INTSXP, errors, colFn));
 
