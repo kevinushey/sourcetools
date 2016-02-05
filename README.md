@@ -10,9 +10,9 @@ Tools for tokenizing and (eventually) parsing R code.
 `sourcetools` is not yet on CRAN -- install with
 
 
-{% highlight r %}
+```r
 devtools::install_github("kevinushey/sourcetools")
-{% endhighlight %}
+```
 
 ## Tokenization
 
@@ -23,13 +23,11 @@ representations of the code, with each token's value as a
 string, and a recorded row, column, and type:
 
 
-{% highlight r %}
+```r
 tokenize_string("if (x < 10) 20")
-{% endhighlight %}
+```
 
-
-
-{% highlight text %}
+```
 ##    value row column       type
 ## 1     if   1      1    keyword
 ## 2          1      3 whitespace
@@ -42,20 +40,18 @@ tokenize_string("if (x < 10) 20")
 ## 9      )   1     11    bracket
 ## 10         1     12 whitespace
 ## 11    20   1     13     number
-{% endhighlight %}
+```
 
 ## Syntax Validation
 
 `validate_syntax()` is provided to identify syntax errors:
 
 
-{% highlight r %}
+```r
 validate_syntax("{1 + 2)")
-{% endhighlight %}
+```
 
-
-
-{% highlight text %}
+```
 ##   row column                error
 ## 1   0      6 unexpected token ')'
-{% endhighlight %}
+```
