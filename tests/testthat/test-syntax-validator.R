@@ -10,7 +10,7 @@ test_that("no syntax errors are detected in R code in packages", {
     contents <- readChar(file, nchars = file.info(file)$size, useBytes = TRUE)
     tokens <- tokenize_string(contents)
     errors <- validate_syntax(contents)
-    expect_true(length(errors) == 0)
+    expect_true(nrow(errors) == 0)
   }
 
 })

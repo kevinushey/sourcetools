@@ -1,18 +1,6 @@
 #include <sourcetools.h>
 using namespace sourcetools;
 
-SEXP asSEXP(const sourcetools::validators::SyntaxError& error)
-{
-  SEXP result = PROTECT(Rf_allocVector(VECSXP, 3));
-
-  SET_VECTOR_ELT(result, 0, Rf_ScalarInteger(error.row()));
-  SET_VECTOR_ELT(result, 1, Rf_ScalarInteger(error.column()));
-  SET_VECTOR_ELT(result, 2, Rf_mkString(error.message().c_str()));
-
-  UNPROTECT(1);
-  return result;
-}
-
 extern "C" SEXP sourcetools_validate_syntax(SEXP contentsSEXP) {
 
   const char* contents = CHAR(STRING_ELT(contentsSEXP, 0));
@@ -26,11 +14,30 @@ extern "C" SEXP sourcetools_validate_syntax(SEXP contentsSEXP) {
   const std::vector<SyntaxError>& errors = validator.errors();
   std::size_t n = errors.size();
 
-  SEXP resultSEXP = PROTECT(Rf_allocVector(VECSXP, 3));
+  r::RObjectFactory factory;
+  SEXP resultSEXP = factory.create(VECSXP, 3);
+
+  auto rowFn = [](SEXP dataSEXP, std::size_t i, const SyntaxError& error)
+  {
+    INTEGER(dataSEXP)[i] = error.row();
+  };
+  SET_VECTOR_ELT(resultSEXP, 0, factory.create(INTSXP, errors, rowFn));
+
+  auto colFn = [](SEXP dataSEXP, std::size_t i, const SyntaxError& error)
+  {
+    INTEGER(dataSEXP)[i] = error.column();
+  };
+  SET_VECTOR_ELT(resultSEXP, 1, factory.create(INTSXP, errors, colFn));
+
+  auto errFn = [](SEXP dataSEXP, std::size_t i, const SyntaxError& error)
+  {
+    const std::string& msg = error.message();
+    SET_STRING_ELT(dataSEXP, i, Rf_mkCharLen(msg.c_str(), msg.size()));
+  };
+  SET_VECTOR_ELT(resultSEXP, 2, factory.create(STRSXP, errors, errFn));
+
   r::util::setNames(resultSEXP, "row", "column", "error");
   r::util::listToDataFrame(resultSEXP, n);
 
-  UNPROTECT(1);
   return resultSEXP;
-
 }
