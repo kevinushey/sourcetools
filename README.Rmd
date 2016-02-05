@@ -1,0 +1,36 @@
+```{r setup, include=FALSE}
+library(sourcetools)
+```
+
+sourcetools
+===========
+
+Tools for tokenizing and (eventually) parsing R code.
+
+## Getting Started
+
+`sourcetools` is not yet on CRAN -- install with
+
+```{r, eval=FALSE}
+devtools::install_github("kevinushey/sourcetools")
+```
+
+## Tokenization
+
+`sourcetools` provides the `tokenize_string()` and
+`tokenize_file()` functions for generating a tokenized
+repreesntation of R code. These produce 'raw' tokenized
+representations of the code, with each token's value as a
+string, and a recorded row, column, and type:
+
+```{r}
+tokenize_string("if (x < 10) 20")
+```
+
+## Syntax Validation
+
+`validate_syntax()` is provided to identify syntax errors:
+
+```{r}
+validate_syntax("{1 + 2)")
+```

@@ -4,9 +4,9 @@
 #include <sstream>
 #include <vector>
 
-#include <sourcetools/collections/Position.h>
-#include <sourcetools/tokens/Token.h>
-#include <sourcetools/cursors/TokenCursor.h>
+#include <sourcetools/collection/Position.h>
+#include <sourcetools/tokenization/Token.h>
+#include <sourcetools/cursor/TokenCursor.h>
 
 namespace sourcetools {
 namespace validators {

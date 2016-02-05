@@ -3,8 +3,8 @@
 
 #include <string>
 
-#include <sourcetools/Macros.h>
-#include <sourcetools/collections/Position.h>
+#include <sourcetools/core/macros.h>
+#include <sourcetools/collection/Position.h>
 
 namespace sourcetools {
 namespace cursors {

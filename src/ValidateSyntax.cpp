@@ -1,8 +1,5 @@
 #include <sourcetools.h>
-
-#define R_NO_REMAP
-#include <R.h>
-#include <Rinternals.h>
+using namespace sourcetools;
 
 SEXP asSEXP(const sourcetools::validators::SyntaxError& error)
 {
@@ -29,12 +26,11 @@ extern "C" SEXP sourcetools_validate_syntax(SEXP contentsSEXP) {
   const std::vector<SyntaxError>& errors = validator.errors();
   std::size_t n = errors.size();
 
-  SEXP result = PROTECT(Rf_allocVector(VECSXP, n));
-
-  for (std::size_t i = 0; i < n; ++i)
-    SET_VECTOR_ELT(result, i, asSEXP(errors[i]));
+  SEXP resultSEXP = PROTECT(Rf_allocVector(VECSXP, 3));
+  r::util::setNames(resultSEXP, "row", "column", "error");
+  r::util::listToDataFrame(resultSEXP, n);
 
   UNPROTECT(1);
-  return result;
+  return resultSEXP;
 
 }

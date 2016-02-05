@@ -1,12 +1,9 @@
 #ifndef SOURCE_TOOLS_TOKENIZER_H
 #define SOURCE_TOOLS_TOKENIZER_H
 
-#include <sourcetools/Macros.h>
-#include <sourcetools/Utils.h>
-
-#include <sourcetools/tokens/Token.h>
-
-#include <sourcetools/cursors/TextCursor.h>
+#include <sourcetools/core/core.h>
+#include <sourcetools/tokenization/Token.h>
+#include <sourcetools/cursor/TextCursor.h>
 
 #include <vector>
 #include <stack>

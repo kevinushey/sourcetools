@@ -6,9 +6,12 @@
 #include <vector>
 #include <string>
 
-#include <sourcetools/Reader.h>
-#include <sourcetools/Tokenizer.h>
-#include <sourcetools/Parser.h>
-#include <sourcetools/Validators.h>
+#include <sourcetools/core/core.h>
+#include <sourcetools/collection/collection.h>
+#include <sourcetools/cursor/cursor.h>
+#include <sourcetools/r/r.h>
+#include <sourcetools/read/read.h>
+#include <sourcetools/tokenization/tokenization.h>
+#include <sourcetools/validation/validation.h>
 
 #endif

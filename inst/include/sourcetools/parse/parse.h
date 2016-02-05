@@ -1,5 +1,5 @@
-#ifndef SOURCE_TOOLS_PARSER_H
-#define SOURCE_TOOLS_PARSER_H
+#ifndef SOURCE_TOOLS_PARSE_PARSE_H
+#define SOURCE_TOOLS_PARSE_PARSE_H
 
 #include <vector>
 #include <string>
@@ -231,4 +231,5 @@ inline std::shared_ptr<parser::ParseNode> parse(const std::string& contents)
 
 } // namespace sourcetools
 
-#endif
+
+#endif /* SOURCE_TOOLS_PARSE_PARSE_H */

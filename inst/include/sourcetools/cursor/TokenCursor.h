@@ -3,9 +3,8 @@
 
 #include <algorithm>
 
-#include <sourcetools/collections/Position.h>
-
-#include <sourcetools/tokens/Token.h>
+#include <sourcetools/collection/Position.h>
+#include <sourcetools/tokenization/Token.h>
 
 namespace sourcetools {
 namespace cursors {

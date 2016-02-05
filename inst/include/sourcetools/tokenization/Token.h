@@ -8,8 +8,8 @@
 #include <map>
 #include <sstream>
 
-#include <sourcetools/collections/Position.h>
-#include <sourcetools/cursors/TextCursor.h>
+#include <sourcetools/collection/Position.h>
+#include <sourcetools/cursor/TextCursor.h>
 
 namespace sourcetools {
 namespace tokens {
