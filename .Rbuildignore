@@ -3,4 +3,5 @@
 ^\.clang-format$
 ^\.gitignore$
 ^benchmark/
-^README.Rmd$
+^README\.Rmd$
+^configure\.R$
