@@ -1,9 +1,11 @@
 ^.*\.Rproj$
+^\.Rhistory$
 ^\.Rproj\.user$
 ^\.clang-format$
 ^\.gitignore$
-^benchmark/
-^README\.Rmd$
-^configure\.R$
 ^\.travis\.yml$
 ^appveyor\.yml$
+^configure\.R$
+^README\.Rmd$
+^benchmark/
+
