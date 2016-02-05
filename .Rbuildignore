@@ -5,3 +5,5 @@
 ^benchmark/
 ^README\.Rmd$
 ^configure\.R$
+^\.travis\.yml$
+^appveyor\.yml$
