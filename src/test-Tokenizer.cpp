@@ -29,12 +29,24 @@ context("Tokenizer") {
   }
 
   test_that("Keywords are detected correctly") {
-    std::string code = "if for while";
+    std::string code = "if for while break repeat";
     const auto& tokens = sourcetools::tokenize(code);
     for (auto& token : tokens) {
       if (sourcetools::tokens::utils::isWhitespace(token))
         continue;
       expect_true(sourcetools::tokens::utils::isKeyword(token));
+    }
+  }
+
+  test_that("Various type-checkers work correctly") {
+
+    using namespace sourcetools::tokens::utils;
+    using namespace sourcetools::tokens;
+
+    for (auto type : {LPAREN, LBRACE, LBRACKET, LDBRACKET,
+                      RPAREN, RBRACE, RBRACKET, RDBRACKET})
+    {
+      expect_true(isBracket(Token(type)));
     }
   }
 
