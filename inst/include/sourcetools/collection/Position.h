@@ -8,11 +8,15 @@ namespace collections {
 
 struct Position
 {
-  Position() : Position(0, 0) {}
+  Position()
+    : row(0), column(0)
+  {
+  }
 
   Position(std::size_t row, std::size_t column)
     : row(row), column(column)
-  {}
+  {
+  }
 
   friend bool operator <(const Position& lhs, const Position& rhs)
   {

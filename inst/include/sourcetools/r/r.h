@@ -15,6 +15,11 @@ class RObjectFactory
 {
 public:
 
+  RObjectFactory()
+    : n_(0)
+  {
+  }
+
   template <typename T, typename F>
   SEXP create(SEXPTYPE type, const std::vector<T>& vector, F&& f)
   {
@@ -38,7 +43,7 @@ public:
   }
 
 private:
-  std::size_t n_ = 0;
+  std::size_t n_;
 };
 
 namespace util {
