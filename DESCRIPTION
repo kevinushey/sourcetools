@@ -12,4 +12,6 @@ SystemRequirements: C++11
 Suggests:
     testthat
 LinkingTo: testthat
+Remotes:
+    hadley/testthat
 RoxygenNote: 5.0.1
