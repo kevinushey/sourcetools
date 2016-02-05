@@ -11,7 +11,7 @@ LazyData: TRUE
 SystemRequirements: C++11
 Suggests:
     testthat
-LinkingTo: testthat
+LinkingTo: testthat (>= 0.11.0.9000)
 Remotes:
     hadley/testthat
 RoxygenNote: 5.0.1
