@@ -1,5 +1,5 @@
-#ifndef SOURCE_TOOLS_READ_H
-#define SOURCE_TOOLS_READ_H
+#ifndef SOURCE_TOOLS_READ_READ_H
+#define SOURCE_TOOLS_READ_READ_H
 
 #include <fstream>
 #include <string>
@@ -23,4 +23,4 @@ inline bool read(const std::string& absolutePath, std::string* pContent)
 
 }  // namespace sourcetools
 
-#endif /* SOURCE_TOOLS_READ_H */
+#endif /* SOURCE_TOOLS_READ_READ_H */
