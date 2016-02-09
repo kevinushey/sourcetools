@@ -59,7 +59,10 @@ Tokenizer <- function(program) {
 Parser <- function(tokenizer) {
 
   tokenizer_ <- tokenizer
-  token_ <- tokenizer_$tokenize()
+
+  # We save a lookahead token, to help inform
+  # what action we should take as we parse.
+  lookahead_ <- tokenizer_$tokenize()
 
   # A hacky helper function for printing debug output when
   # running our parser. Don't worry too much about this.
@@ -82,8 +85,10 @@ Parser <- function(tokenizer) {
       10
     else if (token == "*")
       20
-    else
+    else if (token == "")
       0
+    else
+      stop("unexpected token '", token, "'")
   }
 
   # Handling of 'null denotation' tokens. This is for tokens
@@ -98,7 +103,7 @@ Parser <- function(tokenizer) {
     else if (is_number(token))
       as.numeric(token)
     else
-      token
+      stop("unexpected token '", token, "'")
   }
 
   # 'led', for 'left denotation', is used when a token
@@ -115,17 +120,22 @@ Parser <- function(tokenizer) {
       call(lhs, rhs, parseTopLevelExpression(10))
     } else if (lhs == "*") {
       call(lhs, rhs, parseTopLevelExpression(20))
+    } else {
+      stop("unexpected token '", lhs, "'")
     }
   }
 
   # This is the entry-point that parses a whole expression.
   parseTopLevelExpression <- function(rbp = 0) {
 
-    # Save the current token in 't'.
-    t <- token_
-
-    # Advance to the next token.
-    token_ <<- tokenizer_$tokenize()
+    # Save the current token in 't', and advance
+    # to the next token. Why do we need to save
+    # the token in a 'global' variable? When the
+    # various parse recursions end, we need to make
+    # sure those routines are seeing the current state,
+    # rather than their own state.
+    token <- lookahead_
+    lookahead_ <<- tokenizer_$tokenize()
 
     # Parse the 'null denotation' expression. This
     # represents tokens that are discovered at the beginning
@@ -133,27 +143,27 @@ Parser <- function(tokenizer) {
     # operators (wherein 'nud' will recurse until
     # discovering a non-operator token), and numeric tokens
     # (which end the recursion).
-    cat(indent(), "lhs <- parsePrefixExpression(", format(t), ")\n", sep = "")
-    lhs <- parsePrefixExpression(t)
+    cat(indent(), "lhs <- parsePrefixExpression(", format(token), ")\n", sep = "")
+    node <- parsePrefixExpression(token)
 
     # Now, we need to construct the right-hand side of this
     # expression. The 'lbp' tells us whether we can continue
     # 'joining' expressions into the current parse tree.
     # TODO: make this more clear
-    while (rbp < lbp(token_)) {
+    while (rbp < lbp(lookahead_)) {
 
       # Save the current token, and get the next token.
-      t <- token_
-      token_ <<- tokenizer$tokenize()
+      token <- lookahead_
+      lookahead_ <<- tokenizer$tokenize()
 
       # Construct a new 'node' for our tree. Notice how we
       # 'grow' the left-hand side here.
-      cat(indent(), "lhs <- parseInfixExpression(", format(t), ", ", format(lhs), ")\n", sep = "")
-      lhs <- parseInfixExpression(t, lhs)
+      cat(indent(), "lhs <- parseInfixExpression(", format(token), ", ", format(node), ")\n", sep = "")
+      node <- parseInfixExpression(token, node)
     }
 
     # Return our parse tree.
-    lhs
+    node
   }
 
   list(parse = parseTopLevelExpression)
