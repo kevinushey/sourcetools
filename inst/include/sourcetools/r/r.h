@@ -7,11 +7,12 @@
 
 #include <vector>
 #include <string>
+#include <sourcetools/core/util.h>
 
 namespace sourcetools {
 namespace r {
 
-class RObjectFactory
+class RObjectFactory : noncopyable
 {
 public:
 

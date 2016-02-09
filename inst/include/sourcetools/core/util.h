@@ -5,6 +5,21 @@
 #include <cctype>
 
 namespace sourcetools {
+
+namespace detail {
+
+class noncopyable
+{
+protected:
+  noncopyable() = default;
+  ~noncopyable() = default;
+  noncopyable(const noncopyable&) = delete;
+  noncopyable& operator=(const noncopyable&) = delete;
+};
+
+} // namespace detail
+typedef detail::noncopyable noncopyable;
+
 namespace utils {
 
 inline bool isValidForStartOfRSymbol(char ch)
