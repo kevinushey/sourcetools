@@ -8,4 +8,5 @@
 ^configure\.R$
 ^README\.Rmd$
 ^benchmark/
+^notes/
 
