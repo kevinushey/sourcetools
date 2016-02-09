@@ -64,7 +64,7 @@ template <typename... Ts>
 inline void setNames(SEXP dataSEXP, const Ts&... ts)
 {
   std::size_t n = sizeof...(ts);
-  if (n != Rf_length(dataSEXP))
+  if (n != static_cast<std::size_t>(Rf_length(dataSEXP)))
     return;
 
   SEXP namesSEXP = PROTECT(Rf_allocVector(STRSXP, n));
