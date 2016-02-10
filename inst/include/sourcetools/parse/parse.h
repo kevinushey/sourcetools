@@ -6,11 +6,10 @@
 #include <memory>
 #include <iostream>
 
-#include <sourcetools/Tokenizer.h>
-
-#include <sourcetools/tokens/Token.h>
-#include <sourcetools/cursors/TokenCursor.h>
-#include <sourcetools/collections/Position.h>
+#include <sourcetools/core/core.h>
+#include <sourcetools/tokenization/tokenization.h>
+#include <sourcetools/cursor/cursor.h>
+#include <sourcetools/collection/collection.h>
 
 namespace sourcetools {
 namespace parser {
@@ -19,25 +18,21 @@ class ParseNode
 {
 private:
   typedef tokens::Token Token;
+  typedef std::vector<std::unique_ptr<ParseNode>> Children;
 
 public:
-  static std::shared_ptr<ParseNode> createRootNode()
-  {
-    return std::make_shared<ParseNode>(nullptr);
-  }
 
-  ParseNode* push(const Token& token)
+  static std::unique_ptr<ParseNode> create(const Token& token = Token(),
+                                           ParseNode* parent = nullptr)
   {
-    auto node = std::make_shared<ParseNode>(parent_, token);
-    children_.push_back(node);
-    return node.get();
+    return make_unique<ParseNode>(parent, token);
   }
-
   const ParseNode* parent() const { return parent_; }
+  const Children& children() const { return children_; }
 
   // TODO: I don't want these ctors to be public but apparently
-  // 'std::make_shared()' demands it?
-  ParseNode(ParseNode* parent)
+  // 'std::make_unique()' demands it?
+  explicit ParseNode(ParseNode* parent)
     : token_(tokens::ERR), parent_(parent)
   {}
 
@@ -45,11 +40,9 @@ public:
     : token_(token), parent_(parent)
   {}
 
-private:
   Token token_;
-
   ParseNode* parent_;
-  std::vector<std::shared_ptr<ParseNode>> children_;
+  Children children_;
 };
 
 class Parser
@@ -58,6 +51,10 @@ private:
   typedef cursors::TokenCursor TokenCursor;
   typedef tokens::Token Token;
   typedef tokens::TokenType TokenType;
+
+public:
+
+  Parser() : precedence_(0) {}
 
 private:
   void checkType(TokenCursor* pCursor, TokenType type,
@@ -100,13 +97,50 @@ private:
   PARSE_ACTION(__CURSOR__, moveToNextSignificantToken)
 
 #define FWD_OVER_WHITESPACE_AND_COMMENTS(__CURSOR__)           \
-  PARSE_ACTION(__CURSOR__, fwdOverWhitespaceAndComments)
+  PARSE_ACTION(__CURSOR__, fwdOverWhitespaceAndComments)     \
 
-  void parseFunctionArgumentList(TokenCursor* pCursor, std::shared_ptr<ParseNode>& pNode)
+  // Parse a function argument, e.g.
+  //
+  //    (1) <symbol>
+  //    (2) <symbol> '=' <expression>
+  void parseFunctionArgument(TokenCursor* pCursor, std::unique_ptr<ParseNode>& pNode)
   {
+    CHECK_TYPE(pCursor, tokens::SYMBOL);
+    if (pCursor->nextSignificantToken().isType(tokens::OPERATOR_EQUAL))
+    {
+      MOVE_TO_NEXT_SIGNIFICANT_TOKEN(pCursor);
+      MOVE_TO_NEXT_SIGNIFICANT_TOKEN(pCursor);
+      parseTopLevelExpression(pCursor, pNode);
+    }
+    else
+    {
+      MOVE_TO_NEXT_SIGNIFICANT_TOKEN(pCursor);
+    }
   }
 
-  void parseFunction(TokenCursor* pCursor, std::shared_ptr<ParseNode>& pNode)
+  // Parse a function argument list. This routine does not
+  // see / consume the opening / closing parens, but does
+  // finish consuming expressions once it sees the closing ')'.
+  //
+  //    (1) '(' <empty> ')'
+  //    (2) '(' <arg> (',' <arg>)* ')'
+  //
+  // where 'arg' is as defined above.
+  void parseFunctionArgumentList(TokenCursor* pCursor, std::unique_ptr<ParseNode>& pNode)
+  {
+    if (pCursor->isType(tokens::RPAREN))
+      return;
+
+    do
+    {
+      parseFunctionArgument(pCursor, pNode);
+      if (pCursor->isType(tokens::RPAREN))
+        return;
+      CHECK_TYPE(pCursor, tokens::COMMA);
+    } while (pCursor->moveToNextSignificantToken());
+  }
+
+  void parseFunction(TokenCursor* pCursor, std::unique_ptr<ParseNode>& pNode)
   {
     CHECK_TYPE(pCursor, tokens::KEYWORD_FUNCTION);
     MOVE_TO_NEXT_SIGNIFICANT_TOKEN(pCursor);
@@ -118,7 +152,7 @@ private:
     parseTopLevelExpression(pCursor, pNode);
   }
 
-  void parseFor(TokenCursor* pCursor, std::shared_ptr<ParseNode>& pNode)
+  void parseFor(TokenCursor* pCursor, std::unique_ptr<ParseNode>& pNode)
   {
     CHECK_TYPE(pCursor, tokens::KEYWORD_FOR);
     MOVE_TO_NEXT_SIGNIFICANT_TOKEN(pCursor);
@@ -126,7 +160,7 @@ private:
     MOVE_TO_NEXT_SIGNIFICANT_TOKEN(pCursor);
     CHECK_TYPE(pCursor, tokens::SYMBOL);
   }
-  void parseWhile(TokenCursor* pCursor, std::shared_ptr<ParseNode>& pNode)
+  void parseWhile(TokenCursor* pCursor, std::unique_ptr<ParseNode>& pNode)
   {
     CHECK_TYPE(pCursor, tokens::KEYWORD_WHILE);
     MOVE_TO_NEXT_SIGNIFICANT_TOKEN(pCursor);
@@ -138,14 +172,14 @@ private:
     parseTopLevelExpression(pCursor, pNode);
   }
 
-  void parseRepeat(TokenCursor* pCursor, std::shared_ptr<ParseNode>& pNode)
+  void parseRepeat(TokenCursor* pCursor, std::unique_ptr<ParseNode>& pNode)
   {
     CHECK_TYPE(pCursor, tokens::KEYWORD_REPEAT);
     MOVE_TO_NEXT_SIGNIFICANT_TOKEN(pCursor);
     parseTopLevelExpression(pCursor, pNode);
   }
 
-  void parseIf(TokenCursor* pCursor, std::shared_ptr<ParseNode>& pNode)
+  void parseIf(TokenCursor* pCursor, std::unique_ptr<ParseNode>& pNode)
   {
     CHECK_TYPE(pCursor, tokens::KEYWORD_IF);
     MOVE_TO_NEXT_SIGNIFICANT_TOKEN(pCursor);
@@ -161,7 +195,7 @@ private:
     }
   }
 
-  void parseTopLevelExpression(TokenCursor* pCursor, std::shared_ptr<ParseNode>& pNode)
+  void parseTopLevelExpression(TokenCursor* pCursor, std::unique_ptr<ParseNode>& pNode)
   {
     FWD_OVER_WHITESPACE_AND_COMMENTS(pCursor);
 
@@ -202,13 +236,13 @@ private:
   }
 
 public:
-  std::shared_ptr<ParseNode> parse(const std::string& contents)
+  std::unique_ptr<ParseNode> parse(const std::string& contents)
   {
     const auto& tokens = tokenize(contents);
     LOG(tokens);
 
     TokenCursor cursor(tokens);
-    std::shared_ptr<ParseNode> root = ParseNode::createRootNode();
+    std::unique_ptr<ParseNode> root = ParseNode::create();
 
     do
     {
@@ -219,11 +253,14 @@ public:
     return root;
   }
 
+private:
+  int precedence_;
+
 };
 
 } // namespace parser
 
-inline std::shared_ptr<parser::ParseNode> parse(const std::string& contents)
+inline std::unique_ptr<parser::ParseNode> parse(const std::string& contents)
 {
   parser::Parser parser;
   return parser.parse(contents);
