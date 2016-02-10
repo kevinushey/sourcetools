@@ -1,9 +1,9 @@
 ## An adapation of http://effbot.org/zone/simple-top-down-parsing.htm
-## for R. We examine a super simple language that consists
-## only of '+', '*', and single-digit numbers (no
-## whitespace). For example, "1+2*3+4" is a valid program,
-## doing what you expect. More comments are included inline
-## to help make sense of what's going on.
+## for R. We examine a super simple language (calculator)
+## that consists only of '+', '*', and single-digit numbers
+## (no whitespace). For example, "1+2*3+4" is a valid
+## program, doing what you expect. More comments are
+## included inline to help make sense of what's going on.
 ##
 ## While simple, this example showcases the main points
 ## needed to understand top-down operator precedence
@@ -23,9 +23,9 @@ is_number <- function(token) {
 
 # We 'tokenize' a program (string of code) just by splitting
 # it. So "1+2" becomes c("1", "+", "2"). Obviously a 'real'
-# tokenizer would tokenize incrementally but tokenization is
-# not the interesting part of this example, so we just keep
-# it simple.
+# tokenizer would tokenize incrementally and separate words
+# etc. but tokenization is not the interesting part of this
+# example, so we just keep it simple.
 tokenize <- function(program) {
   strsplit(program, "", fixed = TRUE)[[1]]
 }
@@ -51,17 +51,16 @@ Tokenizer <- function(program) {
   )
 }
 
-# The parser class constructs a parse tree. It's
-# a little bit bloated because various methods need
-# access to a 'global' token object. We construct it
-# with a tokenizer; this tokenizer provides the method
-# with tokens as it parses expressions.
+# Our 'Parser' class will be used to construct
+# our parse tree (an AST).
 Parser <- function(tokenizer) {
 
   tokenizer_ <- tokenizer
 
-  # We save a lookahead token, to help inform
-  # what action we should take as we parse.
+  # We save a lookahead token, to help inform what action we
+  # should take as we parse. It needs to exist as a private
+  # variable so that the various recursing functions see the
+  # correct 'state' of the program.
   lookahead_ <- tokenizer_$tokenize()
 
   # A hacky helper function for printing debug output when
@@ -74,13 +73,13 @@ Parser <- function(tokenizer) {
     )
   }
 
-  # The left-binding precedence for a token. The main important
+  # The left-binding precedence for a token. The important
   # thing is that '*' has a higher precedence than '+'. This
-  # function either receives operators, or a special 'end of line'
-  # token, implying that there is nothing left to parse. We give
-  # it a left-binding precedence of 0, to indicate that parsing
-  # should end now.
-  lbp <- function(token) {
+  # function either receives operators, or a special 'end of
+  # line' token, implying that there is nothing left to
+  # parse. We give it a left-binding precedence of 0, to
+  # indicate that parsing should end now.
+  precedence <- function(token) {
     if (token == "+")
       10
     else if (token == "*")
@@ -88,7 +87,7 @@ Parser <- function(tokenizer) {
     else if (token == "")
       0
     else
-      stop("unexpected token '", token, "'")
+      stop("unexpected token '", token, "'; expected operator or end-of-parse")
   }
 
   # Handling of 'null denotation' tokens. This is for tokens
@@ -116,24 +115,21 @@ Parser <- function(tokenizer) {
   # as the left child, and the next part of the expression
   # as the right child.
   parseInfixExpression <- function(lhs, rhs) {
-    if (lhs == "+") {
-      call(lhs, rhs, parseTopLevelExpression(10))
-    } else if (lhs == "*") {
-      call(lhs, rhs, parseTopLevelExpression(20))
-    } else {
-      stop("unexpected token '", lhs, "'")
-    }
+    if (!is_operator(lhs))
+      stop("unexpected token '", lhs, "'; expecting an operator")
+    call(lhs, rhs, parseTopLevelExpression(precedence(lhs)))
   }
 
   # This is the entry-point that parses a whole expression.
   parseTopLevelExpression <- function(rbp = 0) {
 
-    # Save the current token in 't', and advance
-    # to the next token. Why do we need to save
-    # the token in a 'global' variable? When the
-    # various parse recursions end, we need to make
-    # sure those routines are seeing the current state,
-    # rather than their own state.
+    # Save the current token in 'token', and advance to the
+    # next token.
+    #
+    # Why do we need to save the token in a 'global'
+    # variable? When the various parse recursions end, we
+    # need to make sure those routines are seeing the
+    # current state, rather than their own state.
     token <- lookahead_
     lookahead_ <<- tokenizer_$tokenize()
 
@@ -150,7 +146,7 @@ Parser <- function(tokenizer) {
     # expression. The 'lbp' tells us whether we can continue
     # 'joining' expressions into the current parse tree.
     # TODO: make this more clear
-    while (rbp < lbp(lookahead_)) {
+    while (rbp < precedence(lookahead_)) {
 
       # Save the current token, and get the next token.
       token <- lookahead_
