@@ -172,3 +172,9 @@ tokenizer <- Tokenizer(program)
 parser <- Parser(tokenizer)
 expr <- parser$parse()
 stopifnot(eval(parse(text = program)) == eval(expr))
+
+## Other materials:
+##
+## http://journal.stuffwithstuff.com/2011/03/19/pratt-parsers-expression-parsing-made-easy/ 
+## http://eli.thegreenplace.net/2010/01/02/top-down-operator-precedence-parsing
+## 
