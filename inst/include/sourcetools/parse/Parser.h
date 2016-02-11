@@ -30,7 +30,7 @@ public:
     tokenizer_.tokenize(&lookAhead_);
   }
 
-  // forward-declare
+private:
   std::shared_ptr<Node> parsePrefixExpression(const Token& token)
   {
     auto pNew = Node::create(token);
@@ -51,27 +51,60 @@ public:
   std::shared_ptr<Node> parseTopLevelExpression(int precedence)
   {
     auto token = lookAhead_;
-    tokenizer_.tokenize(&lookAhead_);
+    if (tokens::isEnd(token))
+      return nullptr;
+
+    nextSignificantToken();
 
     auto pNode = parsePrefixExpression(token);
     while (precedence < precedence::left(lookAhead_))
     {
       token = lookAhead_;
-      tokenizer_.tokenize(&lookAhead_);
+      if (tokens::isEnd(token))
+        return nullptr;
+
+      nextSignificantToken();
       pNode = parseInfixExpression(token, pNode);
     }
 
     return pNode;
   }
 
+  void nextSignificantToken()
+  {
+    using namespace tokens;
+
+    bool success = tokenizer_.tokenize(&lookAhead_);
+    while (success && (isComment(lookAhead_) || isWhitespace(lookAhead_)))
+      success = tokenizer_.tokenize(&lookAhead_);
+  }
+
+public:
+
+  std::vector<std::shared_ptr<Node>> parse()
+  {
+    std::vector<std::shared_ptr<Node>> expression;
+
+    while (true)
+    {
+      auto pNode = parseTopLevelExpression(0);
+      if (!pNode)
+        break;
+
+      expression.emplace_back(pNode);
+    }
+
+    return expression;
+  }
+
 };
 
 } // namespace parser
 
-inline std::shared_ptr<parser::Node> parse(const std::string& program)
+inline std::vector<std::shared_ptr<parser::Node>> parse(const std::string& program)
 {
   parser::Parser parser(program);
-  return parser.parseTopLevelExpression(0);
+  return parser.parse();
 }
 
 void log(std::shared_ptr<parser::Node> pNode, int depth = 0);

@@ -307,6 +307,11 @@ inline bool isSymbol(const Token& token)
   return token.type() == SYMBOL;
 }
 
+inline bool isEnd(const Token& token)
+{
+  return token.type() == END;
+}
+
 inline bool isString(const Token& token)
 {
   return token.type() == STRING;

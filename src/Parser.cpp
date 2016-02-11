@@ -53,6 +53,16 @@ SEXP asSEXP(std::shared_ptr<parser::Node> pNode)
   return listSEXP;
 }
 
+SEXP asSEXP(const std::vector<std::shared_ptr<parser::Node>>& expression)
+{
+  std::size_t n = expression.size();
+  SEXP exprSEXP = PROTECT(Rf_allocVector(EXPRSXP, n));
+  for (std::size_t i = 0; i < n; ++i)
+    SET_VECTOR_ELT(exprSEXP, i, asSEXP(expression[i]));
+  UNPROTECT(1);
+  return exprSEXP;
+}
+
 } // namespace sourcetools
 
 extern "C" SEXP sourcetools_parse_string(SEXP stringSEXP)
