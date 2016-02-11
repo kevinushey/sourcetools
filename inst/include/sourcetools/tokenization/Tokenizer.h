@@ -448,6 +448,6 @@ inline std::vector<tokens::Token> tokenize(const std::string& code)
   return tokens;
 }
 
-}  // namespace sourcetools
+} // namespace sourcetools
 
 #endif

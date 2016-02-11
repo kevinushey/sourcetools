@@ -71,10 +71,12 @@ SEXP asSEXP(const std::vector<std::shared_ptr<parser::Node>>& expression)
 
 } // namespace sourcetools
 
-extern "C" SEXP sourcetools_parse_string(SEXP stringSEXP)
+extern "C" SEXP sourcetools_parse_string(SEXP programSEXP)
 {
-  const char* string = CHAR(STRING_ELT(stringSEXP, 0));
-  auto root = sourcetools::parse(string);
-  // sourcetools::log(root);
+  const char* program = CHAR(STRING_ELT(programSEXP, 0));
+  sourcetools::parser::Parser parser(program);
+  auto root = parser.parse();
+  // for (auto&& pNode : root )
+  //   sourcetools::log(pNode);
   return sourcetools::asSEXP(root);
 }

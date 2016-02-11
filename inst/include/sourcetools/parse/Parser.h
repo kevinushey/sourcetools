@@ -44,7 +44,7 @@ private:
   {
     auto pNew = Node::create(token);
     pNew->add(pNode);
-    pNew->add(parseTopLevelExpression(precedence::left(token)));
+    pNew->add(parseTopLevelExpression(precedence::left(token) - precedence::isRightAssociative(token)));
     return pNew;
   }
 
@@ -100,12 +100,6 @@ public:
 };
 
 } // namespace parser
-
-inline std::vector<std::shared_ptr<parser::Node>> parse(const std::string& program)
-{
-  parser::Parser parser(program);
-  return parser.parse();
-}
 
 void log(std::shared_ptr<parser::Node> pNode, int depth = 0);
 

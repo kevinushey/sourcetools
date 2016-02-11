@@ -13,9 +13,10 @@ inline int left(const tokens::Token& token)
   using namespace tokens;
   switch (token.type())
   {
+  case OPERATOR_ASSIGN_LEFT_EQUALS:
+    return 5;
   case OPERATOR_HELP:
     return 10;
-  case OPERATOR_ASSIGN_LEFT_EQUALS:
   case OPERATOR_ASSIGN_LEFT_COLON:
     return 20;
   case OPERATOR_ASSIGN_LEFT:
@@ -83,6 +84,22 @@ inline int right(const tokens::Token& token)
     return 140;
   default:
     return 0;
+  }
+}
+
+inline bool isRightAssociative(const tokens::Token& token)
+{
+  using namespace tokens;
+  switch (token.type())
+  {
+  case OPERATOR_ASSIGN_LEFT:
+  case OPERATOR_ASSIGN_LEFT_PARENT:
+  case OPERATOR_ASSIGN_LEFT_EQUALS:
+  case OPERATOR_EXPONENTATION_STARS:
+  case OPERATOR_HAT:
+    return true;
+  default:
+    return false;
   }
 }
 
