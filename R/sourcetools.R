@@ -49,6 +49,10 @@ tokenize_string <- function(string) {
   .Call("sourcetools_tokenize_string", as.character(string), PACKAGE = "sourcetools")
 }
 
+parse_string <- function(string) {
+  .Call("sourcetools_parse_string", as.character(string), PACKAGE = "sourcetools")
+}
+
 #' Find Syntax Errors
 #'
 #' Find syntax errors in a string of \R code.

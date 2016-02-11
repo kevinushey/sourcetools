@@ -10,6 +10,7 @@
 #include <sstream>
 
 namespace sourcetools {
+namespace tokenizer {
 
 class Tokenizer
 {
@@ -23,7 +24,7 @@ private:
                     std::size_t length,
                     Token* pToken)
   {
-    *pToken = Token(cursor_, type, length);
+    *pToken = std::move(Token(cursor_, type, length));
     cursor_.moveForward(length);
   }
 
@@ -427,13 +428,15 @@ private:
   std::stack<TokenType, std::vector<TokenType>> tokenStack_;
 };
 
+} // namespace tokenizer
+
 inline std::vector<tokens::Token> tokenize(const std::string& code)
 {
   std::vector<tokens::Token> tokens;
   if (code.empty())
     return tokens;
 
-  Tokenizer tokenizer(code);
+  tokenizer::Tokenizer tokenizer(code);
 
   tokens::Token token;
   while (tokenizer.tokenize(&token))
