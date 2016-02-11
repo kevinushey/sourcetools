@@ -302,6 +302,11 @@ inline bool isSymbolic(const Token& token)
   return (token.type() & mask) != 0;
 }
 
+inline bool isNumeric(const Token& token)
+{
+  return (token.type() & NUMBER) != 0;
+}
+
 } // namespace utils
 } // namespace tokens
 
