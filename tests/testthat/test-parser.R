@@ -11,7 +11,7 @@ test_that("agreement on parse of expressions", {
 if (FALSE) {
 
   names <- c("foo", "'bar'", "baz")
-
+  unOps <- c("~", "+", "-", "?", "!")
   binOps <- c(
     # "::", ":::", ## TODO: only allowed in certain contexts
     "$", "@", "^", ":", "%foo%",
@@ -22,15 +22,17 @@ if (FALSE) {
     "~",
     # "->", "->>", ## TODO: The R parser translates these into `<-` assignments
     "<-", "<<-",
-    "="
+    "=",
     "?"
   )
 
-  n <- 3
+  n <- 5
   repeat {
     code <- paste(
+      paste(sample(unOps, n), collapse = ""),
       paste(sample(names, n, TRUE), sample(binOps, n, TRUE), collapse = " "),
-      "end"
+      " end",
+      sep = ""
     )
 
     R <- parse(text = code)
