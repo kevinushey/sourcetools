@@ -248,7 +248,10 @@ public:
   bool tokenize(Token* pToken)
   {
     if (!cursor_.isValid())
+    {
+      *pToken = std::move(Token(tokens::END));
       return false;
+    }
 
     char ch = cursor_.peek();
 

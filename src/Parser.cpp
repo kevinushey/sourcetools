@@ -28,7 +28,7 @@ SEXP asSEXP(std::shared_ptr<parser::Node> pNode)
 
   // TODO: Make an appropriate function for turning
   // tokens into SEXP primitive
-  if (tokens::isOperator(token))
+  if (tokens::isOperator(token) || tokens::isSymbol(token))
     elSEXP = PROTECT(Rf_install(token.contents().c_str()));
   else if (tokens::isNumeric(token))
     elSEXP = PROTECT(Rf_ScalarReal(::atof(token.contents().c_str())));
