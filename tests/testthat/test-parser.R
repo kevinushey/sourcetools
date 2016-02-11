@@ -1,9 +1,22 @@
 context("Parser")
 
+check_parse <- function(...) {
+  vapply(list(...), FUN.VALUE = logical(1), function(code) {
+    all.equal(
+      parse(text = code)[[1]],
+      parse_string(code)[[1]]
+    )
+  })
+}
+
 test_that("agreement on parse of expressions", {
 
-  check_parse("foo ? bar = baz") # R believes that '?' is higher precedence than '='?
-  check_parse("foo ? bar <- baz")
+  results <- check_parse(
+    "foo ? bar = baz",     # R believes that '?' is higher precedence than '='?
+    "foo ? bar <- baz"
+  )
+
+  testthat::expect_true(all(results))
 
 })
 
