@@ -8,7 +8,10 @@ namespace sourcetools {
 
 void log(std::shared_ptr<parser::Node> pNode, int depth)
 {
-  for (std::size_t i = 0; i < depth; ++i)
+  if (!pNode)
+    return;
+
+  for (int i = 0; i < depth; ++i)
     ::Rprintf("  ");
 
   auto&& token = pNode->token();
@@ -23,12 +26,16 @@ void log(std::shared_ptr<parser::Node> pNode, int depth)
 
 SEXP asSEXP(std::shared_ptr<parser::Node> pNode)
 {
+  if (!pNode)
+    return R_NilValue;
+
   auto&& token = pNode->token();
   SEXP elSEXP;
 
   // TODO: Make an appropriate function for turning
   // tokens into SEXP primitive
-  if (tokens::isOperator(token) || tokens::isSymbol(token) || tokens::isKeyword(token))
+  if (tokens::isOperator(token) || tokens::isSymbol(token) || tokens::isKeyword(token) ||
+      tokens::isLeftBracket(token))
     elSEXP = PROTECT(Rf_install(token.contents().c_str()));
   else if (tokens::isNumeric(token))
     elSEXP = PROTECT(Rf_ScalarReal(::atof(token.contents().c_str())));
