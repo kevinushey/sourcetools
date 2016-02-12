@@ -215,7 +215,6 @@ private:
     if (token_.isType(RPAREN))
       return pNode;
 
-    MOVE_TO_NEXT_SIGNIFICANT_TOKEN();
     while (true)
     {
       pNode->add(parseFunctionArgument());
@@ -330,27 +329,33 @@ private:
     SOURCE_TOOLS_DEBUG_PARSER_LOG("parsePrefixExpression('" << token.contents() << "')");
     using namespace tokens;
 
-    auto pNew = Node::create(token);
+    auto pNode = Node::create(token);
     nextSignificantToken();
 
     if (isOperator(token))
-      pNew->add(parseTopLevelExpression(precedence::right(token)));
+      pNode->add(parseTopLevelExpression(precedence::right(token)));
     else if (token.isType(LBRACE))
     {
-      do
+      while (true)
       {
-        pNew->add(parseTopLevelExpression(0));
-      } while (!token_.isType(RBRACE));
-      nextSignificantToken();
+        if (token_.isType(RBRACE))
+        {
+          nextSignificantToken();
+          return pNode;
+        }
+
+        pNode->add(parseTopLevelExpression());
+      }
     }
     else if (token.isType(LPAREN))
     {
       CHECK_TYPE_NOT(RPAREN);
-      pNew->add(parseTopLevelExpression(0));
+      pNode->add(parseTopLevelExpression());
       CHECK_TYPE(RPAREN);
+      nextSignificantToken();
     }
 
-    return pNew;
+    return pNode;
   }
 
   std::shared_ptr<Node> parseInfixExpression(const Token& token,
