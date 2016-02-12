@@ -99,6 +99,37 @@ namespace parser {
     }                                                                   \
   } while (0)
 
+class ParseError
+{
+  typedef collections::Position Position;
+  typedef tokens::Token Token;
+
+  Position start_;
+  Position end_;
+  std::string message_;
+
+public:
+
+  ParseError(const tokens::Token& token, std::string message)
+    : start_(token.position()),
+      end_(token.position()),
+      message_(std::move(message))
+  {
+    end_.column += token.end() - token.begin();
+  }
+
+  ParseError(Position start, Position end, std::string message)
+    : start_(std::move(start)),
+      end_(std::move(end)),
+      message_(std::move(message))
+  {
+  }
+
+  const Position& start() const { return start_; }
+  const Position& end() const { return end_; }
+  const std::string& message() const { return message_; }
+};
+
 class Parser
 {
   typedef tokenizer::Tokenizer Tokenizer;
@@ -107,6 +138,7 @@ class Parser
   std::string program_;
   Tokenizer tokenizer_;
   Token token_;
+  std::vector<ParseError> errors_;
 
 #ifdef SOURCE_TOOLS_DEBUG_PARSER_STACK_OVERFLOW
   int counter_;
@@ -126,15 +158,97 @@ public:
 
 private:
 
+  void unexpectedtoken(const Token& token)
+  {
+    std::string message = std::string() + "unexpected token '" + token.contents() + "'";
+    unexpectedToken(token, std::move(message));
+  }
+
+  void unexpectedToken(const Token& token, const std::string& message)
+  {
+    ParseError error(token, message);
+    errors_.push_back(std::move(error));
+  }
+
   std::shared_ptr<Node> parseControlFlowKeyword(const Token& token)
   {
-    SOURCE_TOOLS_DEBUG_PARSER_LOG("parseControlFlowKeyword(" << token << ")");
+    SOURCE_TOOLS_DEBUG_PARSER_LOG("parseControlFlowKeyword('" << token.contents() << "')");
     using namespace tokens;
 
-    if (token.isType(KEYWORD_FOR))
+    if (token.isType(KEYWORD_FUNCTION))
+      return parseFunction();
+    else if (token.isType(KEYWORD_IF))
+      return parseIf();
+    else if (token.isType(KEYWORD_WHILE))
+      return parseWhile();
+    else if (token.isType(KEYWORD_FOR))
       return parseFor();
+    else if (token.isType(KEYWORD_REPEAT))
+      return parseRepeat();
 
     return nullptr;
+  }
+
+  std::shared_ptr<Node> parseFunctionArgument()
+  {
+    SOURCE_TOOLS_DEBUG_PARSER_LOG("parseFunctionArgument()");
+    using namespace tokens;
+
+    auto pNode = Node::create(token_);
+    CHECK_TYPE(SYMBOL);
+    MOVE_TO_NEXT_SIGNIFICANT_TOKEN();
+    if (token_.isType(OPERATOR_ASSIGN_LEFT_EQUALS))
+    {
+      MOVE_TO_NEXT_SIGNIFICANT_TOKEN();
+      pNode->add(parseTopLevelExpression());
+    }
+
+    return pNode;
+  }
+
+  std::shared_ptr<Node> parseFunctionArgumentList()
+  {
+    SOURCE_TOOLS_DEBUG_PARSER_LOG("parseFunctionArgumentList()");
+    using namespace tokens;
+
+    auto pNode = Node::create(Token());
+    if (token_.isType(RPAREN))
+      return pNode;
+
+    MOVE_TO_NEXT_SIGNIFICANT_TOKEN();
+    while (true)
+    {
+      pNode->add(parseFunctionArgument());
+      if (token_.isType(RPAREN))
+        return pNode;
+      else if (token_.isType(COMMA))
+      {
+        MOVE_TO_NEXT_SIGNIFICANT_TOKEN();
+        continue;
+      }
+
+      // TODO: how should we 'recover' here?
+      unexpectedToken(token_, "expected ',' or ')'");
+      MOVE_TO_NEXT_SIGNIFICANT_TOKEN();
+    }
+    return pNode;
+  }
+
+  std::shared_ptr<Node> parseFunction()
+  {
+    SOURCE_TOOLS_DEBUG_PARSER_LOG("parseFunction()");
+    using namespace tokens;
+
+    auto pNode = Node::create(token_);
+    CHECK_TYPE(KEYWORD_FUNCTION);
+    MOVE_TO_NEXT_SIGNIFICANT_TOKEN();
+    CHECK_TYPE(LPAREN);
+    MOVE_TO_NEXT_SIGNIFICANT_TOKEN();
+    pNode->add(parseFunctionArgumentList());
+    CHECK_TYPE(RPAREN);
+    MOVE_TO_NEXT_SIGNIFICANT_TOKEN();
+    pNode->add(parseTopLevelExpression());
+    return pNode;
   }
 
   std::shared_ptr<Node> parseFor()
@@ -159,9 +273,61 @@ private:
     return pNode;
   }
 
+  std::shared_ptr<Node> parseIf()
+  {
+    using namespace tokens;
+    SOURCE_TOOLS_DEBUG_PARSER_LOG("parseIf()");
+
+    auto pNode = Node::create(token_);
+    CHECK_TYPE(KEYWORD_IF);
+    MOVE_TO_NEXT_SIGNIFICANT_TOKEN();
+    CHECK_TYPE(LPAREN);
+    MOVE_TO_NEXT_SIGNIFICANT_TOKEN();
+    pNode->add(parseTopLevelExpression(0));
+    CHECK_TYPE(RPAREN);
+    MOVE_TO_NEXT_SIGNIFICANT_TOKEN();
+    pNode->add(parseTopLevelExpression(0));
+    while (token_.isType(KEYWORD_ELSE))
+    {
+      MOVE_TO_NEXT_SIGNIFICANT_TOKEN();
+      pNode->add(parseTopLevelExpression(0));
+    }
+    return pNode;
+  }
+
+  std::shared_ptr<Node> parseWhile()
+  {
+    using namespace tokens;
+    SOURCE_TOOLS_DEBUG_PARSER_LOG("parseWhile()");
+
+    auto pNode = Node::create(token_);
+    CHECK_TYPE(KEYWORD_WHILE);
+    MOVE_TO_NEXT_SIGNIFICANT_TOKEN();
+    CHECK_TYPE(LPAREN);
+    MOVE_TO_NEXT_SIGNIFICANT_TOKEN();
+    CHECK_TYPE_NOT(RPAREN);
+    pNode->add(parseTopLevelExpression());
+    CHECK_TYPE(RPAREN);
+    MOVE_TO_NEXT_SIGNIFICANT_TOKEN();
+    pNode->add(parseTopLevelExpression());
+    return pNode;
+  }
+
+  std::shared_ptr<Node> parseRepeat()
+  {
+    using namespace tokens;
+    SOURCE_TOOLS_DEBUG_PARSER_LOG("parseRepeat()");
+
+    auto pNode = Node::create(token_);
+    CHECK_TYPE(KEYWORD_REPEAT);
+    MOVE_TO_NEXT_SIGNIFICANT_TOKEN();
+    pNode->add(parseTopLevelExpression());
+    return pNode;
+  }
+
   std::shared_ptr<Node> parsePrefixExpression(const Token& token)
   {
-    SOURCE_TOOLS_DEBUG_PARSER_LOG("parsePrefixExpression(" << token << ")");
+    SOURCE_TOOLS_DEBUG_PARSER_LOG("parsePrefixExpression('" << token.contents() << "')");
     using namespace tokens;
 
     auto pNew = Node::create(token);
@@ -190,7 +356,7 @@ private:
   std::shared_ptr<Node> parseInfixExpression(const Token& token,
                                              std::shared_ptr<Node> pNode)
   {
-    SOURCE_TOOLS_DEBUG_PARSER_LOG("parseInfixExpression(" << token << ")");
+    SOURCE_TOOLS_DEBUG_PARSER_LOG("parseInfixExpression('" << token.contents() << "')");
 
     auto pNew = Node::create(token);
     nextSignificantToken();
@@ -199,7 +365,7 @@ private:
     return pNew;
   }
 
-  std::shared_ptr<Node> parseTopLevelExpression(int precedence)
+  std::shared_ptr<Node> parseTopLevelExpression(int precedence = 0)
   {
     SOURCE_TOOLS_DEBUG_PARSER_LOG("parseTopLevelExpression(" << precedence << ")");
     using namespace tokens;

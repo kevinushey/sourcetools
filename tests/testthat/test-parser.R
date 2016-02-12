@@ -20,6 +20,16 @@ test_that("agreement on parse of expressions", {
 
 })
 
+test_that("parser handles simple control flow", {
+
+  results <- check_parse(
+    "if (foo) bar + baz",
+    "while (1) 1 + 2",
+    "repeat 1 + 2"
+  )
+
+})
+
 # generate test cases
 if (FALSE) {
 
