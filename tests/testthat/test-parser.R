@@ -25,8 +25,13 @@ test_that("parser handles simple control flow", {
   results <- check_parse(
     "if (foo) bar + baz",
     "while (1) 1 + 2",
-    "repeat 1 + 2"
+    "repeat 1 + 2",
+    "if (foo) bar else baz",
+    "if (foo) bar else if (baz) bat",
+    "for (i in 1:10) 1 + 10"
   )
+
+  stopifnot(all(results))
 
 })
 
