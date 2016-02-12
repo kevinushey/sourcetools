@@ -1,14 +1,5 @@
 context("Parser")
 
-check_parse <- function(...) {
-  vapply(list(...), FUN.VALUE = logical(1), function(code) {
-    all.equal(
-      parse(text = code)[[1]],
-      parse_string(code)[[1]]
-    )
-  })
-}
-
 test_that("agreement on parse of expressions", {
 
   results <- check_parse(
@@ -33,6 +24,18 @@ test_that("parser handles simple control flow", {
 
   stopifnot(all(results))
 
+})
+
+test_that("parser handles compound expressions", {
+
+  results <- check_parse(
+    "if (foo) while (bar) 1",
+    "if (foo) (1 + 2)",
+    "{1; 2; 3}",
+    "{1 + 2\n3 + 4\n5 + 6}"
+  )
+
+  stopifnot(all(results))
 })
 
 # generate test cases

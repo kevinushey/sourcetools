@@ -9,11 +9,12 @@
 
 #include <sourcetools/parse/Node.h>
 #include <sourcetools/parse/Precedence.h>
+#include <sourcetools/parse/ParseError.h>
 
 // Defines that will go away once the parser is more tested / game ready
-#define SOURCE_TOOLS_DEBUG_PARSER_TRACE
+// #define SOURCE_TOOLS_DEBUG_PARSER_TRACE
 // #define SOURCE_TOOLS_DEBUG_PARSER_PRINT_TOKEN_INFO
-#define SOURCE_TOOLS_DEBUG_PARSER_STACK_OVERFLOW
+// #define SOURCE_TOOLS_DEBUG_PARSER_STACK_OVERFLOW
 
 #ifdef SOURCE_TOOLS_DEBUG_PARSER_TRACE
 
@@ -98,37 +99,6 @@ namespace parser {
       return Node::create(token_);                                      \
     }                                                                   \
   } while (0)
-
-class ParseError
-{
-  typedef collections::Position Position;
-  typedef tokens::Token Token;
-
-  Position start_;
-  Position end_;
-  std::string message_;
-
-public:
-
-  ParseError(const tokens::Token& token, std::string message)
-    : start_(token.position()),
-      end_(token.position()),
-      message_(std::move(message))
-  {
-    end_.column += token.end() - token.begin();
-  }
-
-  ParseError(Position start, Position end, std::string message)
-    : start_(std::move(start)),
-      end_(std::move(end)),
-      message_(std::move(message))
-  {
-  }
-
-  const Position& start() const { return start_; }
-  const Position& end() const { return end_; }
-  const std::string& message() const { return message_; }
-};
 
 class Parser
 {
@@ -265,10 +235,10 @@ private:
     MOVE_TO_NEXT_SIGNIFICANT_TOKEN();
     CHECK_TYPE(KEYWORD_IN);
     MOVE_TO_NEXT_SIGNIFICANT_TOKEN();
-    pNode->add(parseTopLevelExpression(0));
+    pNode->add(parseTopLevelExpression());
     CHECK_TYPE(RPAREN);
     MOVE_TO_NEXT_SIGNIFICANT_TOKEN();
-    pNode->add(parseTopLevelExpression(0));
+    pNode->add(parseTopLevelExpression());
     return pNode;
   }
 
@@ -282,14 +252,14 @@ private:
     MOVE_TO_NEXT_SIGNIFICANT_TOKEN();
     CHECK_TYPE(LPAREN);
     MOVE_TO_NEXT_SIGNIFICANT_TOKEN();
-    pNode->add(parseTopLevelExpression(0));
+    pNode->add(parseTopLevelExpression());
     CHECK_TYPE(RPAREN);
     MOVE_TO_NEXT_SIGNIFICANT_TOKEN();
-    pNode->add(parseTopLevelExpression(0));
+    pNode->add(parseTopLevelExpression());
     while (token_.isType(KEYWORD_ELSE))
     {
       MOVE_TO_NEXT_SIGNIFICANT_TOKEN();
-      pNode->add(parseTopLevelExpression(0));
+      pNode->add(parseTopLevelExpression());
     }
     return pNode;
   }
@@ -338,6 +308,9 @@ private:
     {
       while (true)
       {
+        while (token_.isType(SEMI))
+          nextSignificantToken();
+
         if (token_.isType(RBRACE))
         {
           nextSignificantToken();
@@ -421,7 +394,7 @@ public:
 
     while (true)
     {
-      auto pNode = parseTopLevelExpression(0);
+      auto pNode = parseTopLevelExpression();
       if (!pNode)
         break;
 
