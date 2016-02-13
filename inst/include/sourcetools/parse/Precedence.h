@@ -13,6 +13,9 @@ inline int left(const tokens::Token& token)
   using namespace tokens;
   switch (token.type())
   {
+  case LPAREN:
+  case LBRACKET:
+  case LDBRACKET:
   case OPERATOR_ASSIGN_LEFT_EQUALS:
     return 5;
   case OPERATOR_HELP:

@@ -334,12 +334,18 @@ private:
   std::shared_ptr<Node> parseInfixExpression(const Token& token,
                                              std::shared_ptr<Node> pNode)
   {
+    using namespace tokens;
     SOURCE_TOOLS_DEBUG_PARSER_LOG("parseInfixExpression('" << token.contents() << "')");
 
     auto pNew = Node::create(token);
     nextSignificantToken();
     pNew->add(pNode);
     pNew->add(parseTopLevelExpression(precedence::left(token) - precedence::isRightAssociative(token)));
+    if (token.isType(LPAREN) || token.isType(LBRACKET) || token.isType(LDBRACKET))
+    {
+      CHECK_TYPE(complement(token.type()));
+      nextSignificantToken();
+    }
     return pNew;
   }
 
