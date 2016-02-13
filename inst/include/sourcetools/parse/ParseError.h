@@ -33,6 +33,13 @@ public:
   {
   }
 
+  explicit ParseError(std::string message)
+    : start_(0, 0),
+      end_(0, 0),
+      message_(std::move(message))
+  {
+  }
+
   const Position& start() const { return start_; }
   const Position& end() const { return end_; }
   const std::string& message() const { return message_; }

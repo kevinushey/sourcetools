@@ -32,7 +32,13 @@ private:
 
   static SEXP asFunctionCallSEXP(std::shared_ptr<parser::Node> pNode)
   {
-    return Rf_install("lol");
+    using namespace tokens;
+    SEXP langSEXP = PROTECT(R_NilValue);
+    for (auto it = pNode->children().rbegin(); it != pNode->children().rend(); ++it)
+      langSEXP = Rf_lcons(asSEXP(*it), langSEXP);
+    langSEXP = Rf_lcons(Rf_install(pNode->token().contents().c_str()), langSEXP);
+    UNPROTECT(1);
+    return langSEXP;
   }
 
   static SEXP asFunctionDeclSEXP(std::shared_ptr<parser::Node> pNode)
@@ -59,8 +65,7 @@ public:
 
     // TODO: Make an appropriate function for turning
     // tokens into SEXP primitive
-    if (isOperator(token) || isSymbol(token) || isKeyword(token) ||
-        isLeftBracket(token))
+    if (isOperator(token) || isSymbol(token) || isKeyword(token) || isLeftBracket(token))
       elSEXP = PROTECT(Rf_install(token.contents().c_str()));
     else if (isNumeric(token))
       elSEXP = PROTECT(Rf_ScalarReal(::atof(token.contents().c_str())));
@@ -79,13 +84,10 @@ public:
       return elSEXP;
     }
 
-    SEXP listSEXP = PROTECT(Rf_lcons(elSEXP, R_NilValue));
-    SEXP tailSEXP = listSEXP;
-    for (auto&& child : pNode->children())
-    {
-      SETCDR(tailSEXP, Rf_lcons(asSEXP(child), R_NilValue));
-      tailSEXP = CDR(tailSEXP);
-    }
+    SEXP listSEXP = PROTECT(R_NilValue);
+    for (auto it = pNode->children().rbegin(); it != pNode->children().rend(); ++it)
+      listSEXP = Rf_lcons(asSEXP(*it), listSEXP);
+    listSEXP = Rf_lcons(elSEXP, listSEXP);
 
     UNPROTECT(2);
     return listSEXP;

@@ -328,6 +328,13 @@ inline bool isNumeric(const Token& token)
   return (token.type() & NUMBER) != 0;
 }
 
+inline bool isCallOperator(const Token& token)
+{
+  return token.type() == LPAREN ||
+         token.type() == LBRACKET ||
+         token.type() == LDBRACKET;
+}
+
 } // namespace utils
 } // namespace tokens
 

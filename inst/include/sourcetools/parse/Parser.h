@@ -128,6 +128,12 @@ public:
 
 private:
 
+  void unexpectedEndOfInput()
+  {
+    ParseError error("unexpected end of input");
+    errors_.push_back(std::move(error));
+  }
+
   void unexpectedtoken(const Token& token)
   {
     std::string message = std::string() + "unexpected token '" + token.contents() + "'";
@@ -338,14 +344,24 @@ private:
     SOURCE_TOOLS_DEBUG_PARSER_LOG("parseInfixExpression('" << token.contents() << "')");
 
     auto pNew = Node::create(token);
-    nextSignificantToken();
     pNew->add(pNode);
-    pNew->add(parseTopLevelExpression(precedence::left(token) - precedence::isRightAssociative(token)));
-    if (token.isType(LPAREN) || token.isType(LBRACKET) || token.isType(LDBRACKET))
+    MOVE_TO_NEXT_SIGNIFICANT_TOKEN();
+
+    if (isCallOperator(token))
     {
-      CHECK_TYPE(complement(token.type()));
+      // TODO
+      TokenType complementType = complement(token.type());
+      while (token_.type() != complementType)
+      {
+        MOVE_TO_NEXT_SIGNIFICANT_TOKEN();
+      }
       nextSignificantToken();
     }
+    else
+    {
+      pNew->add(parseTopLevelExpression(precedence::left(token) - precedence::isRightAssociative(token)));
+    }
+
     return pNew;
   }
 
