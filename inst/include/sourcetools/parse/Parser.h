@@ -146,26 +146,7 @@ private:
     errors_.push_back(std::move(error));
   }
 
-  std::shared_ptr<Node> parseControlFlowKeyword(const Token& token)
-  {
-    SOURCE_TOOLS_DEBUG_PARSER_LOG("parseControlFlowKeyword('" << token.contents() << "')");
-    using namespace tokens;
-
-    if (token.isType(KEYWORD_FUNCTION))
-      return parseFunction();
-    else if (token.isType(KEYWORD_IF))
-      return parseIf();
-    else if (token.isType(KEYWORD_WHILE))
-      return parseWhile();
-    else if (token.isType(KEYWORD_FOR))
-      return parseFor();
-    else if (token.isType(KEYWORD_REPEAT))
-      return parseRepeat();
-
-    return nullptr;
-  }
-
-  std::shared_ptr<Node> parseFunctionArgument()
+  std::shared_ptr<Node> parseFunctionArgumentListOne()
   {
     SOURCE_TOOLS_DEBUG_PARSER_LOG("parseFunctionArgument()");
     using namespace tokens;
@@ -193,7 +174,7 @@ private:
 
     while (true)
     {
-      pNode->add(parseFunctionArgument());
+      pNode->add(parseFunctionArgumentListOne());
       if (token_.isType(RPAREN))
         return pNode;
       else if (token_.isType(COMMA))
@@ -300,20 +281,45 @@ private:
     return pNode;
   }
 
-  std::shared_ptr<Node> parsePrefixExpression(const Token& token)
+  std::shared_ptr<Node> parseControlFlowKeyword()
   {
-    SOURCE_TOOLS_DEBUG_PARSER_LOG("parsePrefixExpression('" << token.contents() << "')");
+    SOURCE_TOOLS_DEBUG_PARSER_LOG("parseControlFlowKeyword('" << token_.contents() << "')");
     using namespace tokens;
 
-    auto pNode = Node::create(token);
-    nextSignificantToken();
+    if (token_.isType(KEYWORD_FUNCTION))
+      return parseFunction();
+    else if (token_.isType(KEYWORD_IF))
+      return parseIf();
+    else if (token_.isType(KEYWORD_WHILE))
+      return parseWhile();
+    else if (token_.isType(KEYWORD_FOR))
+      return parseFor();
+    else if (token_.isType(KEYWORD_REPEAT))
+      return parseRepeat();
 
-    if (isOperator(token))
-      pNode->add(parseTopLevelExpression(precedence::right(token)));
-    else if (token.isType(LBRACE))
+    unexpectedToken(token_, "expected control-flow keyword");
+    return nullptr;
+  }
+
+  std::shared_ptr<Node> parsePrefixExpression()
+  {
+    SOURCE_TOOLS_DEBUG_PARSER_LOG("parsePrefixExpression('" << token_.contents() << "')");
+    using namespace tokens;
+
+    auto pNode = Node::create(token_);
+
+    if (isOperator(token_))
     {
+      MOVE_TO_NEXT_SIGNIFICANT_TOKEN();
+      pNode->add(parseTopLevelExpression(precedence::right(token_)));
+    }
+    else if (token_.isType(LBRACE))
+    {
+      MOVE_TO_NEXT_SIGNIFICANT_TOKEN();
       while (true)
       {
+        // NOTE: It appears that semi-colons do not create empty expressions;
+        // ie, they do not enter the parse tree.
         while (token_.isType(SEMI))
           nextSignificantToken();
 
@@ -326,34 +332,34 @@ private:
         pNode->add(parseTopLevelExpression());
       }
     }
-    else if (token.isType(LPAREN))
+    else if (token_.isType(LPAREN))
     {
+      MOVE_TO_NEXT_SIGNIFICANT_TOKEN();
       CHECK_TYPE_NOT(RPAREN);
       pNode->add(parseTopLevelExpression());
       CHECK_TYPE(RPAREN);
-      nextSignificantToken();
     }
 
+    nextSignificantToken();
     return pNode;
   }
 
-  std::shared_ptr<Node> parseInfixExpression(const Token& token,
-                                             std::shared_ptr<Node> pNode)
+  std::shared_ptr<Node> parseInfixExpression(std::shared_ptr<Node> pNode)
   {
     using namespace tokens;
     SOURCE_TOOLS_DEBUG_PARSER_LOG("parseInfixExpression('" << token.contents() << "')");
 
+    auto token = token_;
     auto pNew = Node::create(token);
     pNew->add(pNode);
     MOVE_TO_NEXT_SIGNIFICANT_TOKEN();
 
     if (isCallOperator(token))
     {
-      // TODO
       TokenType complementType = complement(token.type());
       while (token_.type() != complementType)
       {
-        MOVE_TO_NEXT_SIGNIFICANT_TOKEN();
+        pNew->add(parseTopLevelExpression());
       }
       nextSignificantToken();
     }
@@ -373,26 +379,24 @@ private:
     SOURCE_TOOLS_DEBUG_CHECK_PARSER_STACK_OVERFLOW();
     SOURCE_TOOLS_DEBUG_TOKEN(token_);
 
-    auto token = token_;
-    if (isEnd(token))
+    if (isEnd(token_))
       return nullptr;
 
     std::shared_ptr<Node> pNode = nullptr;
-    if (isControlFlowKeyword(token))
-      pNode = parseControlFlowKeyword(token);
+    if (isControlFlowKeyword(token_))
+      pNode = parseControlFlowKeyword();
     else
-      pNode = parsePrefixExpression(token);
+      pNode = parsePrefixExpression();
 
-    if (isEnd(token))
+    if (isEnd(token_))
       return pNode;
 
     while (precedence < precedence::left(token_))
     {
-      token = token_;
-      if (tokens::isEnd(token))
+      if (tokens::isEnd(token_))
         return nullptr;
 
-      pNode = parseInfixExpression(token, pNode);
+      pNode = parseInfixExpression(pNode);
     }
 
     return pNode;
