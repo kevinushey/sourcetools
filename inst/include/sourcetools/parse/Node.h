@@ -12,6 +12,7 @@ class Node
 {
 private:
   typedef tokens::Token Token;
+  typedef tokens::TokenType TokenType;
   typedef std::vector<std::shared_ptr<Node>> Children;
 
   Token token_;
@@ -25,9 +26,19 @@ public:
   {
   }
 
+  explicit Node(const TokenType& type)
+    : token_(Token(type)), parent_(nullptr)
+  {
+  }
+
   static std::shared_ptr<Node> create(const Token& token)
   {
     return std::make_shared<Node>(token);
+  }
+
+  static std::shared_ptr<Node> create(const TokenType& type)
+  {
+    return std::make_shared<Node>(type);
   }
 
   void remove(const std::shared_ptr<Node>& pNode)

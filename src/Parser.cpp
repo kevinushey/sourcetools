@@ -14,11 +14,7 @@ void log(std::shared_ptr<parser::Node> pNode, int depth)
   for (int i = 0; i < depth; ++i)
     ::Rprintf("  ");
 
-  auto&& token = pNode->token();
-  ::Rprintf("[%i:%i]: %s\n",
-            (int) token.row(),
-            (int) token.column(),
-            token.contents().c_str());
+  ::Rprintf(toString(pNode->token()).c_str());
 
   for (auto&& child : pNode->children())
     log(child, depth + 1);
@@ -36,7 +32,8 @@ private:
     using namespace tokens;
     SEXP langSEXP = PROTECT(R_NilValue);
     for (auto it = pNode->children().rbegin(); it != pNode->children().rend(); ++it)
-      langSEXP = Rf_lcons(asSEXP(*it), langSEXP);
+      if (!(*it)->token().isType(EMPTY))
+        langSEXP = Rf_lcons(asSEXP(*it), langSEXP);
     UNPROTECT(1);
     return langSEXP;
   }
@@ -64,7 +61,10 @@ public:
 
     SEXP elSEXP;
     if (isOperator(token) || isSymbol(token) || isKeyword(token) || isLeftBracket(token))
-      elSEXP = PROTECT(Rf_install(token.contents().c_str()));
+      elSEXP = PROTECT(Rf_lcons(
+        Rf_install(token.contents().c_str()),
+        R_NilValue
+      ));
     else if (isNumeric(token))
       elSEXP = PROTECT(Rf_ScalarReal(::atof(token.contents().c_str())));
     else if (isString(token))
@@ -84,7 +84,8 @@ public:
 
     SEXP listSEXP = PROTECT(R_NilValue);
     for (auto it = pNode->children().rbegin(); it != pNode->children().rend(); ++it)
-      listSEXP = Rf_lcons(asSEXP(*it), listSEXP);
+      if (!(*it)->token().isType(EMPTY))
+        listSEXP = Rf_lcons(asSEXP(*it), listSEXP);
     listSEXP = Rf_lcons(elSEXP, listSEXP);
 
     UNPROTECT(2);

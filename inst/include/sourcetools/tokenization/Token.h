@@ -345,6 +345,7 @@ inline std::string toString(tokens::TokenType type)
 
        if (type == ERR)        return "err";
   else if (type == END)        return "end";
+  else if (type == EMPTY)      return "empty";
   else if (type == SEMI)       return "semi";
   else if (type == COMMA)      return "comma";
   else if (type == SYMBOL)     return "symbol";
@@ -365,9 +366,22 @@ inline std::string toString(tokens::TokenType type)
 
 inline std::string toString(const tokens::Token& token)
 {
-  std::stringstream ss;
-  ss << "[" << token.row() << ":" << token.column() << "]: " << token.contents();
-  return ss.str();
+  std::string contents;
+  if (token.isType(tokens::END))
+    contents = "<END>";
+  else if (token.isType(tokens::EMPTY))
+    contents = "<empty>";
+  else
+    contents = token.contents();
+
+  char buff[1024];
+  ::snprintf(buff,
+             1024 - 1,
+             "[%4lu:%4lu]: %s\n",
+             (unsigned long) token.row(),
+             (unsigned long) token.column(),
+             contents.c_str());
+  return buff;
 }
 
 inline std::ostream& operator<<(std::ostream& os, const tokens::Token& token)

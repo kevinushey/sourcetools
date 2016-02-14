@@ -123,7 +123,7 @@ public:
     : program_(program),
       tokenizer_(program_)
   {
-    tokenizer_.tokenize(&token_);
+    advance();
 
 #ifdef SOURCE_TOOLS_DEBUG_PARSER_STACK_OVERFLOW
     counter_ = 0;
@@ -188,7 +188,7 @@ private:
     SOURCE_TOOLS_DEBUG_PARSER_LOG("parseFunctionArgumentList()");
     using namespace tokens;
 
-    auto pNode = Node::create(Token());
+    auto pNode = Node::create(EMPTY);
     if (token_.isType(RPAREN))
       return pNode;
 
@@ -318,6 +318,7 @@ private:
       CHECK_UNEXPECTED_END();
       pNode->add(parseExpression());
     }
+    CHECK_AND_ADVANCE(RBRACE);
 
     return pNode;
   }
