@@ -94,13 +94,12 @@ namespace parser {
     }                                                              \
   } while (0)
 
-// NOTE: Does _not_ advance the tokenizer.
 #define CHECK_UNEXPECTED_END()                                 \
   do                                                           \
   {                                                            \
     if (current().isType(::sourcetools::tokens::END))          \
     {                                                          \
-      ::std::cout << "unexpected end of input" << ::std::endl; \
+      ::std::cerr << "unexpected end of input" << ::std::endl; \
       return nullptr;                                          \
     }                                                          \
   } while (0)
@@ -159,7 +158,8 @@ private:
     unexpectedToken(token, unexpectedTokenString(token));
   }
 
-  void unexpectedToken(const Token& token, const std::string& message)
+  void unexpectedToken(const Token& token,
+                       const std::string& message = std::string())
   {
     ParseError error(token, message);
     errors_.push_back(std::move(error));
@@ -359,14 +359,59 @@ private:
       return parseUnaryOperator();
     else if (token.isType(END))
       return nullptr;
+    else if (isSymbolic(token))
+      return Node::create(consume());
 
-    return Node::create(consume());
+    unexpectedToken(token);
+    return nullptr;
   }
 
-  std::shared_ptr<Node> parseFunctionCall()
+  // Parse a function call, e.g.
+  //
+  //    <fn-call> = <expr> <fn-open> <fn-call-args> <fn-close>
+  //
+  //  <fn-open> can be one of '(', '[' or '[[',
+  //  <fn-call-args> are (potentially named) comma-separated values
+  //  <fn-close> is the complement of the above
+  std::shared_ptr<Node> parseFunctionCall(std::shared_ptr<Node> pLhs)
   {
-    SOURCE_TOOLS_DEBUG_PARSER_LOG("parseFunctionCall()");
-    return nullptr;
+    SOURCE_TOOLS_DEBUG_PARSER_LOG("parseFunctionCall('" << current().contents() << "')");
+    using namespace tokens;
+    TokenType lhsType = current().type();
+    TokenType rhsType = complement(lhsType);
+
+    auto pNode = Node::create(current());
+    pNode->add(pLhs);
+
+    CHECK_AND_ADVANCE(lhsType);
+    if (current().isType(rhsType))
+      pNode->add(Node::create(Token(EMPTY)));
+    else
+    {
+      while (true)
+      {
+        CHECK_UNEXPECTED_END();
+        pNode->add(parseExpression());
+        if (current().isType(COMMA))
+        {
+          consume();
+          continue;
+        }
+        else if (current().isType(rhsType))
+        {
+          break;
+        }
+
+        std::string message = std::string() +
+          "expected ',' or '" + toString(rhsType) + "'";
+        unexpectedToken(consume(), message);
+      }
+    }
+
+    CHECK_AND_ADVANCE(rhsType);
+    if (isCallOperator(current()))
+      return parseFunctionCall(pNode);
+    return pNode;
   }
 
   std::shared_ptr<Node> parseExpressionContinuation(std::shared_ptr<Node> pNode)
@@ -376,13 +421,13 @@ private:
     SOURCE_TOOLS_DEBUG_PARSER_LOG("Type: " << toString(current().type()));
 
     auto token = current();
-    auto pNew = Node::create(token);
-    pNew->add(pNode);
-
     if (isCallOperator(token))
-      return parseFunctionCall();
+      return parseFunctionCall(pNode);
     else if (token.isType(END))
       return nullptr;
+
+    auto pNew = Node::create(token);
+    pNew->add(pNode);
 
     advance();
     int precedence =

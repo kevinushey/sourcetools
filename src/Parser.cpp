@@ -32,11 +32,11 @@ private:
 
   static SEXP asFunctionCallSEXP(std::shared_ptr<parser::Node> pNode)
   {
+    DEBUG("asFunctionCallSEXP()");
     using namespace tokens;
     SEXP langSEXP = PROTECT(R_NilValue);
     for (auto it = pNode->children().rbegin(); it != pNode->children().rend(); ++it)
       langSEXP = Rf_lcons(asSEXP(*it), langSEXP);
-    langSEXP = Rf_lcons(Rf_install(pNode->token().contents().c_str()), langSEXP);
     UNPROTECT(1);
     return langSEXP;
   }
@@ -55,7 +55,6 @@ public:
       return R_NilValue;
 
     auto&& token = pNode->token();
-    SEXP elSEXP;
 
     // Handle function calls specially
     if (pNode->children().size() > 1 && (token.isType(LPAREN) || token.isType(LBRACKET) || token.isType(LDBRACKET)))
@@ -63,8 +62,7 @@ public:
     else if (token.isType(KEYWORD_FUNCTION))
       return asFunctionDeclSEXP(pNode);
 
-    // TODO: Make an appropriate function for turning
-    // tokens into SEXP primitive
+    SEXP elSEXP;
     if (isOperator(token) || isSymbol(token) || isKeyword(token) || isLeftBracket(token))
       elSEXP = PROTECT(Rf_install(token.contents().c_str()));
     else if (isNumeric(token))
@@ -114,5 +112,7 @@ extern "C" SEXP sourcetools_parse_string(SEXP programSEXP)
   const char* program = CHAR(STRING_ELT(programSEXP, 0));
   sourcetools::parser::Parser parser(program);
   auto root = parser.parse();
+  for (auto&& child : root)
+    sourcetools::log(child);
   return sourcetools::SEXPConverter::asSEXP(root);
 }
