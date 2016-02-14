@@ -1,6 +1,10 @@
 #ifndef SOURCE_TOOLS_MACROS_H
 #define SOURCE_TOOLS_MACROS_H
 
+#include <string>
+#include <cstdio>
+#include <iostream>
+
 /* Utility */
 #ifdef __GNUC__
 # define LIKELY(x)   __builtin_expect(!!(x), 1)
@@ -20,16 +24,44 @@
 #define SOURCE_TOOLS_STRINGIFY(__X__) #__X__
 
 /* Logging */
+namespace sourcetools {
+namespace debug {
+
+inline std::string shortFilePath(const std::string& filePath)
+{
+  std::string::size_type index = filePath.find_last_of("/");
+  if (index != std::string::npos)
+    return filePath.substr(index + 1);
+  return filePath;
+}
+
+inline std::string debugPosition(const char* filePath, int line)
+{
+  static const int N = 1024;
+  char buffer[N + 1];
+  std::string shortPath = shortFilePath(filePath);
+  ::snprintf(buffer, N, "[%s:%4i]", shortPath.c_str(), line);
+  return buffer;
+}
+
+} // namespace debug
+} // namespace sourcetools
+
+// Flip on/off as necessary
+#define SOURCE_TOOLS_ENABLE_DEBUG_LOGGING
+
 #ifdef SOURCE_TOOLS_ENABLE_DEBUG_LOGGING
 
 #include <iostream>
 
-#define LOG(x) std::cerr << x << std::endl
+#define DEBUG(__X__)                                                   \
+  std::cerr << ::sourcetools::debug::debugPosition(__FILE__, __LINE__) \
+            << ": " << __X__ << ::std::endl;
 #define DEBUG_BLOCK(x)
 
 #else
 
-#define LOG(x)
+#define DEBUG(x)
 #define DEBUG_BLOCK(x) if (false)
 
 #endif

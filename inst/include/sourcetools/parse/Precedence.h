@@ -7,8 +7,7 @@ namespace sourcetools {
 namespace parser {
 namespace precedence {
 
-// left-binding precedence, for binary operators
-inline int left(const tokens::Token& token)
+inline int binary(const tokens::Token& token)
 {
   using namespace tokens;
   switch (token.type())
@@ -70,8 +69,7 @@ inline int left(const tokens::Token& token)
   }
 }
 
-// right-binding precedence, for unary operators
-inline int right(const tokens::Token& token)
+inline int unary(const tokens::Token& token)
 {
   using namespace tokens;
   switch (token.type())

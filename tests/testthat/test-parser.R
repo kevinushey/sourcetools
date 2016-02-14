@@ -2,40 +2,29 @@ context("Parser")
 
 test_that("agreement on parse of expressions", {
 
-  results <- check_parse(
-    "foo ? bar = baz",     # R believes that '?' is higher precedence than '='?
-    "foo ? bar <- baz"
-  )
-
-  testthat::expect_true(all(results))
+  check_parse("foo ? bar = baz")
+  check_parse("foo ? bar <- baz")
 
 })
 
 test_that("parser handles simple control flow", {
 
-  results <- check_parse(
-    "if (foo) bar + baz",
-    "while (1) 1 + 2",
-    "repeat 1 + 2",
-    "if (foo) bar else baz",
-    "if (foo) bar else if (baz) bat",
-    "for (i in 1:10) 1 + 10"
-  )
-
-  stopifnot(all(results))
+  check_parse("if (foo) bar + baz")
+  check_parse("while (1) 1 + 2")
+  check_parse("repeat 1 + 2")
+  check_parse("if (foo) bar else baz")
+  check_parse("if (foo) bar else if (baz) bat")
+  check_parse("for (i in 1:10) 1 + 10")
 
 })
 
 test_that("parser handles compound expressions", {
 
-  results <- check_parse(
-    "if (foo) while (bar) 1",
-    "if (foo) (1 + 2)",
-    "{1; 2; 3}",
-    "{1 + 2\n3 + 4\n5 + 6}"
-  )
+  check_parse("if (foo) while (bar) 1")
+  check_parse("if (foo) (1 + 2)")
+  check_parse("{1; 2; 3}")
+  check_parse("{1 + 2\n3 + 4\n5 + 6}")
 
-  stopifnot(all(results))
 })
 
 # generate test cases

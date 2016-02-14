@@ -343,6 +343,7 @@ inline std::string toString(tokens::TokenType type)
   using namespace tokens;
 
        if (type == ERR)        return "err";
+  else if (type == END)        return "end";
   else if (type == SEMI)       return "semi";
   else if (type == COMMA)      return "comma";
   else if (type == SYMBOL)     return "symbol";
