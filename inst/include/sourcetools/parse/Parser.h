@@ -311,12 +311,19 @@ private:
     auto pNode = Node::create(current());
 
     CHECK_AND_ADVANCE(LBRACE);
-    while (!current().isType(RBRACE))
+    if (current().isType(RBRACE))
     {
-      while (current().isType(SEMI))
-        advance();
-      CHECK_UNEXPECTED_END();
-      pNode->add(parseExpression());
+      pNode->add(Node::create(EMPTY));
+    }
+    else
+    {
+      while (!current().isType(RBRACE))
+      {
+        while (current().isType(SEMI))
+          advance();
+        CHECK_UNEXPECTED_END();
+        pNode->add(parseExpression());
+      }
     }
     CHECK_AND_ADVANCE(RBRACE);
 

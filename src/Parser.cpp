@@ -61,10 +61,7 @@ public:
 
     SEXP elSEXP;
     if (isOperator(token) || isSymbol(token) || isKeyword(token) || isLeftBracket(token))
-      elSEXP = PROTECT(Rf_lcons(
-        Rf_install(token.contents().c_str()),
-        R_NilValue
-      ));
+      elSEXP = PROTECT(Rf_install(token.contents().c_str()));
     else if (isNumeric(token))
       elSEXP = PROTECT(Rf_ScalarReal(::atof(token.contents().c_str())));
     else if (isString(token))
