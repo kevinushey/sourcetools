@@ -27,6 +27,11 @@ test_that("parser handles compound expressions", {
 
 })
 
+test_that("parser handles function calls", {
+  check_parse("foo <- bar(baz)[[1]]$bat")
+  check_parse("foo <- bar() + bam() * bat()")
+})
+
 # generate test cases
 if (FALSE) {
 
