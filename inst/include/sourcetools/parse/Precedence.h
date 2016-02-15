@@ -12,9 +12,6 @@ inline int binary(const tokens::Token& token)
   using namespace tokens;
   switch (token.type())
   {
-  case LPAREN:
-  case LBRACKET:
-  case LDBRACKET:
   case OPERATOR_ASSIGN_LEFT_EQUALS:
     return 5;
   case OPERATOR_HELP:
@@ -60,9 +57,13 @@ inline int binary(const tokens::Token& token)
   case OPERATOR_DOLLAR:
   case OPERATOR_AT:
     return 170;
+  case LPAREN:
+  case LBRACKET:
+  case LDBRACKET:
+    return 180;
   case OPERATOR_NAMESPACE_EXPORTS:
   case OPERATOR_NAMESPACE_ALL:
-    return 180;
+    return 190;
 
   default:
     return 0;
@@ -98,6 +99,9 @@ inline bool isRightAssociative(const tokens::Token& token)
   case OPERATOR_ASSIGN_LEFT_EQUALS:
   case OPERATOR_EXPONENTATION_STARS:
   case OPERATOR_HAT:
+  case LPAREN:
+  case LBRACKET:
+  case LDBRACKET:
     return true;
   default:
     return false;
