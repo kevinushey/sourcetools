@@ -200,15 +200,31 @@ private:
 
 public:
 
-  Token() : type_(ERR) {}
+  Token()
+    : begin_(empty().begin()),
+      end_(empty().end()),
+      type_(ERR)
+  {
+  }
 
-  explicit Token(TokenType type) : type_(type) {}
+  explicit Token(TokenType type)
+    : begin_(empty().begin()),
+      end_(empty().end()),
+      type_(type)
+  {
+  }
 
-  Token(const Position& position) : position_(position), type_(ERR) {}
+  Token(const Position& position)
+    : begin_(empty().begin()),
+      end_(empty().end()),
+      position_(position),
+      type_(ERR)
+  {
+  }
 
-  Token(const TextCursor& cursor, TokenType type, std::size_t tokenSize)
+  Token(const TextCursor& cursor, TokenType type, std::size_t length)
       : begin_(cursor.begin() + cursor.offset()),
-        end_(cursor.begin() + cursor.offset() + tokenSize),
+        end_(cursor.begin() + cursor.offset() + length),
         position_(cursor.position()),
         type_(type)
   {
@@ -231,6 +247,12 @@ private:
 
   Position position_;
   TokenType type_;
+
+  static const std::string& empty()
+  {
+    static std::string instance;
+    return instance;
+  }
 };
 
 inline namespace utils {
