@@ -6,6 +6,8 @@
 sourcetools
 ===========
 
+**`sourcetools` is under active development and is not yet ready for general use.**
+
 Tools for tokenizing and (eventually) parsing R code.
 
 ## Getting Started
