@@ -232,6 +232,7 @@ public:
 
   const char* begin() const { return begin_; }
   const char* end() const { return end_; }
+
   std::string contents() const { return std::string(begin_, end_); }
 
   const Position& position() const { return position_; }

@@ -21,7 +21,7 @@ public:
     : tokens_(tokens),
       offset_(0),
       n_(tokens.size()),
-      noSuchToken_(tokens::ERR)
+      noSuchToken_(tokens::END)
   {}
 
   bool moveToNextToken()
@@ -58,18 +58,13 @@ public:
     if (!moveToPreviousToken())
       return false;
 
-    if (!bwdOverWhitespace())
+    if (!bwdOverWhitespaceAndComments())
       return false;
 
     return true;
   }
 
-  operator const Token&()
-  {
-    return tokens_[offset_];
-  }
-
-  const Token& peekFwd(std::size_t offset = 1)
+  const Token& peekFwd(std::size_t offset = 1) const
   {
     std::size_t index = offset_ + offset;
     if (UNLIKELY(index >= n_))
@@ -78,7 +73,7 @@ public:
     return tokens_[index];
   }
 
-  const Token& peekBwd(std::size_t offset = 1)
+  const Token& peekBwd(std::size_t offset = 1) const
   {
     if (UNLIKELY(offset > offset_))
       return noSuchToken_;
@@ -89,8 +84,12 @@ public:
 
   const Token& currentToken() const
   {
+    if (UNLIKELY(offset_ >= n_))
+      return noSuchToken_;
     return tokens_[offset_];
   }
+
+  operator const Token&() const { return currentToken(); }
 
   bool fwdOverWhitespace()
   {
@@ -124,7 +123,6 @@ public:
     return true;
   }
 
-
   bool fwdOverWhitespaceAndComments()
   {
     while (isType(tokens::COMMENT) || isType(tokens::WHITESPACE))
@@ -141,23 +139,23 @@ public:
     return true;
   }
 
-
-  const Token& nextSignificantToken()
+  const Token& nextSignificantToken() const
   {
     TokenCursor clone(*this);
+    clone.moveToNextSignificantToken();
+    return clone;
+  }
 
-    if (!clone.moveToNextToken())
-      return noSuchToken_;
-
-    if (!clone.fwdOverWhitespaceAndComments())
-      return noSuchToken_;
-
+  const Token& previousSignificantToken() const
+  {
+    TokenCursor clone(*this);
+    clone.moveToPreviousSignificantToken();
     return clone;
   }
 
   bool moveToPosition(std::size_t row, std::size_t column)
   {
-    return moveToPosition(Position(row, column));
+    return moveToPosition({row, column});
   }
 
   bool moveToPosition(const Position& position)
@@ -171,6 +169,75 @@ public:
         return lhs.position() < rhs.position();
       }
     );
+  }
+
+  template <typename F>
+  bool findFwd(F&& f)
+  {
+    do {
+      if (std::forward<F>(f)(*this))
+        return true;
+    } while (moveToNextToken());
+
+    return false;
+  }
+
+  template <typename F>
+  bool findBwd(F&& f)
+  {
+    do {
+      if (std::forward<F>(f)(*this))
+        return true;
+    } while (moveToPreviousToken());
+
+    return false;
+  }
+
+  bool findComplementFwd()
+  {
+    using namespace tokens;
+
+    TokenType lhs = currentToken().type();
+    TokenType rhs = complement(lhs);
+    std::size_t balance = 1;
+
+    while (moveToNextSignificantToken())
+    {
+      TokenType type = currentToken().type();
+      balance += type == lhs;
+      balance -= type == rhs;
+      if (balance == 0) return true;
+    }
+
+    return false;
+  }
+
+  bool findComplementBwd()
+  {
+    using namespace tokens;
+
+    TokenType lhs = currentToken().type();
+    TokenType rhs = complement(lhs);
+    std::size_t balance = 1;
+
+    while (moveToPreviousSignificantToken())
+    {
+      TokenType type = currentToken().type();
+      balance += type == lhs;
+      balance -= type == rhs;
+      if (balance == 0) return true;
+    }
+
+    return false;
+  }
+
+  bool findComplement()
+  {
+    if (tokens::isLeftBracket(*this))
+      return findComplementFwd();
+    else if (tokens::isRightBracket(*this))
+      return findComplementBwd();
+    return false;
   }
 
   friend std::ostream& operator<<(std::ostream& os, const TokenCursor& cursor)

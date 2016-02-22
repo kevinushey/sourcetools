@@ -24,7 +24,7 @@ public:
   char peek(std::size_t offset = 0)
   {
     std::size_t index = offset_ + offset;
-    if (index >= n_)
+    if (UNLIKELY(index >= n_))
       return '\0';
     return text_[index];
   }
