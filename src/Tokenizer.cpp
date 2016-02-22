@@ -89,7 +89,7 @@ extern "C" SEXP sourcetools_tokenize_file(SEXP absolutePathSEXP)
 
 extern "C" SEXP sourcetools_tokenize_string(SEXP stringSEXP)
 {
-  std::string string(CHAR(STRING_ELT(stringSEXP, 0)));
-  const auto& tokens = sourcetools::tokenize(string);
+  SEXP charSEXP = STRING_ELT(stringSEXP, 0);
+  const auto& tokens = sourcetools::tokenize(CHAR(charSEXP), Rf_length(charSEXP));
   return sourcetools::asSEXP(tokens);
 }

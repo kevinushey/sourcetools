@@ -1,5 +1,5 @@
-#ifndef SOURCE_TOOLS_CURSOR_TEXTCURSOR_H
-#define SOURCE_TOOLS_CURSOR_TEXTCURSOR_H
+#ifndef SOURCE_TOOLS_CURSOR_TEXT_CURSOR_H
+#define SOURCE_TOOLS_CURSOR_TEXT_CURSOR_H
 
 #include <string>
 
@@ -13,23 +13,23 @@ class TextCursor
 {
 public:
 
-  TextCursor(const std::string& contents)
-      : contents_(contents),
+  TextCursor(const char* text, std::size_t n)
+      : text_(text),
+        n_(n),
         offset_(0),
-        position_(0, 0),
-        size_(contents.size())
+        position_(0, 0)
   {
   }
 
   char peek(std::size_t offset = 0)
   {
     std::size_t index = offset_ + offset;
-    if (index >= size_)
+    if (index >= n_)
       return '\0';
-    return contents_[index];
+    return text_[index];
   }
 
-  void moveForward(std::size_t times = 1)
+  void advance(std::size_t times = 1)
   {
     for (std::size_t i = 0; i < times; ++i) {
       if (peek() == '\n') {
@@ -42,7 +42,7 @@ public:
     }
   }
 
-  bool isValid() { return LIKELY(offset_ < size_); }
+  operator const char*() const { return text_ + offset_; }
 
   std::size_t offset() const { return offset_; }
 
@@ -50,17 +50,17 @@ public:
   std::size_t row() const { return position_.row; }
   std::size_t column() const { return position_.column; }
 
-  std::string::const_iterator begin() const { return contents_.begin(); }
-  std::string::const_iterator end() const { return contents_.end(); }
+  const char* begin() const { return text_; }
+  const char* end() const { return text_ + n_; }
 
 private:
-  const std::string& contents_;
+  const char* text_;
+  std::size_t n_;
   std::size_t offset_;
   collections::Position position_;
-  std::size_t size_;
 };
 
 } // namespace cursors
 } // namespace sourcetools
 
-#endif /* SOURCE_TOOLS_CURSOR_TEXTCURSOR_H */
+#endif /* SOURCE_TOOLS_CURSOR_TEXT_CURSOR_H */

@@ -25,7 +25,7 @@ private:
                     Token* pToken)
   {
     *pToken = std::move(Token(cursor_, type, length));
-    cursor_.moveForward(length);
+    cursor_.advance(length);
   }
 
   void consumeUntil(char ch,
@@ -38,12 +38,12 @@ private:
     bool success = false;
     std::size_t distance = 0;
 
-    while (lookahead.isValid()) {
-      lookahead.moveForward();
+    while (lookahead != lookahead.end()) {
+      lookahead.advance();
       ++distance;
 
       if (skipEscaped && lookahead.peek() == '\\') {
-        lookahead.moveForward();
+        lookahead.advance();
         ++distance;
         continue;
       }
@@ -239,15 +239,14 @@ private:
 
 public:
 
-  Tokenizer(const std::string& code)
-    : code_(code),
-      cursor_(code_)
+  Tokenizer(const char* code, std::size_t n)
+    : cursor_(code, n)
   {
   }
 
   bool tokenize(Token* pToken)
   {
-    if (!cursor_.isValid())
+    if (cursor_ >= cursor_.end())
     {
       *pToken = std::move(Token(tokens::END));
       return false;
@@ -426,26 +425,30 @@ public:
   }
 
 private:
-  const std::string& code_;
   TextCursor cursor_;
   std::stack<TokenType, std::vector<TokenType>> tokenStack_;
 };
 
 } // namespace tokenizer
 
-inline std::vector<tokens::Token> tokenize(const std::string& code)
+inline std::vector<tokens::Token> tokenize(const char* code, std::size_t n)
 {
   std::vector<tokens::Token> tokens;
-  if (code.empty())
+  if (n == 0)
     return tokens;
 
-  tokenizer::Tokenizer tokenizer(code);
+  tokenizer::Tokenizer tokenizer(code, n);
 
   tokens::Token token;
   while (tokenizer.tokenize(&token))
     tokens.push_back(token);
 
   return tokens;
+}
+
+inline std::vector<tokens::Token> tokenize(const std::string& code)
+{
+  return tokenize(code.data(), code.size());
 }
 
 } // namespace sourcetools

@@ -107,8 +107,8 @@ public:
 
 extern "C" SEXP sourcetools_parse_string(SEXP programSEXP)
 {
-  const char* program = CHAR(STRING_ELT(programSEXP, 0));
-  sourcetools::parser::Parser parser(program);
+  SEXP charSEXP = STRING_ELT(programSEXP, 0);
+  sourcetools::parser::Parser parser(CHAR(charSEXP), Rf_length(charSEXP));
   auto root = parser.parse();
   for (auto&& child : root)
     sourcetools::log(child);

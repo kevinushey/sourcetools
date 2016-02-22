@@ -187,7 +187,7 @@ inline TokenType symbolType(const char* string, std::size_t n)
 
 inline TokenType symbolType(const std::string& symbol)
 {
-  return symbolType(symbol.c_str(), symbol.length());
+  return symbolType(symbol.data(), symbol.size());
 }
 
 } // end namespace types
@@ -201,22 +201,22 @@ private:
 public:
 
   Token()
-    : begin_(empty().begin()),
-      end_(empty().end()),
+    : begin_(nullptr),
+      end_(nullptr),
       type_(ERR)
   {
   }
 
   explicit Token(TokenType type)
-    : begin_(empty().begin()),
-      end_(empty().end()),
+    : begin_(nullptr),
+      end_(nullptr),
       type_(type)
   {
   }
 
   Token(const Position& position)
-    : begin_(empty().begin()),
-      end_(empty().end()),
+    : begin_(nullptr),
+      end_(nullptr),
       position_(position),
       type_(ERR)
   {
@@ -230,8 +230,8 @@ public:
   {
   }
 
-  std::string::const_iterator begin() const { return begin_; }
-  std::string::const_iterator end() const { return end_; }
+  const char* begin() const { return begin_; }
+  const char* end() const { return end_; }
   std::string contents() const { return std::string(begin_, end_); }
 
   const Position& position() const { return position_; }
@@ -242,8 +242,8 @@ public:
   bool isType(TokenType type) const { return type_ == type; }
 
 private:
-  std::string::const_iterator begin_;
-  std::string::const_iterator end_;
+  const char* begin_;
+  const char* end_;
 
   Position position_;
   TokenType type_;

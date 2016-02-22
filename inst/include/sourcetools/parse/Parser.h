@@ -109,7 +109,6 @@ class Parser
   typedef tokenizer::Tokenizer Tokenizer;
   typedef tokens::Token Token;
 
-  std::string program_;
   Tokenizer tokenizer_;
   Token token_;
   std::vector<ParseError> errors_;
@@ -119,9 +118,8 @@ class Parser
 #endif
 
 public:
-  explicit Parser(const std::string& program)
-    : program_(program),
-      tokenizer_(program_)
+  explicit Parser(const char* code, std::size_t n)
+    : tokenizer_(code, n)
   {
     advance();
 
