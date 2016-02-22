@@ -334,7 +334,10 @@ private:
     using namespace tokens;
     auto pNode = Node::create(current());
     CHECK_AND_ADVANCE(LPAREN);
-    pNode->add(parseExpression());
+    if (current().isType(RPAREN))
+      unexpectedToken(current());
+    else
+      pNode->add(parseExpression());
     CHECK_AND_ADVANCE(RPAREN);
     return pNode;
   }
@@ -363,10 +366,10 @@ private:
       return parseParentheticalExpression();
     else if (isUnaryOperator(token))
       return parseUnaryOperator();
-    else if (token.isType(END))
-      return nullptr;
     else if (isSymbolic(token))
       return Node::create(consume());
+    else if (token.isType(END))
+      return nullptr;
 
     unexpectedToken(token);
     return nullptr;
@@ -374,7 +377,7 @@ private:
 
   // Parse a function call, e.g.
   //
-  //    <fn-call> = <expr> <fn-open> <fn-call-args> <fn-close>
+  //    <fn-call> ::= <expr> <fn-open> <fn-call-args> <fn-close>
   //
   //  <fn-open> can be one of '(', '[' or '[[',
   //  <fn-call-args> are (potentially named) comma-separated values
