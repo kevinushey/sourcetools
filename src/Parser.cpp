@@ -26,6 +26,26 @@ class SEXPConverter
 {
 private:
 
+  static SEXP asKeywordSEXP(const tokens::Token& token)
+  {
+    using namespace tokens;
+
+    switch (token.type())
+    {
+    case KEYWORD_FALSE:         return Rf_ScalarLogical(0);
+    case KEYWORD_TRUE:          return Rf_ScalarLogical(1);
+    case KEYWORD_Inf:           return Rf_ScalarReal(INFINITY);
+    case KEYWORD_NA:            return Rf_ScalarLogical(NA_LOGICAL);
+    case KEYWORD_NA_character_: return NA_STRING;
+    // case KEYWORD_NA_complex_:   return NA_COM
+    case KEYWORD_NA_integer_:   return Rf_ScalarInteger(NA_INTEGER);
+    case KEYWORD_NA_real_:      return Rf_ScalarReal(NA_REAL);
+    case KEYWORD_NaN:           return Rf_ScalarReal(R_NaN);
+    case KEYWORD_NULL:          return R_NilValue;
+    default:                    return Rf_install(token.contents().c_str());
+    }
+  }
+
   static SEXP asFunctionCallSEXP(std::shared_ptr<parser::Node> pNode)
   {
     DEBUG("asFunctionCallSEXP()");
@@ -89,7 +109,9 @@ public:
       return asFunctionDeclSEXP(pNode);
 
     SEXP elSEXP;
-    if (isOperator(token) || isSymbol(token) || isKeyword(token) || isLeftBracket(token))
+    if (isKeyword(token))
+      elSEXP = PROTECT(asKeywordSEXP(token));
+    else if (isOperator(token) || isSymbol(token) || isLeftBracket(token))
       elSEXP = PROTECT(Rf_install(token.contents().c_str()));
     else if (isNumeric(token))
       elSEXP = PROTECT(Rf_ScalarReal(::atof(token.contents().c_str())));

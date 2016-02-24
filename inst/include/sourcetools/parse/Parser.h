@@ -366,7 +366,7 @@ private:
       return parseParentheticalExpression();
     else if (isUnaryOperator(token))
       return parseUnaryOperator();
-    else if (isSymbolic(token))
+    else if (isSymbolic(token) || isKeyword(token))
       return Node::create(consume());
     else if (token.isType(END))
       return nullptr;
