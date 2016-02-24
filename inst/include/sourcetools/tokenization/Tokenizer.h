@@ -424,6 +424,20 @@ public:
     return true;
   }
 
+  Token peek(std::size_t lookahead = 1)
+  {
+    Tokenizer clone(*this);
+
+    Token result(tokens::END);
+    for (std::size_t i = 0; i < lookahead; ++i) {
+      if (!clone.tokenize(&result)) {
+        break;
+      }
+    }
+
+    return result;
+  }
+
 private:
   TextCursor cursor_;
   std::stack<TokenType, std::vector<TokenType>> tokenStack_;

@@ -90,7 +90,7 @@ namespace parser {
     if (!current().isType(__TYPE__))                               \
     {                                                              \
       DEBUG(unexpectedTokenString(current()));                     \
-      return nullptr;                                              \
+      return Node::create(ERR);                                    \
     }                                                              \
   } while (0)
 
@@ -100,7 +100,7 @@ namespace parser {
     if (current().isType(::sourcetools::tokens::END))          \
     {                                                          \
       ::std::cerr << "unexpected end of input" << ::std::endl; \
-      return nullptr;                                          \
+      return Node::create(ERR);                                \
     }                                                          \
   } while (0)
 
@@ -299,7 +299,7 @@ private:
       return parseRepeat();
 
     unexpectedToken(consume(), "expected control-flow keyword");
-    return nullptr;
+    return Node::create(ERR);
   }
 
   std::shared_ptr<Node> parseBracedExpression()
@@ -371,8 +371,33 @@ private:
     else if (token.isType(END))
       return nullptr;
 
-    unexpectedToken(token);
-    return nullptr;
+    unexpectedToken(consume());
+    return Node::create(ERR);
+  }
+
+  std::shared_ptr<Node> parseFunctionCallOne(tokens::TokenType rhsType)
+  {
+    using namespace tokens;
+
+    const Token& token = current();
+    if (token.isType(COMMA) || token.isType(rhsType))
+      return Node::create(Token(EMPTY));
+
+    if (peek().isType(OPERATOR_ASSIGN_LEFT_EQUALS))
+    {
+      auto pLhs  = Node::create(consume());
+      auto pNode = Node::create(consume());
+      pNode->add(pLhs);
+
+      if (current().isType(COMMA) || current().isType(rhsType))
+        pNode->add(Node::create(EMPTY));
+      else
+        pNode->add(parseExpression());
+
+      return pNode;
+    }
+
+    return parseExpression();
   }
 
   // Parse a function call, e.g.
@@ -381,7 +406,11 @@ private:
   //
   //  <fn-open> can be one of '(', '[' or '[[',
   //  <fn-call-args> are (potentially named) comma-separated values
-  //  <fn-close> is the complement of the above
+  //  <fn-close> is the complement of the above.
+  //
+  // Parsing a function call is surprisingly tricky, due to the
+  // nature of allowing a mixture of unnamed, named, and missing
+  // arguments.
   std::shared_ptr<Node> parseFunctionCall(std::shared_ptr<Node> pLhs)
   {
     SOURCE_TOOLS_DEBUG_PARSER_LOG("parseFunctionCall('" << current().contents() << "')");
@@ -393,6 +422,7 @@ private:
     pNode->add(pLhs);
 
     CHECK_AND_ADVANCE(lhsType);
+
     if (current().isType(rhsType))
       pNode->add(Node::create(Token(EMPTY)));
     else
@@ -400,13 +430,15 @@ private:
       while (true)
       {
         CHECK_UNEXPECTED_END();
-        pNode->add(parseExpression());
-        if (current().isType(COMMA))
+        pNode->add(parseFunctionCallOne(rhsType));
+
+        const Token& token = current();
+        if (token.isType(COMMA))
         {
           consume();
           continue;
         }
-        else if (current().isType(rhsType))
+        else if (token.isType(rhsType))
         {
           break;
         }
@@ -479,6 +511,22 @@ private:
     while (success && (isComment(token_) || isWhitespace(token_)))
       success = tokenizer_.tokenize(&token_);
     return success;
+  }
+
+  Token peek(std::size_t lookahead = 1,
+             bool skipWhitespace = true,
+             bool skipComments = true)
+  {
+    for (; lookahead < 100; ++lookahead)
+    {
+      Token result = tokenizer_.peek(lookahead);
+      if (skipWhitespace && result.isType(tokens::WHITESPACE))
+        continue;
+      if (skipComments && result.isType(tokens::COMMENT))
+        continue;
+      return result;
+    }
+    return Token(tokens::ERR);
   }
 
 public:

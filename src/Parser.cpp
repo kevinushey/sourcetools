@@ -55,7 +55,7 @@ private:
       auto&& node = *it;
       const Token& token = node->token();
       if (token.isType(EMPTY))
-        continue;
+        langSEXP = Rf_lcons(R_MissingArg, langSEXP);
 
       else if (token.isType(tokens::OPERATOR_ASSIGN_LEFT_EQUALS))
       {
@@ -130,6 +130,8 @@ public:
     SEXP elSEXP;
     if (isKeyword(token))
       elSEXP = PROTECT(asKeywordSEXP(token));
+    else if (token.isType(EMPTY))
+      elSEXP = PROTECT(R_MissingArg);
     else if (isOperator(token) || isSymbol(token) || isLeftBracket(token))
       elSEXP = PROTECT(Rf_install(token.contents().c_str()));
     else if (isNumeric(token))

@@ -3,7 +3,7 @@ check_parse <- function(code) {
     return(FALSE)
 
   testthat::expect_equal(
-    parse(text = code)[[1]],
+    base::parse(text = code)[[1]],
     parse_string(code)[[1]]
   )
 

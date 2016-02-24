@@ -112,6 +112,7 @@ inline TokenType complement(TokenType type)
 {
   static const TokenType mask =
     SOURCE_TOOLS_BRACKET_LEFT_BIT | SOURCE_TOOLS_BRACKET_RIGHT_BIT;
+
   return type ^ mask;
 }
 
