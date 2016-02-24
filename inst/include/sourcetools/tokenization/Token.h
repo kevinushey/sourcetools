@@ -183,6 +183,20 @@ inline bool isCallOperator(const Token& token)
          token.type() == LDBRACKET;
 }
 
+inline std::string stringValue(const Token& token)
+{
+  switch (token.type())
+  {
+  case STRING:
+    return std::string(token.begin() + 1, token.end() - 1);
+  case SYMBOL:
+    if (*token.begin() == '`')
+      return std::string(token.begin() + 1, token.end() - 1);
+  default:
+    return std::string(token.begin(), token.end());
+  }
+}
+
 } // namespace utils
 } // namespace tokens
 

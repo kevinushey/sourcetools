@@ -63,7 +63,9 @@ private:
         auto&& rhs = node->children()[1];
 
         langSEXP = Rf_lcons(asSEXP(rhs), langSEXP);
-        SET_TAG(langSEXP, asSEXP(lhs));
+
+        const Token& token = lhs->token();
+        SET_TAG(langSEXP, Rf_install(tokens::utils::stringValue(token).c_str()));
       }
       else
       {
@@ -84,7 +86,9 @@ private:
     SEXP headSEXP = listSEXP;
     for (auto&& child : pNode->children())
     {
-      SET_TAG(headSEXP, Rf_install(child->token().contents().c_str()));
+      const tokens::Token& token = child->token();
+      if (token.isType(tokens::SYMBOL))
+        SET_TAG(headSEXP, Rf_install(tokens::utils::stringValue(token).c_str()));
       if (child->children().empty())
         SETCAR(headSEXP, R_MissingArg);
       else
