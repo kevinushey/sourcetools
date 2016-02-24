@@ -184,17 +184,63 @@ inline bool isCallOperator(const Token& token)
          token.type() == LDBRACKET;
 }
 
+inline std::string stringValue(const char* begin, const char* end)
+{
+  if (begin == end)
+    return std::string();
+
+  std::size_t n = end - begin;
+  char* buffer = new char(n + 1);
+  buffer[end - begin] = '\0';
+
+  std::size_t idx = 0;
+  for (const char* it = begin; it != end; ++it, ++idx)
+  {
+    if (*it == '\\')
+    {
+      ++it;
+      switch (*it)
+      {
+      case 'a':  buffer[idx] = '\a'; --n; break;
+      case 'b':  buffer[idx] = '\b'; --n; break;
+      case 'f':  buffer[idx] = '\f'; --n; break;
+      case 'n':  buffer[idx] = '\n'; --n; break;
+      case 'r':  buffer[idx] = '\r'; --n; break;
+      case 't':  buffer[idx] = '\t'; --n; break;
+      case 'v':  buffer[idx] = '\v'; --n; break;
+      case '\\': buffer[idx] = '\\'; --n; break;
+      case '"':
+      case '\'':
+      case '`':
+      case ' ':
+      case '\n':
+        --n;
+        buffer[idx] = *it;
+        break;
+      }
+    }
+    else
+    {
+      buffer[idx] = *it;
+    }
+  }
+
+  std::string result(buffer, n);
+  ::free(buffer);
+  return result;
+}
+
 inline std::string stringValue(const Token& token)
 {
   switch (token.type())
   {
   case STRING:
-    return std::string(token.begin() + 1, token.end() - 1);
+    return stringValue(token.begin() + 1, token.end() - 1);
   case SYMBOL:
     if (*token.begin() == '`')
-      return std::string(token.begin() + 1, token.end() - 1);
+      return stringValue(token.begin() + 1, token.end() - 1);
   default:
-    return std::string(token.begin(), token.end());
+    return stringValue(token.begin(), token.end());
   }
 }
 
