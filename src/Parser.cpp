@@ -48,12 +48,28 @@ private:
 
   static SEXP asFunctionCallSEXP(std::shared_ptr<parser::Node> pNode)
   {
-    DEBUG("asFunctionCallSEXP()");
     using namespace tokens;
     SEXP langSEXP = PROTECT(R_NilValue);
     for (auto it = pNode->children().rbegin(); it != pNode->children().rend(); ++it)
-      if (!(*it)->token().isType(EMPTY))
+    {
+      auto&& node = *it;
+      const Token& token = node->token();
+      if (token.isType(EMPTY))
+        continue;
+
+      else if (token.isType(tokens::OPERATOR_ASSIGN_LEFT_EQUALS))
+      {
+        auto&& lhs = node->children()[0];
+        auto&& rhs = node->children()[1];
+
+        langSEXP = Rf_lcons(asSEXP(rhs), langSEXP);
+        SET_TAG(langSEXP, asSEXP(lhs));
+      }
+      else
+      {
         langSEXP = Rf_lcons(asSEXP(*it), langSEXP);
+      }
+    }
     UNPROTECT(1);
     return langSEXP;
   }
@@ -103,7 +119,7 @@ public:
     auto&& token = pNode->token();
 
     // Handle function calls specially
-    if (pNode->children().size() > 1 && (token.isType(LPAREN) || token.isType(LBRACKET) || token.isType(LDBRACKET)))
+    if (pNode->children().size() > 1 && token.isType(LPAREN))
       return asFunctionCallSEXP(pNode);
     else if (token.isType(KEYWORD_FUNCTION))
       return asFunctionDeclSEXP(pNode);
