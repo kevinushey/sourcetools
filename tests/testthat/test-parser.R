@@ -36,6 +36,20 @@ test_that("parser handles precedence", {
   check_parse("a$b[[1]]$c")
 })
 
+test_that("parser handles missing arguments", {
+  check_parse("a(,)")
+  check_parse("a[,]")
+  check_parse("a[[,]]")
+
+  check_parse("a(1,)")
+  check_parse("a[1,]")
+  check_parse("a[[1,]]")
+
+  check_parse("a(,1)")
+  check_parse("a[,1]")
+  check_parse("a[[,1]]")
+})
+
 test_that("parser handles random R code in my git folder", {
   skip("TODO")
 
@@ -51,7 +65,11 @@ test_that("parser handles random R code in my git folder", {
     cat("Checking parse: '", file, "'\n", sep = "")
     R  <- base::parse(text = contents, keep.source = FALSE)
     ST <- sourcetools:::parse_string(contents)
-    expect_true(all.equal(R, ST))
+
+    dR  <- deparse(R)
+    dST <- deparse(ST)
+
+    expect_true(all.equal(dR, dST))
     Sys.sleep(1)
   }
 

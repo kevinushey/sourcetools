@@ -149,8 +149,7 @@ public:
 
     SEXP listSEXP = PROTECT(R_NilValue);
     for (auto it = pNode->children().rbegin(); it != pNode->children().rend(); ++it)
-      if (!(*it)->token().isType(EMPTY))
-        listSEXP = Rf_lcons(asSEXP(*it), listSEXP);
+      listSEXP = Rf_lcons(asSEXP(*it), listSEXP);
     listSEXP = Rf_lcons(elSEXP, listSEXP);
 
     UNPROTECT(2);
