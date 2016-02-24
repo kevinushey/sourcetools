@@ -190,7 +190,7 @@ inline std::string stringValue(const char* begin, const char* end)
     return std::string();
 
   std::size_t n = end - begin;
-  char* buffer = new char(n + 1);
+  char* buffer = new char[n + 1];
   buffer[end - begin] = '\0';
 
   std::size_t idx = 0;
@@ -226,7 +226,7 @@ inline std::string stringValue(const char* begin, const char* end)
   }
 
   std::string result(buffer, n);
-  ::free(buffer);
+  delete[] buffer;
   return result;
 }
 
