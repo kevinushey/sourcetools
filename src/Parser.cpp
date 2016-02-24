@@ -111,6 +111,14 @@ private:
       asSEXP(pNode->children()[1]));
   }
 
+  static SEXP asNumericSEXP(const tokens::Token& token)
+  {
+    if (*(token.end() - 1) == 'L')
+      return Rf_ScalarInteger(::atof(token.begin()));
+    else
+      return Rf_ScalarReal(::atof(token.begin()));
+  }
+
 public:
   static SEXP asSEXP(std::shared_ptr<parser::Node> pNode)
   {
@@ -135,7 +143,7 @@ public:
     else if (isOperator(token) || isSymbol(token) || isLeftBracket(token))
       elSEXP = PROTECT(Rf_install(token.contents().c_str()));
     else if (isNumeric(token))
-      elSEXP = PROTECT(Rf_ScalarReal(::atof(token.contents().c_str())));
+      elSEXP = PROTECT(asNumericSEXP(token));
     else if (isString(token))
       elSEXP = PROTECT(Rf_mkString(tokens::utils::stringValue(token).c_str()));
     else

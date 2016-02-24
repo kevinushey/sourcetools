@@ -36,6 +36,16 @@ test_that("parser handles precedence", {
   check_parse("a$b[[1]]$c")
 })
 
+test_that("parser handles numbers of various forms", {
+  check_parse(".15")
+  check_parse("15.")
+  check_parse("1.5")
+  check_parse("1.5L")
+  check_parse("15L")
+  check_parse("10E5")
+  check_parse("10E5L")
+})
+
 test_that("parser handles missing arguments", {
   check_parse("a(,)")
   check_parse("a[,]")
@@ -70,7 +80,6 @@ test_that("parser handles random R code in my git folder", {
     dST <- deparse(ST)
 
     expect_true(all.equal(dR, dST))
-    Sys.sleep(1)
   }
 
 })
