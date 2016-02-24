@@ -38,9 +38,38 @@ private:
     return langSEXP;
   }
 
+  static SEXP asFunctionArgumentListSEXP(std::shared_ptr<parser::Node> pNode)
+  {
+    std::size_t n = pNode->children().size();
+    if (n == 0)
+      return R_NilValue;
+
+    SEXP listSEXP = PROTECT(Rf_allocList(n));
+    SEXP headSEXP = listSEXP;
+    for (auto&& child : pNode->children())
+    {
+      SET_TAG(headSEXP, Rf_install(child->token().contents().c_str()));
+      if (child->children().empty())
+        SETCAR(headSEXP, R_MissingArg);
+      else
+        SETCAR(headSEXP, asSEXP(child->children()[0]));
+      headSEXP = CDR(headSEXP);
+    }
+    Rf_PrintValue(listSEXP);
+
+    UNPROTECT(1);
+    return listSEXP;
+  }
+
   static SEXP asFunctionDeclSEXP(std::shared_ptr<parser::Node> pNode)
   {
-    return R_NilValue;
+    if (pNode->children().size() != 2)
+      return R_NilValue;
+
+    return Rf_lang3(
+      Rf_install("function"),
+      asFunctionArgumentListSEXP(pNode->children()[0]),
+      asSEXP(pNode->children()[1]));
   }
 
 public:
