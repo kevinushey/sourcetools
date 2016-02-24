@@ -32,8 +32,12 @@ test_that("parser handles function calls", {
   check_parse("foo <- bar() + bam() * bat()")
 })
 
+test_that("parser handles precedence", {
+  check_parse("a$b[[1]]$c")
+})
+
 test_that("parser handles random R code in my git folder", {
-  skip_on_cran()
+  skip("TODO")
 
   folders <- file.path(
     list.files("~/git", full.names = TRUE),
@@ -45,7 +49,9 @@ test_that("parser handles random R code in my git folder", {
   for (file in files) {
     contents <- read(file)
     cat("Checking parse: '", file, "'\n", sep = "")
-    check_parse(contents)
+    R  <- base::parse(text = contents, keep.source = FALSE)
+    ST <- sourcetools:::parse_string(contents)
+    expect_true(all.equal(R, ST))
     Sys.sleep(1)
   }
 

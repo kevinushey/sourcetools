@@ -54,12 +54,12 @@ inline int binary(const tokens::Token& token)
   case OPERATOR_EXPONENTATION_STARS:
   case OPERATOR_HAT:
     return 150;
-  case OPERATOR_DOLLAR:
-  case OPERATOR_AT:
-    return 170;
   case LPAREN:
   case LBRACKET:
   case LDBRACKET:
+    return 170;
+  case OPERATOR_DOLLAR:
+  case OPERATOR_AT:
     return 180;
   case OPERATOR_NAMESPACE_EXPORTS:
   case OPERATOR_NAMESPACE_ALL:
