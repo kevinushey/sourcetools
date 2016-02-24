@@ -91,7 +91,6 @@ private:
         SETCAR(headSEXP, asSEXP(child->children()[0]));
       headSEXP = CDR(headSEXP);
     }
-    Rf_PrintValue(listSEXP);
 
     UNPROTECT(1);
     return listSEXP;

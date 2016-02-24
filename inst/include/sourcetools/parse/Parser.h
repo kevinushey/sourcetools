@@ -12,9 +12,9 @@
 #include <sourcetools/parse/ParseError.h>
 
 // Defines that will go away once the parser is more tested / game ready
-#define SOURCE_TOOLS_DEBUG_PARSER_TRACE
-#define SOURCE_TOOLS_DEBUG_PARSER_PRINT_TOKEN_INFO
-#define SOURCE_TOOLS_DEBUG_PARSER_STACK_OVERFLOW
+// #define SOURCE_TOOLS_DEBUG_PARSER_TRACE
+// #define SOURCE_TOOLS_DEBUG_PARSER_PRINT_TOKEN_INFO
+// #define SOURCE_TOOLS_DEBUG_PARSER_STACK_OVERFLOW
 
 #ifdef SOURCE_TOOLS_DEBUG_PARSER_TRACE
 
