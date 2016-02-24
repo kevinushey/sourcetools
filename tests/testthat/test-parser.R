@@ -32,6 +32,25 @@ test_that("parser handles function calls", {
   check_parse("foo <- bar() + bam() * bat()")
 })
 
+test_that("parser handles random R code in my git folder", {
+  skip_on_cran()
+
+  folders <- file.path(
+    list.files("~/git", full.names = TRUE),
+    "R"
+  )
+
+  files <- list.files(folders, full.names = TRUE)
+
+  for (file in files) {
+    contents <- read(file)
+    cat("Checking parse: '", file, "'\n", sep = "")
+    check_parse(contents)
+    Sys.sleep(1)
+  }
+
+})
+
 # generate test cases
 if (FALSE) {
 
