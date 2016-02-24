@@ -79,6 +79,9 @@ test_that("parser handles random R code in my git folder", {
     dR  <- deparse(R)
     dST <- deparse(ST)
 
+    bad <- dR != dST
+    rbind(R = dR[bad], ST = dST[bad])
+
     expect_true(all.equal(dR, dST))
   }
 

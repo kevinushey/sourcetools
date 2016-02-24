@@ -72,6 +72,12 @@ private:
         langSEXP = Rf_lcons(asSEXP(*it), langSEXP);
       }
     }
+
+    if (pNode->token().isType(LBRACKET))
+      langSEXP = Rf_lcons(Rf_install("["), langSEXP);
+    else if (pNode->token().isType(LDBRACKET))
+      langSEXP = Rf_lcons(Rf_install("[["), langSEXP);
+
     UNPROTECT(1);
     return langSEXP;
   }
@@ -119,6 +125,21 @@ private:
       return Rf_ScalarReal(::atof(token.begin()));
   }
 
+  static bool isFunctionCall(std::shared_ptr<parser::Node> pNode)
+  {
+    auto&& token = pNode->token();
+    if (token.isType(tokens::LBRACKET) || token.isType(tokens::LDBRACKET))
+      return true;
+
+    if (!token.isType(tokens::LPAREN))
+      return false;
+
+    // Differentiate between '(a, b)' and 'a(b)' by looking at
+    // the token positions. Not great, I know...
+    auto&& child = pNode->children()[0];
+    return child->token().begin() < token.begin();
+  }
+
 public:
   static SEXP asSEXP(std::shared_ptr<parser::Node> pNode)
   {
@@ -127,12 +148,12 @@ public:
     if (!pNode)
       return R_NilValue;
 
-    auto&& token = pNode->token();
-
     // Handle function calls specially
-    if (pNode->children().size() > 1 && token.isType(LPAREN))
+    if (isFunctionCall(pNode))
       return asFunctionCallSEXP(pNode);
-    else if (token.isType(KEYWORD_FUNCTION))
+
+    auto&& token = pNode->token();
+    if (token.isType(KEYWORD_FUNCTION))
       return asFunctionDeclSEXP(pNode);
 
     SEXP elSEXP;
