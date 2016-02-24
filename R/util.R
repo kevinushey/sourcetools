@@ -6,4 +6,6 @@ check_parse <- function(code) {
     parse(text = code)[[1]],
     parse_string(code)[[1]]
   )
+
+  TRUE
 }

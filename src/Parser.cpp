@@ -176,7 +176,7 @@ extern "C" SEXP sourcetools_parse_string(SEXP programSEXP)
   SEXP charSEXP = STRING_ELT(programSEXP, 0);
   sourcetools::parser::Parser parser(CHAR(charSEXP), Rf_length(charSEXP));
   auto root = parser.parse();
-  for (auto&& child : root)
-    sourcetools::log(child);
+  // for (auto&& child : root)
+  //   sourcetools::log(child);
   return sourcetools::SEXPConverter::asSEXP(root);
 }
