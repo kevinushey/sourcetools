@@ -186,6 +186,17 @@ inline bool isCallOperator(const Token& token)
 
 namespace detail {
 
+inline bool isHexDigit(char c)
+{
+  if (c >= '0' && c <= '9')
+    return true;
+  else if (c >= 'a' && c <= 'f')
+    return true;
+  else if (c >= 'A' && c <= 'F')
+    return true;
+  return false;
+}
+
 inline int hexValue(char c)
 {
   if (c >= '0' && c <= '9')
@@ -198,52 +209,121 @@ inline int hexValue(char c)
   return 0;
 }
 
-inline int parseOctal(const char* it, char* output)
+// Parses an octal escape sequence, e.g. '\012'.
+inline bool parseOctal(const char*& it, char*& output)
 {
-  int value = 0;
-  int i = 0;
-  for (; i <= 2; ++i)
+  // Check for opening escape
+  if (*it != '\\')
+    return false;
+
+  // Check for number following
+  char lookahead = *(it + 1);
+  if (lookahead < '0' || lookahead > '7')
+    return false;
+  ++it;
+
+  // Begin parsing. Consume up to three numbers.
+  unsigned char result = 0;
+  const char* end = it + 3;
+  for (; it != end; ++it)
   {
-    char c = it[i];
-    if ('0' <= c && c <= '7')
-      value = 8 * value + c - '0';
+    char ch = *it;
+    if ('0' <= ch && ch <= '7')
+      result = 8 * result + ch - '0';
     else
       break;
   }
 
-  *output = value;
-  return i;
+  // Assign result, and return.
+  *output++ = result;
+  return true;
 }
 
-inline int parseHex(const char* it, char* output)
+// Parse a hex escape sequence, e.g. '\xFF'.
+inline bool parseHex(const char*& it, char*& output)
 {
+  // Check for opening escape.
+  if (*it != '\\')
+    return false;
+
+  if (*(it + 1) != 'x')
+    return false;
+
+  if (!isHexDigit(*(it + 2)))
+    return false;
+
+  // Begin parsing.
+  it += 2;
   unsigned char value = 0;
+  const char* end = it + 2;
+  for (; it != end; ++it)
+  {
+    int result = hexValue(*it);
+    if (result == 0)
+      break;
+    value = 16 * value + result;
+  }
 
-  int i = 0;
-  for (; i < 2; ++i)
-    value = 16 * value + hexValue(it[i]);
-
-  *output = value;
-  return i;
+  *output++ = value;
+  return true;
 }
 
-inline unsigned int parseUnicode(const char* it, char* output, int size)
+// Parse a unicode escape sequence.
+inline bool parseUnicode(const char*& it, char*& output)
 {
+  if (*it != '\\')
+    return false;
+
+  char lookahead = *(it + 1);
+  int size;
+  if (lookahead == 'u')
+    size = 4;
+  else if (lookahead == 'U')
+    size = 8;
+  else
+    return false;
+
+  // Clone the input iterator (only set it on success)
+  const char* clone = it;
+  clone += 2;
+
+  // Check for e.g. '\u{...}'
+  //                   ^
+  bool delimited = *clone == '{';
+  clone += delimited;
+
+  // Check for a hex digit.
+  if (!isHexDigit(*clone))
+    return false;
+
+  // Begin parsing hex digits
   wchar_t value = 0;
+  const char* end = clone + size;
+  for (; clone != end; ++clone)
+  {
+    int hex = hexValue(*clone);
+    if (hex == 0)
+      break;
+    value = 16 * value + hex;
+  }
 
-  bool delimited = *it == '{';
-  it += delimited;
+  // Eat a closing '}' if we had a starting '{'.
+  if (delimited)
+  {
+    if (*clone != '}')
+      return false;
+    ++clone;
+  }
 
-  int i = 0;
-  for (; i < size; ++i)
-    value = 16 * value + hexValue(it[i]);
-
-  it += delimited;
-
-  std::cout << "Value: " << (unsigned int) value << std::endl;
   std::mbstate_t state {};
   int bytes = ::wcrtomb(output, value, &state);
-  return bytes;
+  if (bytes == -1)
+    return false;
+
+  // Update iterator state
+  it = clone;
+  output += bytes;
+  return true;
 }
 
 } // namespace detail
@@ -255,88 +335,48 @@ inline std::string stringValue(const char* begin, const char* end)
 
   std::size_t n = end - begin;
   char* buffer = new char[n + 1];
-  buffer[end - begin] = '\0';
 
-  std::size_t idx = 0;
   const char* it = begin;
-  while (it != end)
+  char* output = buffer;
+
+  while (it < end)
   {
     if (*it == '\\')
     {
-      ++it;
-      char value = *it;
-
-      // Handle octals (e.g. '\127')
-      if ('0' <= value && value <= '7')
+      if (detail::parseOctal(it, output) ||
+          detail::parseHex(it, output) ||
+          detail::parseUnicode(it, output))
       {
-        int diff = detail::parseOctal(it, buffer + idx);
-        it += diff, n -= diff, ++idx;
-        continue;
-      }
-
-      // Handle hex (e.g. '\x127')
-      if (value == 'x')
-      {
-        ++it, --n;
-        int diff = detail::parseHex(it, buffer + idx);
-        it += diff, n -= diff, ++idx;
-        continue;
-      }
-
-      // Handle 4-char unicode escape (e.g. '\u1234')
-      if (value == 'u')
-      {
-        ++it, --n;
-        int diff = detail::parseUnicode(it, buffer + idx, 4);
-        if (diff == -1)
-          ;
-        else
-          it += diff, n -= diff; ++idx;
-        continue;
-      }
-
-      // Handle 8-char unicode escape (e.g. '\U123456789')
-      if (value == 'U')
-      {
-        ++it, --n;
-        int diff = detail::parseUnicode(it, buffer + idx, 8);
-        if (diff == -1)
-          ;
-        else
-          it += diff, n -= diff; ++idx;
         continue;
       }
 
       // Handle the rest
-      switch (value)
+      ++it;
+      switch (*it)
       {
-      case 'a':  buffer[idx] = '\a'; --n; break;
-      case 'b':  buffer[idx] = '\b'; --n; break;
-      case 'f':  buffer[idx] = '\f'; --n; break;
-      case 'n':  buffer[idx] = '\n'; --n; break;
-      case 'r':  buffer[idx] = '\r'; --n; break;
-      case 't':  buffer[idx] = '\t'; --n; break;
-      case 'v':  buffer[idx] = '\v'; --n; break;
-      case '\\': buffer[idx] = '\\'; --n; break;
-      case '"':
-      case '\'':
-      case '`':
-      case ' ':
-      case '\n':
-        --n;
-        buffer[idx] = value;
-        break;
+      case 'a':  *output++ = '\a'; break;
+      case 'b':  *output++ = '\b'; break;
+      case 'f':  *output++ = '\f'; break;
+      case 'n':  *output++ = '\n'; break;
+      case 'r':  *output++ = '\r'; break;
+      case 't':  *output++ = '\t'; break;
+      case 'v':  *output++ = '\v'; break;
+      case '\\': *output++ = '\\'; break;
+      default:   *output++ = *it;  break;
       }
+      ++it;
     }
     else
     {
-      buffer[idx] = *it;
+      *output++ = *it++;
     }
-
-    ++it, ++idx;
   }
 
-  std::string result(buffer, n);
+  // Ensure null termination, just in case
+  *output++ = '\0';
+
+  // Construct the result string and return
+  std::string result(buffer, output - buffer);
   delete[] buffer;
   return result;
 }
