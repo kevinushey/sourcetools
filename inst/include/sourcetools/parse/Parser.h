@@ -225,7 +225,10 @@ private:
     auto pNode = Node::create(current());
     CHECK_AND_ADVANCE(KEYWORD_FUNCTION);
     CHECK_AND_ADVANCE(LPAREN);
+    ParseState state = state_;
+    state_ = ParseState::PAREN;
     pNode->add(parseFunctionArgumentList());
+    state_ = state;
     CHECK_AND_ADVANCE(RPAREN);
     pNode->add(parseExpression());
     return pNode;
@@ -238,10 +241,13 @@ private:
     auto pNode = Node::create(current());
     CHECK_AND_ADVANCE(KEYWORD_FOR);
     CHECK_AND_ADVANCE(LPAREN);
+    ParseState state = state_;
+    state_ = ParseState::PAREN;
     CHECK(SYMBOL);
     pNode->add(Node::create(consume()));
     CHECK_AND_ADVANCE(KEYWORD_IN);
     pNode->add(parseExpression());
+    state_ = state;
     CHECK_AND_ADVANCE(RPAREN);
     pNode->add(parseExpression());
     return pNode;
@@ -254,7 +260,10 @@ private:
     auto pNode = Node::create(current());
     CHECK_AND_ADVANCE(KEYWORD_IF);
     CHECK_AND_ADVANCE(LPAREN);
+    ParseState state = state_;
+    state_ = ParseState::PAREN;
     pNode->add(parseExpression());
+    state_ = state;
     CHECK_AND_ADVANCE(RPAREN);
     pNode->add(parseExpression());
     if (current().isType(KEYWORD_ELSE))
@@ -272,7 +281,10 @@ private:
     auto pNode = Node::create(current());
     CHECK_AND_ADVANCE(KEYWORD_WHILE);
     CHECK_AND_ADVANCE(LPAREN);
+    ParseState state = state_;
+    state_ = ParseState::PAREN;
     pNode->add(parseExpression());
+    state_ = state;
     CHECK_AND_ADVANCE(RPAREN);
     pNode->add(parseExpression());
     return pNode;

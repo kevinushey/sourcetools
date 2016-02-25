@@ -34,6 +34,7 @@ test_that("parser handles function calls", {
 
 test_that("parser handles precedence", {
   check_parse("a$b[[1]]$c")
+  check_parse("object <- unclass(object)[i]")
 })
 
 test_that("parser handles numbers of various forms", {
@@ -73,6 +74,11 @@ test_that("parser handles semi-colons as statement delimiter", {
   check_parse("{a <- 1;}")
 })
 
+test_that("parser distinguishes ways of calling subset", {
+  check_parse('"["(unclass(object), i)')
+  ST <- sourcetools:::parse(text = '"["(unclass(object), i)')
+})
+
 test_that("parser handles if-else", {
 
   code <- "
@@ -99,7 +105,7 @@ test_that("parser handles random R code in my git folder", {
   for (file in files) {
     contents <- read(file)
     cat("Checking parse: '", file, "'\n", sep = "")
-    R  <- base::parse(text = contents, keep.source = FALSE)
+    R  <- base::parse(file, keep.source = FALSE)
     ST <- sourcetools:::parse_string(contents)
 
     dR  <- deparse(R)
