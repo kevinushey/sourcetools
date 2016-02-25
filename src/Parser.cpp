@@ -157,7 +157,11 @@ public:
       return asFunctionDeclSEXP(pNode);
 
     SEXP elSEXP;
-    if (isKeyword(token))
+    if (token.isType(KEYWORD_BREAK))
+      elSEXP = PROTECT(Rf_lang1(Rf_install("break")));
+    else if (token.isType(KEYWORD_NEXT))
+      elSEXP = PROTECT(Rf_lang1(Rf_install("next")));
+    else if (isKeyword(token))
       elSEXP = PROTECT(asKeywordSEXP(token));
     else if (token.isType(EMPTY))
       elSEXP = PROTECT(R_MissingArg);
