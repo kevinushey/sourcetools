@@ -74,9 +74,14 @@ test_that("parser handles semi-colons as statement delimiter", {
   check_parse("{a <- 1;}")
 })
 
-test_that("parser distinguishes ways of calling subset", {
+test_that("parser handles various escapes in strings", {
+  check_parse("'a = \\u{A0}'")
+  check_parse("a <- ifelse(a, '\\u{A0}', '\\u{A1}')")
+})
+
+test_that("parser normalizes string names in function calls", {
   check_parse('"["(unclass(object), i)')
-  ST <- sourcetools:::parse(text = '"["(unclass(object), i)')
+  check_parse('"lol"(1, 2)')
 })
 
 test_that("parser handles if-else", {
@@ -100,9 +105,10 @@ test_that("parser handles random R code in my git folder", {
     "R"
   )
 
-  files <- list.files(folders, full.names = TRUE)
+  files <- list.files(folders, full.names = TRUE, pattern = "[rR]$")
 
-  for (file in files) {
+  for (i in seq_along(files)) {
+    file <- files[[i]]
     contents <- read(file)
     cat("Checking parse: '", file, "'\n", sep = "")
     R  <- base::parse(file, keep.source = FALSE)

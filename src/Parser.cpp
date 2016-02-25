@@ -79,6 +79,11 @@ private:
       langSEXP = Rf_lcons(Rf_install("["), langSEXP);
     else if (pNode->token().isType(LDBRACKET))
       langSEXP = Rf_lcons(Rf_install("[["), langSEXP);
+    else if (pNode->token().isType(LPAREN))
+    {
+      if (TYPEOF(CAR(langSEXP)) == STRSXP)
+        SETCAR(langSEXP, Rf_install(CHAR(STRING_ELT(CAR(langSEXP), 0))));
+    }
 
     UNPROTECT(1);
     return langSEXP;
@@ -159,7 +164,9 @@ public:
       return asFunctionDeclSEXP(pNode);
 
     SEXP elSEXP;
-    if (token.isType(KEYWORD_BREAK))
+    if (token.isType(OPERATOR_EXPONENTATION_STARS))
+      elSEXP = PROTECT(Rf_install("^"));
+    else if (token.isType(KEYWORD_BREAK))
       elSEXP = PROTECT(Rf_lang1(Rf_install("break")));
     else if (token.isType(KEYWORD_NEXT))
       elSEXP = PROTECT(Rf_lang1(Rf_install("next")));

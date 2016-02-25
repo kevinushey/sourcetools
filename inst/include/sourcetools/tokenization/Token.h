@@ -301,9 +301,10 @@ inline bool parseUnicode(const char*& it, char*& output)
   const char* end = clone + size;
   for (; clone != end; ++clone)
   {
-    int hex = hexValue(*clone);
-    if (hex == 0)
+    if (!isHexDigit(*clone))
       break;
+
+    int hex = hexValue(*clone);
     value = 16 * value + hex;
   }
 

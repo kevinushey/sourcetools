@@ -449,6 +449,10 @@ private:
 
     CHECK_AND_ADVANCE(lhsType);
 
+    ParseState state = state_;
+    if (lhsType == LPAREN)
+      state_ = ParseState::PAREN;
+
     if (current().isType(rhsType))
       pNode->add(Node::create(Token(EMPTY)));
     else
@@ -476,6 +480,10 @@ private:
     }
 
     CHECK_AND_ADVANCE(rhsType);
+
+    if (lhsType == LPAREN)
+      state_ = state;
+
     if (isCallOperator(current()) && canParseExpressionContinuation())
       return parseFunctionCall(pNode);
     return pNode;
