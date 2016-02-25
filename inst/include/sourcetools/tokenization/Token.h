@@ -184,6 +184,70 @@ inline bool isCallOperator(const Token& token)
          token.type() == LDBRACKET;
 }
 
+namespace detail {
+
+inline int hexValue(char c)
+{
+  if (c >= '0' && c <= '9')
+    return c - '0';
+  else if (c >= 'a' && c <= 'f')
+    return c - 'a' + 10;
+  else if (c >= 'A' && c <= 'F')
+    return c - 'A' + 10;
+
+  return 0;
+}
+
+inline int parseOctal(const char* it, char* output)
+{
+  int value = 0;
+  int i = 0;
+  for (; i <= 2; ++i)
+  {
+    char c = it[i];
+    if ('0' <= c && c <= '7')
+      value = 8 * value + c - '0';
+    else
+      break;
+  }
+
+  *output = value;
+  return i;
+}
+
+inline int parseHex(const char* it, char* output)
+{
+  unsigned char value = 0;
+
+  int i = 0;
+  for (; i < 2; ++i)
+    value = 16 * value + hexValue(it[i]);
+
+  *output = value;
+  return i;
+}
+
+inline unsigned int parseUnicode(const char* it, char* output, int size)
+{
+  wchar_t value = 0;
+
+  bool delimited = *it == '{';
+  it += delimited;
+
+  int i = 0;
+  for (; i < size; ++i)
+    value = 16 * value + hexValue(it[i]);
+
+  it += delimited;
+
+  std::cout << "Value: " << (unsigned int) value << std::endl;
+  std::mbstate_t state {};
+  int bytes = ::wcrtomb(output, value, &state);
+  return bytes;
+}
+
+} // namespace detail
+
 inline std::string stringValue(const char* begin, const char* end)
 {
   if (begin == end)
@@ -194,12 +258,57 @@ inline std::string stringValue(const char* begin, const char* end)
   buffer[end - begin] = '\0';
 
   std::size_t idx = 0;
-  for (const char* it = begin; it != end; ++it, ++idx)
+  const char* it = begin;
+  while (it != end)
   {
     if (*it == '\\')
     {
       ++it;
-      switch (*it)
+      char value = *it;
+
+      // Handle octals (e.g. '\127')
+      if ('0' <= value && value <= '7')
+      {
+        int diff = detail::parseOctal(it, buffer + idx);
+        it += diff, n -= diff, ++idx;
+        continue;
+      }
+
+      // Handle hex (e.g. '\x127')
+      if (value == 'x')
+      {
+        ++it, --n;
+        int diff = detail::parseHex(it, buffer + idx);
+        it += diff, n -= diff, ++idx;
+        continue;
+      }
+
+      // Handle 4-char unicode escape (e.g. '\u1234')
+      if (value == 'u')
+      {
+        ++it, --n;
+        int diff = detail::parseUnicode(it, buffer + idx, 4);
+        if (diff == -1)
+          ;
+        else
+          it += diff, n -= diff; ++idx;
+        continue;
+      }
+
+      // Handle 8-char unicode escape (e.g. '\U123456789')
+      if (value == 'U')
+      {
+        ++it, --n;
+        int diff = detail::parseUnicode(it, buffer + idx, 8);
+        if (diff == -1)
+          ;
+        else
+          it += diff, n -= diff; ++idx;
+        continue;
+      }
+
+      // Handle the rest
+      switch (value)
       {
       case 'a':  buffer[idx] = '\a'; --n; break;
       case 'b':  buffer[idx] = '\b'; --n; break;
@@ -215,7 +324,7 @@ inline std::string stringValue(const char* begin, const char* end)
       case ' ':
       case '\n':
         --n;
-        buffer[idx] = *it;
+        buffer[idx] = value;
         break;
       }
     }
@@ -223,6 +332,8 @@ inline std::string stringValue(const char* begin, const char* end)
     {
       buffer[idx] = *it;
     }
+
+    ++it, ++idx;
   }
 
   std::string result(buffer, n);
