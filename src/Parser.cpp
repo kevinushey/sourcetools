@@ -165,10 +165,12 @@ public:
       elSEXP = PROTECT(asKeywordSEXP(token));
     else if (token.isType(EMPTY))
       elSEXP = PROTECT(R_MissingArg);
-    else if (isOperator(token) || isSymbol(token) || isLeftBracket(token))
+    else if (isOperator(token) || isLeftBracket(token))
       elSEXP = PROTECT(Rf_install(token.contents().c_str()));
     else if (isNumeric(token))
       elSEXP = PROTECT(asNumericSEXP(token));
+    else if (isSymbol(token))
+      elSEXP = PROTECT(Rf_install(tokens::utils::stringValue(token).c_str()));
     else if (isString(token))
       elSEXP = PROTECT(Rf_mkString(tokens::utils::stringValue(token).c_str()));
     else

@@ -471,7 +471,7 @@ private:
     }
 
     CHECK_AND_ADVANCE(rhsType);
-    if (isCallOperator(current()))
+    if (isCallOperator(current()) && canParseExpressionContinuation())
       return parseFunctionCall(pNode);
     return pNode;
   }
@@ -500,8 +500,7 @@ private:
     return pNew;
   }
 
-  bool canParseExpressionContinuation(std::shared_ptr<Node> pNode,
-                                      int precedence)
+  bool canParseExpressionContinuation(int precedence = 0)
   {
     return precedence < precedence::binary(current()) && (
       state_ == ParseState::PAREN ||
@@ -513,7 +512,7 @@ private:
     SOURCE_TOOLS_DEBUG_PARSER_LOG("parseExpression(" << precedence << ")");
     using namespace tokens;
     auto pNode = parseExpressionStart();
-    while (canParseExpressionContinuation(pNode, precedence))
+    while (canParseExpressionContinuation(precedence))
       pNode = parseExpressionContinuation(pNode);
     return pNode;
   }

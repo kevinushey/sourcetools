@@ -62,11 +62,26 @@ test_that("parser handles missing arguments", {
 
 test_that("parser handles newlines as statement delimiter", {
   check_parse("a <- b\n+1")
+  check_parse("a <- 1\n(b)")
+  check_parse("a <- foo(1)\n(b)")
 })
 
 test_that("parser handles semi-colons as statement delimiter", {
   check_parse("a <- 1; b <- 2; c <- 3")
   check_parse("{a <- 1;}")
+})
+
+test_that("parser handles if-else", {
+
+  code <- "
+    if (foo) {
+      bar
+    } else if (baz) {
+    }
+  "
+
+  check_parse(code)
+
 })
 
 test_that("parser handles random R code in my git folder", {
@@ -89,6 +104,8 @@ test_that("parser handles random R code in my git folder", {
     dST <- deparse(ST)
 
     bad <- dR != dST
+    first <- which(bad)[1]
+    rbind(R = dR[first], ST = dST[first])
     rbind(R = dR[bad], ST = dST[bad])
 
     expect_true(all.equal(dR, dST))
