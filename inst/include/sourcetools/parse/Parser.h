@@ -104,6 +104,11 @@ namespace parser {
     }                                                          \
   } while (0)
 
+enum class ParseState
+{
+  TOP_LEVEL, BRACE, PAREN
+};
+
 class Parser
 {
   typedef tokenizer::Tokenizer Tokenizer;
@@ -111,6 +116,8 @@ class Parser
 
   Tokenizer tokenizer_;
   Token token_;
+  Token previous_;
+  ParseState state_;
   std::vector<ParseError> errors_;
 
 #ifdef SOURCE_TOOLS_DEBUG_PARSER_STACK_OVERFLOW
@@ -119,7 +126,7 @@ class Parser
 
 public:
   explicit Parser(const char* code, std::size_t n)
-    : tokenizer_(code, n)
+    : tokenizer_(code, n), state_(ParseState::TOP_LEVEL)
   {
     advance();
 
@@ -309,6 +316,8 @@ private:
     auto pNode = Node::create(current());
 
     CHECK_AND_ADVANCE(LBRACE);
+    ParseState state = state_;
+    state_ = ParseState::BRACE;
     if (current().isType(RBRACE))
     {
       pNode->add(Node::create(EMPTY));
@@ -317,12 +326,13 @@ private:
     {
       while (!current().isType(RBRACE))
       {
-        while (current().isType(SEMI))
-          advance();
         CHECK_UNEXPECTED_END();
         pNode->add(parseExpression());
+        while (current().isType(SEMI))
+          advance();
       }
     }
+    state_ = state;
     CHECK_AND_ADVANCE(RBRACE);
 
     return pNode;
@@ -334,10 +344,13 @@ private:
     using namespace tokens;
     auto pNode = Node::create(current());
     CHECK_AND_ADVANCE(LPAREN);
+    ParseState state = state_;
+    state_ = ParseState::PAREN;
     if (current().isType(RPAREN))
       unexpectedToken(current());
     else
       pNode->add(parseExpression());
+    state_ = state;
     CHECK_AND_ADVANCE(RPAREN);
     return pNode;
   }
@@ -356,7 +369,15 @@ private:
     SOURCE_TOOLS_DEBUG_PARSER_LOG("Type: " << toString(current().type()));
     using namespace tokens;
 
-    auto token = current();
+    while (current().isType(SEMI))
+    {
+      if (state_ == ParseState::PAREN)
+        unexpectedToken(consume());
+      else
+        advance();
+    }
+
+    auto&& token = current();
 
     if (isControlFlowKeyword(token))
       return parseControlFlowKeyword();
@@ -479,22 +500,28 @@ private:
     return pNew;
   }
 
+  bool canParseExpressionContinuation(std::shared_ptr<Node> pNode,
+                                      int precedence)
+  {
+    return precedence < precedence::binary(current()) && (
+      state_ == ParseState::PAREN ||
+      previous().row() == current().row());
+  }
+
   std::shared_ptr<Node> parseExpression(int precedence = 0)
   {
     SOURCE_TOOLS_DEBUG_PARSER_LOG("parseExpression(" << precedence << ")");
     using namespace tokens;
-    auto node = parseExpressionStart();
-    while (precedence < precedence::binary(current()))
-      node = parseExpressionContinuation(node);
-    return node;
+    auto pNode = parseExpressionStart();
+    while (canParseExpressionContinuation(pNode, precedence))
+      pNode = parseExpressionContinuation(pNode);
+    return pNode;
   }
 
   // Tokenization ----
 
-  const Token& current()
-  {
-    return token_;
-  }
+  const Token& current()  const { return token_; }
+  const Token& previous() const { return previous_; }
 
   Token consume()
   {
@@ -505,6 +532,7 @@ private:
 
   bool advance()
   {
+    previous_ = token_;
     using namespace tokens;
 
     bool success = tokenizer_.tokenize(&token_);

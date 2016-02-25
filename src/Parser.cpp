@@ -36,7 +36,7 @@ private:
     case KEYWORD_TRUE:          return Rf_ScalarLogical(1);
     case KEYWORD_Inf:           return Rf_ScalarReal(INFINITY);
     case KEYWORD_NA:            return Rf_ScalarLogical(NA_LOGICAL);
-    case KEYWORD_NA_character_: return NA_STRING;
+    case KEYWORD_NA_character_: return Rf_ScalarString(NA_STRING);
     // case KEYWORD_NA_complex_:   return NA_COM
     case KEYWORD_NA_integer_:   return Rf_ScalarInteger(NA_INTEGER);
     case KEYWORD_NA_real_:      return Rf_ScalarReal(NA_REAL);

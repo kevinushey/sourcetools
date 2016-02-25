@@ -60,6 +60,15 @@ test_that("parser handles missing arguments", {
   check_parse("a[[,1]]")
 })
 
+test_that("parser handles newlines as statement delimiter", {
+  check_parse("a <- b\n+1")
+})
+
+test_that("parser handles semi-colons as statement delimiter", {
+  check_parse("a <- 1; b <- 2; c <- 3")
+  check_parse("{a <- 1;}")
+})
+
 test_that("parser handles random R code in my git folder", {
   skip("TODO")
 
