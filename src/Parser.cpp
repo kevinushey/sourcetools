@@ -62,7 +62,9 @@ private:
         auto&& lhs = node->children()[0];
         auto&& rhs = node->children()[1];
 
-        langSEXP = Rf_lcons(asSEXP(rhs), langSEXP);
+        langSEXP = rhs->token().isType(EMPTY)
+          ? Rf_lcons(R_MissingArg, langSEXP)
+          : Rf_lcons(asSEXP(rhs), langSEXP);
 
         const Token& token = lhs->token();
         SET_TAG(langSEXP, Rf_install(tokens::utils::stringValue(token).c_str()));
@@ -163,8 +165,6 @@ public:
       elSEXP = PROTECT(Rf_lang1(Rf_install("next")));
     else if (isKeyword(token))
       elSEXP = PROTECT(asKeywordSEXP(token));
-    else if (token.isType(EMPTY))
-      elSEXP = PROTECT(R_MissingArg);
     else if (isOperator(token) || isLeftBracket(token))
       elSEXP = PROTECT(Rf_install(token.contents().c_str()));
     else if (isNumeric(token))
@@ -184,7 +184,8 @@ public:
 
     SEXP listSEXP = PROTECT(R_NilValue);
     for (auto it = pNode->children().rbegin(); it != pNode->children().rend(); ++it)
-      listSEXP = Rf_lcons(asSEXP(*it), listSEXP);
+      if (!(*it)->token().isType(EMPTY))
+        listSEXP = Rf_lcons(asSEXP(*it), listSEXP);
     listSEXP = Rf_lcons(elSEXP, listSEXP);
 
     UNPROTECT(2);

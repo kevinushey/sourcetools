@@ -318,6 +318,7 @@ private:
     CHECK_AND_ADVANCE(LBRACE);
     ParseState state = state_;
     state_ = ParseState::BRACE;
+    skipSemicolons();
     if (current().isType(RBRACE))
     {
       pNode->add(Node::create(EMPTY));
@@ -328,8 +329,7 @@ private:
       {
         CHECK_UNEXPECTED_END();
         pNode->add(parseExpression());
-        while (current().isType(SEMI))
-          advance();
+        skipSemicolons();
       }
     }
     state_ = state;
@@ -369,14 +369,7 @@ private:
     SOURCE_TOOLS_DEBUG_PARSER_LOG("Type: " << toString(current().type()));
     using namespace tokens;
 
-    while (current().isType(SEMI))
-    {
-      if (state_ == ParseState::PAREN)
-        unexpectedToken(consume());
-      else
-        advance();
-    }
-
+    skipSemicolons();
     auto&& token = current();
 
     if (isControlFlowKeyword(token))
@@ -554,6 +547,19 @@ private:
       return result;
     }
     return Token(tokens::ERR);
+  }
+
+  // Utils ----
+
+  void skipSemicolons()
+  {
+    while (current().isType(tokens::SEMI))
+    {
+      if (state_ == ParseState::PAREN)
+        unexpectedToken(consume());
+      else
+        advance();
+    }
   }
 
 public:
