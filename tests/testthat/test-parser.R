@@ -112,7 +112,10 @@ test_that("parser handles random R code in my git folder", {
     contents <- read(file)
     cat("Checking parse: '", file, "'\n", sep = "")
     R  <- base::parse(file, keep.source = FALSE)
+
+    gctorture(TRUE)
     ST <- sourcetools:::parse_string(contents)
+    gctorture(FALSE)
 
     dR  <- deparse(R)
     dST <- deparse(ST)
