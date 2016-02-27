@@ -69,6 +69,8 @@ private:
     {
       const Token& token = node->token();
       if (token.isType(EMPTY))
+        break;
+      else if (token.isType(MISSING))
         SETCDR(langSEXP, Rf_lang1(R_MissingArg));
 
       else if (token.isType(tokens::OPERATOR_ASSIGN_LEFT_EQUALS))
@@ -76,7 +78,7 @@ private:
         auto&& lhs = node->children()[0];
         auto&& rhs = node->children()[1];
 
-        if (rhs->token().isType(EMPTY))
+        if (rhs->token().isType(MISSING))
           SETCDR(langSEXP, Rf_lang1(R_MissingArg));
         else
           SETCDR(langSEXP, Rf_lang1(asSEXP(rhs)));
@@ -181,7 +183,9 @@ public:
       return asFunctionDeclSEXP(pNode);
 
     SEXP elSEXP;
-    if (token.isType(OPERATOR_EXPONENTATION_STARS))
+    if (token.isType(MISSING))
+      elSEXP = PROTECT(R_MissingArg);
+    else if (token.isType(OPERATOR_EXPONENTATION_STARS))
       elSEXP = PROTECT(Rf_install("^"));
     else if (token.isType(KEYWORD_BREAK))
       elSEXP = PROTECT(Rf_lang1(Rf_install("break")));

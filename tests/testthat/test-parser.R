@@ -41,7 +41,7 @@ test_that("parser handles numbers of various forms", {
   check_parse(".15")
   check_parse("15.")
   check_parse("1.5")
-  check_parse("1.5L")
+  # check_parse("1.5L") #TODO: R warns and parses as numeric
   check_parse("15L")
   check_parse("10E5")
   check_parse("10E5L")
@@ -77,6 +77,10 @@ test_that("parser handles semi-colons as statement delimiter", {
 test_that("parser handles various escapes in strings", {
   check_parse("'a = \\u{A0}'")
   check_parse("a <- ifelse(a, '\\u{A0}', '\\u{A1}')")
+})
+
+test_that("parser handles missing arguments correclty", {
+  check_parse("a()")
 })
 
 test_that("parser normalizes string names in function calls", {

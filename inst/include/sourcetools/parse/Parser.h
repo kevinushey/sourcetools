@@ -407,7 +407,7 @@ private:
 
     const Token& token = current();
     if (token.isType(COMMA) || token.isType(rhsType))
-      return Node::create(Token(EMPTY));
+      return Node::create(Token(MISSING));
 
     if (peek().isType(OPERATOR_ASSIGN_LEFT_EQUALS))
     {
@@ -416,7 +416,7 @@ private:
       pNode->add(pLhs);
 
       if (current().isType(COMMA) || current().isType(rhsType))
-        pNode->add(Node::create(EMPTY));
+        pNode->add(Node::create(MISSING));
       else
         pNode->add(parseExpression());
 

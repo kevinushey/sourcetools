@@ -14,11 +14,7 @@ check_parse <- function(code) {
     paste("ST: '", deparse(ST), "'", sep = "")
   ))
 
-  testthat::expect_equal(R, ST,
-    base::parse(text = code)[[1]],
-    parse_string(code)[[1]],
-    info = info
-  )
+  testthat::expect_identical(R, ST, info = info)
 
   TRUE
 }
