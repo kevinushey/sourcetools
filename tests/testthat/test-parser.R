@@ -92,14 +92,7 @@ test_that("parser normalizes string names in function calls", {
 
 test_that("parser handles if-else", {
 
-  code <- "
-    if (foo) {
-      bar
-    } else if (baz) {
-    }
-  "
-
-  check_parse(code)
+  check_parse("if (foo) {\nbar\n} else if (baz) {\n}")
 
 })
 
@@ -120,18 +113,18 @@ test_that("parser handles random R code in my git folder", {
     R  <- base::parse(file, keep.source = FALSE)
 
     gctorture(TRUE)
-    ST <- sourcetools:::parse_string(contents)
+    S <- sourcetools:::parse_string(contents)
     gctorture(FALSE)
 
-    dR  <- deparse(R)
-    dST <- deparse(ST)
+    dR <- deparse(R)
+    dS <- deparse(S)
 
-    bad <- dR != dST
+    bad <- dR != dS
     first <- which(bad)[1]
-    rbind(R = dR[first], ST = dST[first])
-    rbind(R = dR[bad], ST = dST[bad])
+    rbind(R = dR[first], S = dS[first])
+    rbind(R = dR[bad], S = dS[bad])
 
-    expect_true(all.equal(dR, dST))
+    expect_identical(R, S)
   }
 
 })
