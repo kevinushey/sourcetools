@@ -49,44 +49,60 @@ private:
   static SEXP asFunctionCallSEXP(std::shared_ptr<parser::Node> pNode)
   {
     using namespace tokens;
-    SEXP langSEXP = PROTECT(R_NilValue);
-    for (auto it = pNode->children().rbegin(); it != pNode->children().rend(); ++it)
+
+    auto&& token = pNode->token();
+
+    // Figure out the 'head' of this language object.
+    // '[' and '[[' get these tokens as-is, while '('
+    // instead uses the name of the first child.
+    SEXP langSEXP;
+    if (token.isType(LBRACKET))
+      langSEXP = Rf_lang1(Rf_install("["));
+    else if (token.isType(LDBRACKET))
+      langSEXP = Rf_lang1(Rf_install("[["));
+    else
+      langSEXP = Rf_lang1(R_NilValue);
+
+    // Start appending the child nodes to our list.
+    SEXP headSEXP = PROTECT(langSEXP);
+    for (auto&& node : pNode->children())
     {
-      auto&& node = *it;
       const Token& token = node->token();
       if (token.isType(EMPTY))
-        langSEXP = Rf_lcons(R_MissingArg, langSEXP);
+        SETCDR(langSEXP, Rf_lang1(R_MissingArg));
 
       else if (token.isType(tokens::OPERATOR_ASSIGN_LEFT_EQUALS))
       {
         auto&& lhs = node->children()[0];
         auto&& rhs = node->children()[1];
 
-        langSEXP = rhs->token().isType(EMPTY)
-          ? Rf_lcons(R_MissingArg, langSEXP)
-          : Rf_lcons(asSEXP(rhs), langSEXP);
+        if (rhs->token().isType(EMPTY))
+          SETCDR(langSEXP, Rf_lang1(R_MissingArg));
+        else
+          SETCDR(langSEXP, Rf_lang1(asSEXP(rhs)));
 
         const Token& token = lhs->token();
-        SET_TAG(langSEXP, Rf_install(tokens::utils::stringValue(token).c_str()));
+        SEXP nameSEXP = Rf_install(tokens::utils::stringValue(token).c_str());
+        SET_TAG(CDR(langSEXP), nameSEXP);
       }
       else
       {
-        langSEXP = Rf_lcons(asSEXP(*it), langSEXP);
+        SETCDR(langSEXP, Rf_lang1(asSEXP(node)));
       }
+
+      langSEXP = CDR(langSEXP);
     }
 
-    if (pNode->token().isType(LBRACKET))
-      langSEXP = Rf_lcons(Rf_install("["), langSEXP);
-    else if (pNode->token().isType(LDBRACKET))
-      langSEXP = Rf_lcons(Rf_install("[["), langSEXP);
-    else if (pNode->token().isType(LPAREN))
-    {
-      if (TYPEOF(CAR(langSEXP)) == STRSXP)
-        SETCAR(langSEXP, Rf_install(CHAR(STRING_ELT(CAR(langSEXP), 0))));
-    }
+    SEXP resultSEXP = CAR(headSEXP) == R_NilValue
+      ? CDR(headSEXP)
+      : headSEXP;
+
+    // Convert strings to symbols at head position
+    if (TYPEOF(CAR(resultSEXP)) == STRSXP)
+      SETCAR(resultSEXP, Rf_install(CHAR(STRING_ELT(CAR(resultSEXP), 0))));
 
     UNPROTECT(1);
-    return langSEXP;
+    return resultSEXP;
   }
 
   static SEXP asFunctionArgumentListSEXP(std::shared_ptr<parser::Node> pNode)
@@ -118,10 +134,11 @@ private:
     if (pNode->children().size() != 2)
       return R_NilValue;
 
-    return Rf_lang3(
-      Rf_install("function"),
-      asFunctionArgumentListSEXP(pNode->children()[0]),
-      asSEXP(pNode->children()[1]));
+    SEXP lhsSEXP = PROTECT(asFunctionArgumentListSEXP(pNode->children()[0]));
+    SEXP rhsSEXP = PROTECT(asSEXP(pNode->children()[1]));
+    SEXP resultSEXP = Rf_lang3(Rf_install("function"), lhsSEXP, rhsSEXP);
+    UNPROTECT(2);
+    return resultSEXP;
   }
 
   static SEXP asNumericSEXP(const tokens::Token& token)
@@ -189,14 +206,14 @@ public:
       return elSEXP;
     }
 
-    SEXP listSEXP = PROTECT(R_NilValue);
-    for (auto it = pNode->children().rbegin(); it != pNode->children().rend(); ++it)
-      if (!(*it)->token().isType(EMPTY))
-        listSEXP = Rf_lcons(asSEXP(*it), listSEXP);
-    listSEXP = Rf_lcons(elSEXP, listSEXP);
+    SEXP headSEXP = PROTECT(Rf_lang1(elSEXP));
+    SEXP listSEXP = headSEXP;
+    for (auto&& child : pNode->children())
+      if (!child->token().isType(EMPTY))
+        listSEXP = SETCDR(listSEXP, Rf_lang1(asSEXP(child)));
 
     UNPROTECT(2);
-    return listSEXP;
+    return headSEXP;
   }
 
   static SEXP asSEXP(const std::vector<std::shared_ptr<parser::Node>>& expression)
