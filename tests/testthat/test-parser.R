@@ -61,6 +61,8 @@ test_that("parser handles missing arguments", {
   check_parse("a[[,1]]")
 
   check_parse("a(x =, b =)")
+  check_parse("quote(expr =)")
+  check_parse("a(x = ,)")
 })
 
 test_that("parser handles newlines as statement delimiter", {

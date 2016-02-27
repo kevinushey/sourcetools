@@ -218,9 +218,9 @@ private:
     return pNode;
   }
 
-  std::shared_ptr<Node> parseFunction()
+  std::shared_ptr<Node> parseFunctionDefinition()
   {
-    SOURCE_TOOLS_DEBUG_PARSER_LOG("parseFunction()");
+    SOURCE_TOOLS_DEBUG_PARSER_LOG("parseFunctionDefinition()");
     using namespace tokens;
     auto pNode = Node::create(current());
     CHECK_AND_ADVANCE(KEYWORD_FUNCTION);
@@ -307,7 +307,7 @@ private:
 
     auto token = current();
     if (token.isType(KEYWORD_FUNCTION))
-      return parseFunction();
+      return parseFunctionDefinition();
     else if (token.isType(KEYWORD_IF))
       return parseIf();
     else if (token.isType(KEYWORD_WHILE))
@@ -450,8 +450,7 @@ private:
     CHECK_AND_ADVANCE(lhsType);
 
     ParseState state = state_;
-    if (lhsType == LPAREN)
-      state_ = ParseState::PAREN;
+    state_ = ParseState::PAREN;
 
     if (current().isType(rhsType))
       pNode->add(Node::create(Token(EMPTY)));
@@ -481,8 +480,7 @@ private:
 
     CHECK_AND_ADVANCE(rhsType);
 
-    if (lhsType == LPAREN)
-      state_ = state;
+    state_ = state;
 
     if (isCallOperator(current()) && canParseExpressionContinuation())
       return parseFunctionCall(pNode);

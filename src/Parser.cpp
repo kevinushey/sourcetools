@@ -138,7 +138,10 @@ private:
 
     SEXP lhsSEXP = PROTECT(asFunctionArgumentListSEXP(pNode->children()[0]));
     SEXP rhsSEXP = PROTECT(asSEXP(pNode->children()[1]));
-    SEXP resultSEXP = Rf_lang3(Rf_install("function"), lhsSEXP, rhsSEXP);
+    SEXP resultSEXP = Rf_lang4(Rf_install("function"),
+                               lhsSEXP,
+                               rhsSEXP,
+                               R_NilValue);
     UNPROTECT(2);
     return resultSEXP;
   }
