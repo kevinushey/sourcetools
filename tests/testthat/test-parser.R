@@ -2,97 +2,105 @@ context("Parser")
 
 test_that("agreement on parse of expressions", {
 
-  check_parse("foo ? bar = baz")
-  check_parse("foo ? bar <- baz")
+  expect_parse("foo ? bar = baz")
+  expect_parse("foo ? bar <- baz")
 
 })
 
 test_that("parser handles simple control flow", {
 
-  check_parse("if (foo) bar + baz")
-  check_parse("while (1) 1 + 2")
-  check_parse("repeat 1 + 2")
-  check_parse("if (foo) bar else baz")
-  check_parse("if (foo) bar else if (baz) bat")
-  check_parse("for (i in 1:10) 1 + 10")
+  expect_parse("if (foo) bar + baz")
+  expect_parse("while (1) 1 + 2")
+  expect_parse("repeat 1 + 2")
+  expect_parse("if (foo) bar else baz")
+  expect_parse("if (foo) bar else if (baz) bat")
+  expect_parse("for (i in 1:10) 1 + 10")
 
 })
 
 test_that("parser handles compound expressions", {
 
-  check_parse("if (foo) while (bar) 1")
-  check_parse("if (foo) (1 + 2)")
-  check_parse("{1; 2; 3}")
-  check_parse("{1 + 2\n3 + 4\n5 + 6}")
+  expect_parse("if (foo) while (bar) 1")
+  expect_parse("if (foo) (1 + 2)")
+  expect_parse("{1; 2; 3}")
+  expect_parse("{1 + 2\n3 + 4\n5 + 6}")
 
 })
 
 test_that("parser handles function calls", {
-  check_parse("foo <- bar(baz)[[1]]$bat")
-  check_parse("foo <- bar() + bam() * bat()")
+  expect_parse("foo <- bar(baz)[[1]]$bat")
+  expect_parse("foo <- bar() + bam() * bat()")
 })
 
 test_that("parser handles precedence", {
-  check_parse("a$b[[1]]$c")
-  check_parse("object <- unclass(object)[i]")
+  expect_parse("a$b[[1]]$c")
+  expect_parse("object <- unclass(object)[i]")
 })
 
 test_that("parser handles numbers of various forms", {
-  check_parse(".15")
-  check_parse("15.")
-  check_parse("1.5")
-  # check_parse("1.5L") #TODO: R warns and parses as numeric
-  check_parse("15L")
-  check_parse("10E5")
-  check_parse("10E5L")
+  expect_parse(".15")
+  expect_parse("15.")
+  expect_parse("1.5")
+  # expect_parse("1.5L") #TODO: R warns and parses as numeric
+  expect_parse("15L")
+  expect_parse("10E5")
+  expect_parse("10E5L")
+})
+
+test_that("parser handles function calls with no args", {
+  # Did you know?
+  #
+  # > length(base::parse(text = "a[]")[[1]])   # [1] 3
+  # > length(base::parse(text = "a[[]]")[[1]]) # [1] 3
+  #
+  # R inserts an empty 'R_MissingArg' argument into the third spot.
+  expect_parse("a()")
+  expect_parse("a[]")
+  expect_parse("a[[]]")
 })
 
 test_that("parser handles missing arguments", {
-  check_parse("a(,)")
-  check_parse("a[,]")
-  check_parse("a[[,]]")
+  expect_parse("a(,)")
+  expect_parse("a[,]")
+  expect_parse("a[[,]]")
 
-  check_parse("a(1,)")
-  check_parse("a[1,]")
-  check_parse("a[[1,]]")
+  expect_parse("a(1,)")
+  expect_parse("a[1,]")
+  expect_parse("a[[1,]]")
 
-  check_parse("a(,1)")
-  check_parse("a[,1]")
-  check_parse("a[[,1]]")
+  expect_parse("a(,1)")
+  expect_parse("a[,1]")
+  expect_parse("a[[,1]]")
 
-  check_parse("a(x =, b =)")
-  check_parse("quote(expr =)")
-  check_parse("a(x = ,)")
+  expect_parse("a(x =, b =)")
+  expect_parse("quote(expr =)")
+  expect_parse("a(x = ,)")
 })
 
 test_that("parser handles newlines as statement delimiter", {
-  check_parse("a <- b\n+1")
-  check_parse("a <- 1\n(b)")
-  check_parse("a <- foo(1)\n(b)")
+  expect_parse("a <- b\n+1")
+  expect_parse("a <- 1\n(b)")
+  expect_parse("a <- foo(1)\n(b)")
 })
 
 test_that("parser handles semi-colons as statement delimiter", {
-  check_parse("a <- 1; b <- 2; c <- 3")
-  check_parse("{a <- 1;}")
+  expect_parse("a <- 1; b <- 2; c <- 3")
+  expect_parse("{a <- 1;}")
 })
 
 test_that("parser handles various escapes in strings", {
-  check_parse("'a = \\u{A0}'")
-  check_parse("a <- ifelse(a, '\\u{A0}', '\\u{A1}')")
-})
-
-test_that("parser handles missing arguments correclty", {
-  check_parse("a()")
+  expect_parse("'a = \\u{A0}'")
+  expect_parse("a <- ifelse(a, '\\u{A0}', '\\u{A1}')")
 })
 
 test_that("parser normalizes string names in function calls", {
-  check_parse('"["(unclass(object), i)')
-  check_parse('"lol"(1, 2)')
+  expect_parse('"["(unclass(object), i)')
+  expect_parse('"lol"(1, 2)')
 })
 
 test_that("parser handles if-else", {
 
-  check_parse("if (foo) {\nbar\n} else if (baz) {\n}")
+  expect_parse("if (foo) {\nbar\n} else if (baz) {\n}")
 
 })
 
@@ -111,11 +119,9 @@ test_that("parser handles random R code in my git folder", {
     contents <- read(file)
     cat("Checking parse: '", file, "'\n", sep = "")
     R  <- base::parse(file, keep.source = FALSE)
-
-    gctorture(TRUE)
     S <- sourcetools:::parse_string(contents)
-    gctorture(FALSE)
 
+    # The following is just for easier debugging
     dR <- deparse(R)
     dS <- deparse(S)
 
@@ -124,6 +130,7 @@ test_that("parser handles random R code in my git folder", {
     rbind(R = dR[first], S = dS[first])
     rbind(R = dR[bad], S = dS[bad])
 
+    # The actual test
     expect_identical(R, S)
   }
 

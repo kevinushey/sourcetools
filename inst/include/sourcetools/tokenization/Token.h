@@ -406,6 +406,7 @@ inline std::string toString(tokens::TokenType type)
        if (type == ERR)        return "err";
   else if (type == END)        return "end";
   else if (type == EMPTY)      return "empty";
+  else if (type == MISSING)    return "missing";
   else if (type == SEMI)       return "semi";
   else if (type == COMMA)      return "comma";
   else if (type == SYMBOL)     return "symbol";
@@ -431,6 +432,8 @@ inline std::string toString(const tokens::Token& token)
     contents = "<END>";
   else if (token.isType(tokens::EMPTY))
     contents = "<empty>";
+  else if (token.isType(tokens::MISSING))
+    contents = "<missing>";
   else
     contents = token.contents();
 

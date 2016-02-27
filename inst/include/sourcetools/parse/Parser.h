@@ -453,7 +453,9 @@ private:
     state_ = ParseState::PAREN;
 
     if (current().isType(rhsType))
-      pNode->add(Node::create(Token(EMPTY)));
+      pNode->add(lhsType == LPAREN ?
+                   Node::create(Token(EMPTY)) :
+                   Node::create(Token(MISSING)));
     else
     {
       while (true)
