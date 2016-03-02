@@ -11,8 +11,6 @@
 #include <sourcetools/cursor/cursor.h>
 #include <sourcetools/r/r.h>
 #include <sourcetools/read/read.h>
-#include <sourcetools/parse/parse.h>
 #include <sourcetools/tokenization/tokenization.h>
-#include <sourcetools/validation/validation.h>
 
 #endif

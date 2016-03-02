@@ -1,6 +1,0 @@
-#ifndef SOURCE_TOOLS_VALIDATION_VALIDATION_H
-#define SOURCE_TOOLS_VALIDATION_VALIDATION_H
-
-#include <sourcetools/validation/SyntaxValidator.h>
-
-#endif /* SOURCE_TOOLS_VALIDATION_VALIDATION_H */

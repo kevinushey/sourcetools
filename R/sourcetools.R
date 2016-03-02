@@ -49,31 +49,7 @@ tokenize_string <- function(string) {
   .Call("sourcetools_tokenize_string", as.character(string), PACKAGE = "sourcetools")
 }
 
-#' Find Syntax Errors
-#'
-#' Find syntax errors in a string of \R code.
-#'
-#' @param string A character vector (of length one).
-#' @export
-validate_syntax <- function(string) {
-  .Call("sourcetools_validate_syntax", as.character(string), PACKAGE = "sourcetools")
-}
-
 #' @export
 print.RTokens <- function(x, ...) {
   print.data.frame(x, ...)
-}
-
-parse <- function(file = "", text = NULL) {
-  if (is.null(text))
-    text <- read(file)
-  parse_string(text)
-}
-
-parse_string <- function(string) {
-  .Call("sourcetools_parse_string", string, PACKAGE = "sourcetools")
-}
-
-parse_file <- function(file) {
-  parse_string(read(file))
 }
