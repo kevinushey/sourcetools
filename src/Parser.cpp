@@ -6,7 +6,7 @@
 
 namespace sourcetools {
 
-void log(std::shared_ptr<parser::Node> pNode, int depth)
+void log(parser::Node* pNode, int depth)
 {
   if (!pNode)
     return;
@@ -54,7 +54,7 @@ private:
     }
   }
 
-  static SEXP asFunctionCallSEXP(std::shared_ptr<parser::Node> pNode)
+  static SEXP asFunctionCallSEXP(const Node* pNode)
   {
     using namespace tokens;
 
@@ -77,7 +77,7 @@ private:
          it != pNode->children().end();
          ++it)
     {
-      const std::shared_ptr<Node>& node = *it;
+      const Node* node = *it;
       const Token& token = node->token();
       if (token.isType(EMPTY))
         break;
@@ -86,8 +86,8 @@ private:
 
       else if (token.isType(tokens::OPERATOR_ASSIGN_LEFT_EQUALS))
       {
-        const std::shared_ptr<Node>& lhs = node->children()[0];
-        const std::shared_ptr<Node>& rhs = node->children()[1];
+        const Node* lhs = node->children()[0];
+        const Node* rhs = node->children()[1];
 
         if (rhs->token().isType(MISSING))
           SETCDR(langSEXP, Rf_lang1(R_MissingArg));
@@ -118,7 +118,7 @@ private:
     return resultSEXP;
   }
 
-  static SEXP asFunctionArgumentListSEXP(std::shared_ptr<parser::Node> pNode)
+  static SEXP asFunctionArgumentListSEXP(const Node* pNode)
   {
     std::size_t n = pNode->children().size();
     if (n == 0)
@@ -130,7 +130,7 @@ private:
          it != pNode->children().end();
          ++it)
     {
-      const std::shared_ptr<Node>& child = *it;
+      const Node* child = *it;
       const tokens::Token& token = child->token();
       if (token.isType(tokens::SYMBOL))
         SET_TAG(headSEXP, Rf_install(tokens::stringValue(token).c_str()));
@@ -145,7 +145,7 @@ private:
     return listSEXP;
   }
 
-  static SEXP asFunctionDeclSEXP(std::shared_ptr<parser::Node> pNode)
+  static SEXP asFunctionDeclSEXP(const Node* pNode)
   {
     if (pNode->children().size() != 2)
       return R_NilValue;
@@ -168,7 +168,7 @@ private:
       return Rf_ScalarReal(::atof(token.begin()));
   }
 
-  static bool isFunctionCall(std::shared_ptr<parser::Node> pNode)
+  static bool isFunctionCall(const Node* pNode)
   {
     const tokens::Token& token = pNode->token();
     if (token.isType(tokens::LBRACKET) || token.isType(tokens::LDBRACKET))
@@ -179,12 +179,12 @@ private:
 
     // Differentiate between '(a, b)' and 'a(b)' by looking at
     // the token positions. Not great, I know...
-    const std::shared_ptr<Node>& child = pNode->children()[0];
+    const Node* child = pNode->children()[0];
     return child->token().begin() < token.begin();
   }
 
 public:
-  static SEXP asSEXP(std::shared_ptr<parser::Node> pNode)
+  static SEXP asSEXP(const Node* pNode)
   {
     using namespace tokens;
 
@@ -233,7 +233,7 @@ public:
          it != pNode->children().end();
          ++it)
     {
-      const std::shared_ptr<Node>& child = *it;
+      const Node* child = *it;
       if (!child->token().isType(EMPTY))
         listSEXP = SETCDR(listSEXP, Rf_lang1(asSEXP(child)));
     }
@@ -242,7 +242,7 @@ public:
     return headSEXP;
   }
 
-  static SEXP asSEXP(const std::vector<std::shared_ptr<parser::Node> >& expression)
+  static SEXP asSEXP(const std::vector<parser::Node*>& expression)
   {
     std::size_t n = expression.size();
     SEXP exprSEXP = PROTECT(Rf_allocVector(EXPRSXP, n));
@@ -260,10 +260,14 @@ public:
 
 extern "C" SEXP sourcetools_parse_string(SEXP programSEXP)
 {
+  typedef sourcetools::parser::Node Node;
   SEXP charSEXP = STRING_ELT(programSEXP, 0);
   sourcetools::parser::Parser parser(CHAR(charSEXP), Rf_length(charSEXP));
-  std::vector< std::shared_ptr<sourcetools::parser::Node> > root = parser.parse();
+  std::vector<Node*> root = parser.parse();
   // for (auto&& child : root)
   //   sourcetools::log(child);
-  return sourcetools::SEXPConverter::asSEXP(root);
+  SEXP resultSEXP = sourcetools::SEXPConverter::asSEXP(root);
+  for (std::size_t i = 0; i < root.size(); ++i)
+    delete root[i];
+  return resultSEXP;
 }

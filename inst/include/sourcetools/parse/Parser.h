@@ -174,12 +174,12 @@ private:
 
   // Parser sub-routines ----
 
-  std::shared_ptr<Node> parseFunctionArgumentListOne()
+  Node* parseFunctionArgumentListOne()
   {
     SOURCE_TOOLS_DEBUG_PARSER_LOG("parseFunctionArgument()");
     using namespace tokens;
 
-    std::shared_ptr<Node> pNode = Node::create(current());
+    Node* pNode = Node::create(current());
     CHECK_AND_ADVANCE(SYMBOL);
     if (current().isType(OPERATOR_ASSIGN_LEFT_EQUALS))
     {
@@ -190,12 +190,12 @@ private:
     return pNode;
   }
 
-  std::shared_ptr<Node> parseFunctionArgumentList()
+  Node* parseFunctionArgumentList()
   {
     SOURCE_TOOLS_DEBUG_PARSER_LOG("parseFunctionArgumentList()");
     using namespace tokens;
 
-    std::shared_ptr<Node> pNode = Node::create(EMPTY);
+    Node* pNode = Node::create(EMPTY);
     if (token_.isType(RPAREN))
       return pNode;
 
@@ -220,11 +220,11 @@ private:
     return pNode;
   }
 
-  std::shared_ptr<Node> parseFunctionDefinition()
+  Node* parseFunctionDefinition()
   {
     SOURCE_TOOLS_DEBUG_PARSER_LOG("parseFunctionDefinition()");
     using namespace tokens;
-    std::shared_ptr<Node> pNode = Node::create(current());
+    Node* pNode = Node::create(current());
     CHECK_AND_ADVANCE(KEYWORD_FUNCTION);
     CHECK_AND_ADVANCE(LPAREN);
     ParseState state = state_;
@@ -236,11 +236,11 @@ private:
     return pNode;
   }
 
-  std::shared_ptr<Node> parseFor()
+  Node* parseFor()
   {
     SOURCE_TOOLS_DEBUG_PARSER_LOG("parseFor()");
     using namespace tokens;
-    std::shared_ptr<Node> pNode = Node::create(current());
+    Node* pNode = Node::create(current());
     CHECK_AND_ADVANCE(KEYWORD_FOR);
     CHECK_AND_ADVANCE(LPAREN);
     ParseState state = state_;
@@ -255,11 +255,11 @@ private:
     return pNode;
   }
 
-  std::shared_ptr<Node> parseIf()
+  Node* parseIf()
   {
     SOURCE_TOOLS_DEBUG_PARSER_LOG("parseIf()");
     using namespace tokens;
-    std::shared_ptr<Node> pNode = Node::create(current());
+    Node* pNode = Node::create(current());
     CHECK_AND_ADVANCE(KEYWORD_IF);
     CHECK_AND_ADVANCE(LPAREN);
     ParseState state = state_;
@@ -276,11 +276,11 @@ private:
     return pNode;
   }
 
-  std::shared_ptr<Node> parseWhile()
+  Node* parseWhile()
   {
     SOURCE_TOOLS_DEBUG_PARSER_LOG("parseWhile()");
     using namespace tokens;
-    std::shared_ptr<Node> pNode = Node::create(current());
+    Node* pNode = Node::create(current());
     CHECK_AND_ADVANCE(KEYWORD_WHILE);
     CHECK_AND_ADVANCE(LPAREN);
     ParseState state = state_;
@@ -292,17 +292,17 @@ private:
     return pNode;
   }
 
-  std::shared_ptr<Node> parseRepeat()
+  Node* parseRepeat()
   {
     SOURCE_TOOLS_DEBUG_PARSER_LOG("parseRepeat()");
     using namespace tokens;
-    std::shared_ptr<Node> pNode = Node::create(current());
+    Node* pNode = Node::create(current());
     CHECK_AND_ADVANCE(KEYWORD_REPEAT);
     pNode->add(parseExpression());
     return pNode;
   }
 
-  std::shared_ptr<Node> parseControlFlowKeyword()
+  Node* parseControlFlowKeyword()
   {
     SOURCE_TOOLS_DEBUG_PARSER_LOG("parseControlFlowKeyword('" << token_.contents() << "')");
     using namespace tokens;
@@ -323,11 +323,11 @@ private:
     return Node::create(ERR);
   }
 
-  std::shared_ptr<Node> parseBracedExpression()
+  Node* parseBracedExpression()
   {
     SOURCE_TOOLS_DEBUG_PARSER_LOG("parseBracedExpression()");
     using namespace tokens;
-    std::shared_ptr<Node> pNode = Node::create(current());
+    Node* pNode = Node::create(current());
 
     CHECK_AND_ADVANCE(LBRACE);
     ParseState state = state_;
@@ -352,11 +352,11 @@ private:
     return pNode;
   }
 
-  std::shared_ptr<Node> parseParentheticalExpression()
+  Node* parseParentheticalExpression()
   {
     SOURCE_TOOLS_DEBUG_PARSER_LOG("parseParentheticalExpression()");
     using namespace tokens;
-    std::shared_ptr<Node> pNode = Node::create(current());
+    Node* pNode = Node::create(current());
     CHECK_AND_ADVANCE(LPAREN);
     ParseState state = state_;
     state_ = PARSE_STATE_PAREN;
@@ -369,15 +369,15 @@ private:
     return pNode;
   }
 
-  std::shared_ptr<Node> parseUnaryOperator()
+  Node* parseUnaryOperator()
   {
     SOURCE_TOOLS_DEBUG_PARSER_LOG("parseUnaryOperator()");
-    std::shared_ptr<Node> pNode = Node::create(current());
+    Node* pNode = Node::create(current());
     pNode->add(parseExpression(precedence::unary(consume())));
     return pNode;
   }
 
-  std::shared_ptr<Node> parseExpressionStart()
+  Node* parseExpressionStart()
   {
     SOURCE_TOOLS_DEBUG_PARSER_LOG("parseExpressionStart('" << current().contents() << "')");
     SOURCE_TOOLS_DEBUG_PARSER_LOG("Type: " << toString(current().type()));
@@ -403,7 +403,7 @@ private:
     return Node::create(ERR);
   }
 
-  std::shared_ptr<Node> parseFunctionCallOne(tokens::TokenType rhsType)
+  Node* parseFunctionCallOne(tokens::TokenType rhsType)
   {
     using namespace tokens;
 
@@ -413,8 +413,8 @@ private:
 
     if (peek().isType(OPERATOR_ASSIGN_LEFT_EQUALS))
     {
-      std::shared_ptr<Node> pLhs  = Node::create(consume());
-      std::shared_ptr<Node> pNode = Node::create(consume());
+      Node* pLhs  = Node::create(consume());
+      Node* pNode = Node::create(consume());
       pNode->add(pLhs);
 
       if (current().isType(COMMA) || current().isType(rhsType))
@@ -439,14 +439,14 @@ private:
   // Parsing a function call is surprisingly tricky, due to the
   // nature of allowing a mixture of unnamed, named, and missing
   // arguments.
-  std::shared_ptr<Node> parseFunctionCall(std::shared_ptr<Node> pLhs)
+  Node* parseFunctionCall(Node* pLhs)
   {
     SOURCE_TOOLS_DEBUG_PARSER_LOG("parseFunctionCall('" << current().contents() << "')");
     using namespace tokens;
     TokenType lhsType = current().type();
     TokenType rhsType = complement(lhsType);
 
-    std::shared_ptr<Node> pNode = Node::create(current());
+    Node* pNode = Node::create(current());
     pNode->add(pLhs);
 
     CHECK_AND_ADVANCE(lhsType);
@@ -491,7 +491,7 @@ private:
     return pNode;
   }
 
-  std::shared_ptr<Node> parseExpressionContinuation(std::shared_ptr<Node> pNode)
+  Node* parseExpressionContinuation(Node* pNode)
   {
     using namespace tokens;
     SOURCE_TOOLS_DEBUG_PARSER_LOG("parseExpressionContinuation('" << current().contents() << "')");
@@ -503,7 +503,7 @@ private:
     else if (token.isType(END))
       return nullptr;
 
-    std::shared_ptr<Node> pNew = Node::create(token);
+    Node* pNew = Node::create(token);
     pNew->add(pNode);
 
     advance();
@@ -522,11 +522,11 @@ private:
       previous().row() == current().row());
   }
 
-  std::shared_ptr<Node> parseExpression(int precedence = 0)
+  Node* parseExpression(int precedence = 0)
   {
     SOURCE_TOOLS_DEBUG_PARSER_LOG("parseExpression(" << precedence << ")");
     using namespace tokens;
-    std::shared_ptr<Node> pNode = parseExpressionStart();
+    Node* pNode = parseExpressionStart();
     while (canParseExpressionContinuation(precedence))
       pNode = parseExpressionContinuation(pNode);
     return pNode;
@@ -586,13 +586,13 @@ private:
 
 public:
 
-  std::vector<std::shared_ptr<Node> > parse()
+  std::vector<Node* > parse()
   {
-    std::vector<std::shared_ptr<Node> > expression;
+    std::vector<Node* > expression;
 
     while (true)
     {
-      std::shared_ptr<Node> pNode = parseExpression();
+      Node* pNode = parseExpression();
       if (!pNode)
         break;
 
@@ -606,7 +606,7 @@ public:
 
 } // namespace parser
 
-void log(std::shared_ptr<parser::Node> pNode, int depth = 0);
+void log(parser::Node* pNode, int depth = 0);
 
 } // namespace sourcetools
 

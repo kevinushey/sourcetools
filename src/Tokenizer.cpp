@@ -75,6 +75,8 @@ SEXP asSEXP(const std::vector<tokens::Token>& tokens)
 
 extern "C" SEXP sourcetools_tokenize_file(SEXP absolutePathSEXP)
 {
+  typedef sourcetools::tokens::Token Token;
+
   const char* absolutePath = CHAR(STRING_ELT(absolutePathSEXP, 0));
   std::string contents;
   if (!sourcetools::read(absolutePath, &contents))
@@ -83,13 +85,15 @@ extern "C" SEXP sourcetools_tokenize_file(SEXP absolutePathSEXP)
     return R_NilValue;
   }
 
-  const auto& tokens = sourcetools::tokenize(contents);
+  const std::vector<Token>& tokens = sourcetools::tokenize(contents);
   return sourcetools::asSEXP(tokens);
 }
 
 extern "C" SEXP sourcetools_tokenize_string(SEXP stringSEXP)
 {
+  typedef sourcetools::tokens::Token Token;
   SEXP charSEXP = STRING_ELT(stringSEXP, 0);
-  const auto& tokens = sourcetools::tokenize(CHAR(charSEXP), Rf_length(charSEXP));
+  const std::vector<Token>& tokens =
+    sourcetools::tokenize(CHAR(charSEXP), Rf_length(charSEXP));
   return sourcetools::asSEXP(tokens);
 }
