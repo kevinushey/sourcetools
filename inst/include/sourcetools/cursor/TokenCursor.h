@@ -9,6 +9,20 @@
 namespace sourcetools {
 namespace cursors {
 
+namespace detail {
+
+class PositionComparator
+{
+public:
+  inline bool operator()(const tokens::Token& lhs,
+                         const tokens::Token& rhs)
+  {
+    return lhs.position() < rhs.position();
+  }
+};
+
+} // namespace detail
+
 class TokenCursor {
 
 private:
@@ -155,7 +169,7 @@ public:
 
   bool moveToPosition(std::size_t row, std::size_t column)
   {
-    return moveToPosition({row, column});
+    return moveToPosition(Position(row, column));
   }
 
   bool moveToPosition(const Position& position)
@@ -164,18 +178,14 @@ public:
       tokens_.begin(),
       tokens_.end(),
       Token(position),
-      [](const Token& lhs, const Token& rhs)
-      {
-        return lhs.position() < rhs.position();
-      }
-    );
+      detail::PositionComparator());
   }
 
   template <typename F>
-  bool findFwd(F&& f)
+  bool findFwd(F f)
   {
     do {
-      if (std::forward<F>(f)(*this))
+      if (f(*this))
         return true;
     } while (moveToNextToken());
 
@@ -183,10 +193,10 @@ public:
   }
 
   template <typename F>
-  bool findBwd(F&& f)
+  bool findBwd(F f)
   {
     do {
-      if (std::forward<F>(f)(*this))
+      if (f(*this))
         return true;
     } while (moveToPreviousToken());
 

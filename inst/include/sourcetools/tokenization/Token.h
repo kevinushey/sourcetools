@@ -80,8 +80,6 @@ private:
   }
 };
 
-inline namespace utils {
-
 inline bool isBracket(const Token& token)
 {
   return SOURCE_TOOLS_CHECK_MASK(token.type(), SOURCE_TOOLS_BRACKET_MASK);
@@ -316,7 +314,8 @@ inline bool parseUnicode(const char*& it, char*& output)
     ++clone;
   }
 
-  std::mbstate_t state {};
+  std::mbstate_t state;
+  ::memset(&state, 0, sizeof(state));
   int bytes = ::wcrtomb(output, value, &state);
   if (bytes == -1)
     return false;
@@ -396,7 +395,6 @@ inline std::string stringValue(const Token& token)
   }
 }
 
-} // namespace utils
 } // namespace tokens
 
 inline std::string toString(tokens::TokenType type)
@@ -454,8 +452,13 @@ inline std::ostream& operator<<(std::ostream& os, const tokens::Token& token)
 
 inline std::ostream& operator<<(std::ostream& os, const std::vector<tokens::Token>& tokens)
 {
-  for (auto& token : tokens)
-    os << token << std::endl;
+  for (std::vector<tokens::Token>::const_iterator it = tokens.begin();
+       it != tokens.end();
+       ++it)
+  {
+    os << *it << std::endl;
+  }
+
   return os;
 }
 

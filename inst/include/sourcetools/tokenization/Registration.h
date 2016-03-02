@@ -6,8 +6,6 @@ namespace tokens {
 
 typedef uint32_t TokenType;
 
-inline namespace types {
-
 // Simple, non-nestable types.
 #define SOURCE_TOOLS_REGISTER_SIMPLE_TYPE(__NAME__, __TYPE__)         \
   static const TokenType __NAME__ = __TYPE__
@@ -180,8 +178,6 @@ inline TokenType symbolType(const std::string& symbol)
 {
   return symbolType(symbol.data(), symbol.size());
 }
-
-} // end namespace types
 
 } // namespace tokens
 } // namespace sourcetools

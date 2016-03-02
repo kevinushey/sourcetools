@@ -62,14 +62,14 @@ private:
 
   void updateBracketStack(const Token& token, std::vector<TokenType>* pStack)
   {
-    using namespace tokens::utils;
+    using namespace tokens;
 
     // Update brace state
     if (isLeftBracket(token)) {
       pStack->push_back(token.type());
     } else if (isRightBracket(token)) {
       std::size_t size = pStack->size();
-      auto last = pStack->at(size - 1);
+      TokenType last = pStack->at(size - 1);
       if (size == 1) {
         unexpectedToken(token);
       } else {
@@ -112,7 +112,7 @@ private:
   void executeValidators(const tokens::Token& prevToken,
                          const tokens::Token& thisToken)
   {
-    using namespace tokens::utils;
+    using namespace tokens;
 
     if (isOperator(prevToken)) {
 

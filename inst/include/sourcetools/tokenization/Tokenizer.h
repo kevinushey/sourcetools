@@ -440,7 +440,7 @@ public:
 
 private:
   TextCursor cursor_;
-  std::stack<TokenType, std::vector<TokenType>> tokenStack_;
+  std::stack<TokenType, std::vector<TokenType> > tokenStack_;
 };
 
 } // namespace tokenizer

@@ -104,15 +104,17 @@ namespace parser {
     }                                                          \
   } while (0)
 
-enum class ParseState
-{
-  TOP_LEVEL, BRACE, PAREN
-};
-
 class Parser
 {
   typedef tokenizer::Tokenizer Tokenizer;
   typedef tokens::Token Token;
+
+  enum ParseState
+  {
+    PARSE_STATE_TOP_LEVEL,
+    PARSE_STATE_BRACE,
+    PARSE_STATE_PAREN
+  };
 
   Tokenizer tokenizer_;
   Token token_;
@@ -126,7 +128,7 @@ class Parser
 
 public:
   explicit Parser(const char* code, std::size_t n)
-    : tokenizer_(code, n), state_(ParseState::TOP_LEVEL)
+    : tokenizer_(code, n), state_(PARSE_STATE_TOP_LEVEL)
   {
     advance();
 
@@ -177,7 +179,7 @@ private:
     SOURCE_TOOLS_DEBUG_PARSER_LOG("parseFunctionArgument()");
     using namespace tokens;
 
-    auto pNode = Node::create(current());
+    std::shared_ptr<Node> pNode = Node::create(current());
     CHECK_AND_ADVANCE(SYMBOL);
     if (current().isType(OPERATOR_ASSIGN_LEFT_EQUALS))
     {
@@ -193,7 +195,7 @@ private:
     SOURCE_TOOLS_DEBUG_PARSER_LOG("parseFunctionArgumentList()");
     using namespace tokens;
 
-    auto pNode = Node::create(EMPTY);
+    std::shared_ptr<Node> pNode = Node::create(EMPTY);
     if (token_.isType(RPAREN))
       return pNode;
 
@@ -222,11 +224,11 @@ private:
   {
     SOURCE_TOOLS_DEBUG_PARSER_LOG("parseFunctionDefinition()");
     using namespace tokens;
-    auto pNode = Node::create(current());
+    std::shared_ptr<Node> pNode = Node::create(current());
     CHECK_AND_ADVANCE(KEYWORD_FUNCTION);
     CHECK_AND_ADVANCE(LPAREN);
     ParseState state = state_;
-    state_ = ParseState::PAREN;
+    state_ = PARSE_STATE_PAREN;
     pNode->add(parseFunctionArgumentList());
     state_ = state;
     CHECK_AND_ADVANCE(RPAREN);
@@ -238,11 +240,11 @@ private:
   {
     SOURCE_TOOLS_DEBUG_PARSER_LOG("parseFor()");
     using namespace tokens;
-    auto pNode = Node::create(current());
+    std::shared_ptr<Node> pNode = Node::create(current());
     CHECK_AND_ADVANCE(KEYWORD_FOR);
     CHECK_AND_ADVANCE(LPAREN);
     ParseState state = state_;
-    state_ = ParseState::PAREN;
+    state_ = PARSE_STATE_PAREN;
     CHECK(SYMBOL);
     pNode->add(Node::create(consume()));
     CHECK_AND_ADVANCE(KEYWORD_IN);
@@ -257,11 +259,11 @@ private:
   {
     SOURCE_TOOLS_DEBUG_PARSER_LOG("parseIf()");
     using namespace tokens;
-    auto pNode = Node::create(current());
+    std::shared_ptr<Node> pNode = Node::create(current());
     CHECK_AND_ADVANCE(KEYWORD_IF);
     CHECK_AND_ADVANCE(LPAREN);
     ParseState state = state_;
-    state_ = ParseState::PAREN;
+    state_ = PARSE_STATE_PAREN;
     pNode->add(parseExpression());
     state_ = state;
     CHECK_AND_ADVANCE(RPAREN);
@@ -278,11 +280,11 @@ private:
   {
     SOURCE_TOOLS_DEBUG_PARSER_LOG("parseWhile()");
     using namespace tokens;
-    auto pNode = Node::create(current());
+    std::shared_ptr<Node> pNode = Node::create(current());
     CHECK_AND_ADVANCE(KEYWORD_WHILE);
     CHECK_AND_ADVANCE(LPAREN);
     ParseState state = state_;
-    state_ = ParseState::PAREN;
+    state_ = PARSE_STATE_PAREN;
     pNode->add(parseExpression());
     state_ = state;
     CHECK_AND_ADVANCE(RPAREN);
@@ -294,7 +296,7 @@ private:
   {
     SOURCE_TOOLS_DEBUG_PARSER_LOG("parseRepeat()");
     using namespace tokens;
-    auto pNode = Node::create(current());
+    std::shared_ptr<Node> pNode = Node::create(current());
     CHECK_AND_ADVANCE(KEYWORD_REPEAT);
     pNode->add(parseExpression());
     return pNode;
@@ -305,7 +307,7 @@ private:
     SOURCE_TOOLS_DEBUG_PARSER_LOG("parseControlFlowKeyword('" << token_.contents() << "')");
     using namespace tokens;
 
-    auto token = current();
+    const Token& token = current();
     if (token.isType(KEYWORD_FUNCTION))
       return parseFunctionDefinition();
     else if (token.isType(KEYWORD_IF))
@@ -325,11 +327,11 @@ private:
   {
     SOURCE_TOOLS_DEBUG_PARSER_LOG("parseBracedExpression()");
     using namespace tokens;
-    auto pNode = Node::create(current());
+    std::shared_ptr<Node> pNode = Node::create(current());
 
     CHECK_AND_ADVANCE(LBRACE);
     ParseState state = state_;
-    state_ = ParseState::BRACE;
+    state_ = PARSE_STATE_BRACE;
     skipSemicolons();
     if (current().isType(RBRACE))
     {
@@ -354,10 +356,10 @@ private:
   {
     SOURCE_TOOLS_DEBUG_PARSER_LOG("parseParentheticalExpression()");
     using namespace tokens;
-    auto pNode = Node::create(current());
+    std::shared_ptr<Node> pNode = Node::create(current());
     CHECK_AND_ADVANCE(LPAREN);
     ParseState state = state_;
-    state_ = ParseState::PAREN;
+    state_ = PARSE_STATE_PAREN;
     if (current().isType(RPAREN))
       unexpectedToken(current());
     else
@@ -370,7 +372,7 @@ private:
   std::shared_ptr<Node> parseUnaryOperator()
   {
     SOURCE_TOOLS_DEBUG_PARSER_LOG("parseUnaryOperator()");
-    auto pNode = Node::create(current());
+    std::shared_ptr<Node> pNode = Node::create(current());
     pNode->add(parseExpression(precedence::unary(consume())));
     return pNode;
   }
@@ -382,7 +384,7 @@ private:
     using namespace tokens;
 
     skipSemicolons();
-    auto&& token = current();
+    const Token& token = current();
 
     if (isControlFlowKeyword(token))
       return parseControlFlowKeyword();
@@ -411,8 +413,8 @@ private:
 
     if (peek().isType(OPERATOR_ASSIGN_LEFT_EQUALS))
     {
-      auto pLhs  = Node::create(consume());
-      auto pNode = Node::create(consume());
+      std::shared_ptr<Node> pLhs  = Node::create(consume());
+      std::shared_ptr<Node> pNode = Node::create(consume());
       pNode->add(pLhs);
 
       if (current().isType(COMMA) || current().isType(rhsType))
@@ -444,13 +446,13 @@ private:
     TokenType lhsType = current().type();
     TokenType rhsType = complement(lhsType);
 
-    auto pNode = Node::create(current());
+    std::shared_ptr<Node> pNode = Node::create(current());
     pNode->add(pLhs);
 
     CHECK_AND_ADVANCE(lhsType);
 
     ParseState state = state_;
-    state_ = ParseState::PAREN;
+    state_ = PARSE_STATE_PAREN;
 
     if (current().isType(rhsType))
       pNode->add(lhsType == LPAREN ?
@@ -495,13 +497,13 @@ private:
     SOURCE_TOOLS_DEBUG_PARSER_LOG("parseExpressionContinuation('" << current().contents() << "')");
     SOURCE_TOOLS_DEBUG_PARSER_LOG("Type: " << toString(current().type()));
 
-    auto token = current();
+    Token token = current();
     if (isCallOperator(token))
       return parseFunctionCall(pNode);
     else if (token.isType(END))
       return nullptr;
 
-    auto pNew = Node::create(token);
+    std::shared_ptr<Node> pNew = Node::create(token);
     pNew->add(pNode);
 
     advance();
@@ -516,7 +518,7 @@ private:
   bool canParseExpressionContinuation(int precedence = 0)
   {
     return precedence < precedence::binary(current()) && (
-      state_ == ParseState::PAREN ||
+      state_ == PARSE_STATE_PAREN ||
       previous().row() == current().row());
   }
 
@@ -524,7 +526,7 @@ private:
   {
     SOURCE_TOOLS_DEBUG_PARSER_LOG("parseExpression(" << precedence << ")");
     using namespace tokens;
-    auto pNode = parseExpressionStart();
+    std::shared_ptr<Node> pNode = parseExpressionStart();
     while (canParseExpressionContinuation(precedence))
       pNode = parseExpressionContinuation(pNode);
     return pNode;
@@ -537,7 +539,7 @@ private:
 
   Token consume()
   {
-    auto token = current();
+    Token token = current();
     advance();
     return token;
   }
@@ -575,7 +577,7 @@ private:
   {
     while (current().isType(tokens::SEMI))
     {
-      if (state_ == ParseState::PAREN)
+      if (state_ == PARSE_STATE_PAREN)
         unexpectedToken(consume());
       else
         advance();
@@ -584,17 +586,17 @@ private:
 
 public:
 
-  std::vector<std::shared_ptr<Node>> parse()
+  std::vector<std::shared_ptr<Node> > parse()
   {
-    std::vector<std::shared_ptr<Node>> expression;
+    std::vector<std::shared_ptr<Node> > expression;
 
     while (true)
     {
-      auto pNode = parseExpression();
+      std::shared_ptr<Node> pNode = parseExpression();
       if (!pNode)
         break;
 
-      expression.emplace_back(pNode);
+      expression.push_back(pNode);
     }
 
     return expression;

@@ -10,11 +10,12 @@ namespace parser {
 
 class Node
 {
-private:
+public:
   typedef tokens::Token Token;
   typedef tokens::TokenType TokenType;
-  typedef std::vector<std::shared_ptr<Node>> Children;
+  typedef std::vector<std::shared_ptr<Node> > Children;
 
+private:
   Token token_;
   Node* parent_;
   Children children_;
@@ -54,7 +55,7 @@ public:
       pNode->parent_->remove(pNode);
 
     pNode->parent_ = this;
-    children_.emplace_back(pNode);
+    children_.push_back(pNode);
   }
 
   const Token& token() const { return token_; }

@@ -15,5 +15,4 @@ Suggests:
     testthat
 LinkingTo:
     testthat (>= 0.11.0.9000)
-SystemRequirements: C++11
 RoxygenNote: 5.0.1

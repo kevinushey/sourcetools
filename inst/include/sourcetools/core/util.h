@@ -6,22 +6,17 @@
 #include <cctype>
 
 namespace sourcetools {
-
-template <typename T, typename... Args>
-std::unique_ptr<T> make_unique(Args&&... args)
-{
-  return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
-}
-
 namespace detail {
 
 class noncopyable
 {
 protected:
-  noncopyable() = default;
-  ~noncopyable() = default;
-  noncopyable(const noncopyable&) = delete;
-  noncopyable& operator=(const noncopyable&) = delete;
+  noncopyable() {}
+  ~noncopyable() {}
+
+private:
+  noncopyable(const noncopyable&);
+  noncopyable& operator=(const noncopyable&);
 };
 
 } // namespace detail

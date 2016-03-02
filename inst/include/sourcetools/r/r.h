@@ -22,7 +22,7 @@ public:
   }
 
   template <typename T, typename F>
-  SEXP create(SEXPTYPE type, const std::vector<T>& vector, F&& f)
+  SEXP create(SEXPTYPE type, const std::vector<T>& vector, F f)
   {
     n_ += 1;
     std::size_t n = vector.size();
@@ -49,29 +49,12 @@ private:
 
 namespace util {
 
-inline void setNamesImpl(SEXP namesSEXP, int index, const std::string& name)
+inline void setNames(SEXP dataSEXP, const char** names, std::size_t n)
 {
-  SET_STRING_ELT(namesSEXP, index, Rf_mkCharLen(name.c_str(), name.size()));
-}
-
-template <typename... Ts>
-inline void setNamesImpl(SEXP namesSEXP, int index, const std::string& name, const Ts&... ts)
-{
-  SET_STRING_ELT(namesSEXP, index, Rf_mkCharLen(name.c_str(), name.size()));
-  setNamesImpl(namesSEXP, index + 1, ts...);
-}
-
-template <typename... Ts>
-inline void setNames(SEXP dataSEXP, const Ts&... ts)
-{
-  std::size_t n = sizeof...(ts);
-  if (n != static_cast<std::size_t>(Rf_length(dataSEXP)))
-    return;
-
-  SEXP namesSEXP = PROTECT(Rf_allocVector(STRSXP, n));
-  setNamesImpl(namesSEXP, 0, ts...);
-  Rf_setAttrib(dataSEXP, R_NamesSymbol, namesSEXP);
-  UNPROTECT(1);
+  RObjectFactory factory;
+  SEXP namesSEXP = factory.create(STRSXP, n);
+  for (std::size_t i = 0; i < n; ++i)
+    SET_STRING_ELT(namesSEXP, i, Rf_mkChar(names[i]));
 }
 
 inline void listToDataFrame(SEXP listSEXP, int n)
