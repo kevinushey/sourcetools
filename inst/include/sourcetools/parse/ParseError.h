@@ -18,25 +18,28 @@ class ParseError
 
 public:
 
-  ParseError(const tokens::Token& token, std::string message)
+  ParseError(const tokens::Token& token,
+             const std::string& message)
     : start_(token.position()),
       end_(token.position()),
-      message_(std::move(message))
+      message_(message)
   {
     end_.column += token.end() - token.begin();
   }
 
-  ParseError(Position start, Position end, std::string message)
-    : start_(std::move(start)),
-      end_(std::move(end)),
-      message_(std::move(message))
+  ParseError(const Position& start,
+             const Position& end,
+             const std::string& message)
+    : start_(start),
+      end_(end),
+      message_(message)
   {
   }
 
-  explicit ParseError(std::string message)
+  explicit ParseError(const std::string& message)
     : start_(0, 0),
       end_(0, 0),
-      message_(std::move(message))
+      message_(message)
   {
   }
 

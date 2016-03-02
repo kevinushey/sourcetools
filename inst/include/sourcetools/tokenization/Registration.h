@@ -4,7 +4,7 @@
 namespace sourcetools {
 namespace tokens {
 
-typedef uint32_t TokenType;
+typedef unsigned int TokenType;
 
 // Simple, non-nestable types.
 #define SOURCE_TOOLS_REGISTER_SIMPLE_TYPE(__NAME__, __TYPE__)         \

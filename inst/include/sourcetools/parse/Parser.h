@@ -144,7 +144,7 @@ private:
   void unexpectedEndOfInput()
   {
     ParseError error("unexpected end of input");
-    errors_.push_back(std::move(error));
+    errors_.push_back(error);
   }
 
   std::string unexpectedTokenString(const Token& token)
@@ -169,7 +169,7 @@ private:
                        const std::string& message = std::string())
   {
     ParseError error(token, message);
-    errors_.push_back(std::move(error));
+    errors_.push_back(error);
   }
 
   // Parser sub-routines ----
@@ -397,7 +397,7 @@ private:
     else if (isSymbolic(token) || isKeyword(token))
       return Node::create(consume());
     else if (token.isType(END))
-      return nullptr;
+      return NULL;
 
     unexpectedToken(consume());
     return Node::create(ERR);
@@ -501,7 +501,7 @@ private:
     if (isCallOperator(token))
       return parseFunctionCall(pNode);
     else if (token.isType(END))
-      return nullptr;
+      return NULL;
 
     Node* pNew = Node::create(token);
     pNew->add(pNode);

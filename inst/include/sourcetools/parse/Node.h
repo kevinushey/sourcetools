@@ -23,12 +23,12 @@ private:
 public:
 
   explicit Node(const Token& token)
-    : token_(token), parent_(nullptr)
+    : token_(token), parent_(NULL)
   {
   }
 
   explicit Node(const TokenType& type)
-    : token_(Token(type)), parent_(nullptr)
+    : token_(Token(type)), parent_(NULL)
   {
   }
 

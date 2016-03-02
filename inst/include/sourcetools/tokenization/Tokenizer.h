@@ -24,7 +24,7 @@ private:
                     std::size_t length,
                     Token* pToken)
   {
-    *pToken = std::move(Token(cursor_, type, length));
+    *pToken = Token(cursor_, type, length);
     cursor_.advance(length);
   }
 
@@ -248,7 +248,7 @@ public:
   {
     if (cursor_ >= cursor_.end())
     {
-      *pToken = std::move(Token(tokens::END));
+      *pToken = Token(tokens::END);
       return false;
     }
 

@@ -24,22 +24,22 @@ private:
 public:
 
   Token()
-    : begin_(nullptr),
-      end_(nullptr),
+    : begin_(NULL),
+      end_(NULL),
       type_(ERR)
   {
   }
 
   explicit Token(TokenType type)
-    : begin_(nullptr),
-      end_(nullptr),
+    : begin_(NULL),
+      end_(NULL),
       type_(type)
   {
   }
 
   Token(const Position& position)
-    : begin_(nullptr),
-      end_(nullptr),
+    : begin_(NULL),
+      end_(NULL),
       position_(position),
       type_(ERR)
   {
