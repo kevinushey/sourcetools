@@ -89,7 +89,7 @@ public:
 
     TokenCursor cursor(tokens);
     std::vector<TokenType> stack;
-    stack.push_back(tokens::ERR);
+    stack.push_back(tokens::INVALID);
 
     const Token* pThisToken = &(cursor.currentToken());
     const Token* pPrevToken = pThisToken;

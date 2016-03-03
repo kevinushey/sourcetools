@@ -90,7 +90,7 @@ namespace parser {
     if (!current().isType(__TYPE__))                               \
     {                                                              \
       DEBUG(unexpectedTokenString(current()));                     \
-      return Node::create(ERR);                                    \
+      return Node::create(INVALID);                                \
     }                                                              \
   } while (0)
 
@@ -100,7 +100,7 @@ namespace parser {
     if (current().isType(::sourcetools::tokens::END))          \
     {                                                          \
       ::std::cerr << "unexpected end of input" << ::std::endl; \
-      return Node::create(ERR);                                \
+      return Node::create(INVALID);                            \
     }                                                          \
   } while (0)
 
@@ -320,7 +320,7 @@ private:
       return parseRepeat();
 
     unexpectedToken(consume(), "expected control-flow keyword");
-    return Node::create(ERR);
+    return Node::create(INVALID);
   }
 
   Node* parseBracedExpression()
@@ -400,7 +400,7 @@ private:
       return NULL;
 
     unexpectedToken(consume());
-    return Node::create(ERR);
+    return Node::create(INVALID);
   }
 
   Node* parseFunctionCallOne(tokens::TokenType rhsType)
@@ -568,7 +568,7 @@ private:
         continue;
       return result;
     }
-    return Token(tokens::ERR);
+    return Token(tokens::INVALID);
   }
 
   // Utils ----
