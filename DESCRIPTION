@@ -1,7 +1,7 @@
 Package: sourcetools
 Type: Package
 Title: Tools for the Reading and Tokenization of R Code
-Version: 0.1.0
+Version: 0.1.1
 Author: Kevin Ushey
 Maintainer: Kevin Ushey <kevinushey@gmail.com>
 Description: Tools for the reading and tokenization of R code.

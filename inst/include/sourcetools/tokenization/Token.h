@@ -26,7 +26,7 @@ public:
   Token()
     : begin_(nullptr),
       end_(nullptr),
-      type_(ERR)
+      type_(INVALID)
   {
   }
 
@@ -41,7 +41,7 @@ public:
     : begin_(nullptr),
       end_(nullptr),
       position_(position),
-      type_(ERR)
+      type_(INVALID)
   {
   }
 
@@ -403,7 +403,7 @@ inline std::string toString(tokens::TokenType type)
 {
   using namespace tokens;
 
-       if (type == ERR)        return "err";
+       if (type == INVALID)    return "invalid";
   else if (type == END)        return "end";
   else if (type == EMPTY)      return "empty";
   else if (type == MISSING)    return "missing";

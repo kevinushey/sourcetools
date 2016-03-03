@@ -108,13 +108,13 @@ test_that("`[[` and `[` are tokenized correctly", {
 
 test_that("Failures during number tokenization is detected", {
   tokens <- tokenize_string("1.5E---")
-  expect_true(tokens$type[[1]] == "err")
+  expect_true(tokens$type[[1]] == "invalid")
 })
 
 test_that("invalid number e.g. 1E1.5 tokenized as single entity", {
   tokens <- tokenize_string("1E1.5")
   expect_true(nrow(tokens) == 1)
-  expect_true(tokens$type[[1]] == "err")
+  expect_true(tokens$type[[1]] == "invalid")
 })
 
 test_that("keywords are tokenized as keywords", {
@@ -143,7 +143,7 @@ test_that("files in packages are tokenized without errors", {
     files <- list.files(dir, pattern = "R$", full.names = TRUE)
     for (file in files) {
       tokens <- tokenize_file(file)
-      errors <- tokens$type == "err"
+      errors <- tokens$type == "invalid"
       expect_true(all(errors == FALSE))
     }
   }

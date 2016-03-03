@@ -4,7 +4,7 @@
 namespace sourcetools {
 namespace tokens {
 
-typedef uint32_t TokenType;
+typedef unsigned int TokenType;
 
 inline namespace types {
 
@@ -12,7 +12,7 @@ inline namespace types {
 #define SOURCE_TOOLS_REGISTER_SIMPLE_TYPE(__NAME__, __TYPE__)         \
   static const TokenType __NAME__ = __TYPE__
 
-SOURCE_TOOLS_REGISTER_SIMPLE_TYPE(ERR,        (1 << 31));
+SOURCE_TOOLS_REGISTER_SIMPLE_TYPE(INVALID,    (1 << 31));
 SOURCE_TOOLS_REGISTER_SIMPLE_TYPE(END,        (1 << 30));
 SOURCE_TOOLS_REGISTER_SIMPLE_TYPE(EMPTY,      (1 << 29));
 SOURCE_TOOLS_REGISTER_SIMPLE_TYPE(MISSING,    (1 << 28));

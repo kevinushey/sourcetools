@@ -57,7 +57,7 @@ private:
     if (success) {
       consumeToken(type, distance + 1, pToken);
     } else {
-      consumeToken(tokens::ERR, distance + 1, pToken);
+      consumeToken(tokens::INVALID, distance + 1, pToken);
     }
   }
 
@@ -141,7 +141,7 @@ private:
     // or with an 'L' for an integer.
     if (!isHexDigit(cursor_.peek(distance)))
     {
-      consumeToken(tokens::ERR, distance, pToken);
+      consumeToken(tokens::INVALID, distance, pToken);
       return false;
     }
 
@@ -164,7 +164,7 @@ private:
       peek = cursor_.peek(distance);
     }
 
-    consumeToken(success ? tokens::NUMBER : tokens::ERR, distance, pToken);
+    consumeToken(success ? tokens::NUMBER : tokens::INVALID, distance, pToken);
     return true;
   }
 
@@ -221,7 +221,7 @@ private:
     if (cursor_.peek(distance) == 'L')
       ++distance;
 
-    consumeToken(success ? tokens::NUMBER : tokens::ERR, distance, pToken);
+    consumeToken(success ? tokens::NUMBER : tokens::INVALID, distance, pToken);
   }
 
   void consumeSymbol(Token* pToken)
@@ -273,13 +273,13 @@ public:
       }
     } else if (ch == ']') {
       if (tokenStack_.empty()) {
-        consumeToken(tokens::ERR, 1, pToken);
+        consumeToken(tokens::INVALID, 1, pToken);
       } else if (tokenStack_.top() == tokens::LDBRACKET) {
         tokenStack_.pop();
         if (cursor_.peek(1) == ']')
           consumeToken(tokens::RDBRACKET, 2, pToken);
         else
-          consumeToken(tokens::ERR, 1, pToken);
+          consumeToken(tokens::INVALID, 1, pToken);
       } else {
         tokenStack_.pop();
         consumeToken(tokens::RBRACKET, 1, pToken);
@@ -419,7 +419,7 @@ public:
 
     // Nothing matched -- error
     else
-      consumeToken(tokens::ERR, 1, pToken);
+      consumeToken(tokens::INVALID, 1, pToken);
 
     return true;
   }
