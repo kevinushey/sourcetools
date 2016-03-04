@@ -30,6 +30,10 @@ public:
     if (!conn.size(&size))
       return false;
 
+    // Early return for empty files
+    if (size == 0)
+      return true;
+
     // mmap the file
     MemoryMappedConnection map(conn, size);
     if (!map.open())
