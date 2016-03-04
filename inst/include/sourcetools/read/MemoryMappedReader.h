@@ -26,17 +26,9 @@ public:
       return false;
 
     // Get size of file
-    struct stat info;
-    if (::fstat(conn, &info) == -1)
+    std::size_t size;
+    if (!conn.size(&size))
       return false;
-    off_t size = info.st_size;
-
-    // Return early for empty files
-    if (size <= 0)
-    {
-      *pContent = std::string();
-      return true;
-    }
 
     // mmap the file
     MemoryMappedConnection map(conn, size);

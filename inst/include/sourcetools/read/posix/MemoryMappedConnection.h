@@ -2,6 +2,7 @@
 #define SOURCE_TOOLS_READ_POSIX_MEMORY_MAPPED_CONNECTION_H
 
 #include <sys/mman.h>
+#include <fcntl.h>
 
 namespace sourcetools {
 namespace detail {
