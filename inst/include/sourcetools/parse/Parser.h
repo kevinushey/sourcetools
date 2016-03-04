@@ -1,3 +1,4 @@
+// [[Rcpp::export]]
 #ifndef SOURCE_TOOLS_PARSE_PARSER_H
 #define SOURCE_TOOLS_PARSE_PARSER_H
 
@@ -17,13 +18,9 @@
 // #define SOURCE_TOOLS_DEBUG_PARSER_STACK_OVERFLOW
 
 #ifdef SOURCE_TOOLS_DEBUG_PARSER_TRACE
-
 # define SOURCE_TOOLS_DEBUG_PARSER_LOG(__X__) std::cerr << __X__ << std::endl
-
 #else
-
 # define SOURCE_TOOLS_DEBUG_PARSER_LOG(__X__)
-
 #endif
 
 #ifdef SOURCE_TOOLS_DEBUG_PARSER_PRINT_TOKEN_INFO
@@ -43,71 +40,14 @@
 
 #endif
 
-#ifdef SOURCE_TOOLS_DEBUG_PARSER_STACK_OVERFLOW
-
-# define SOURCE_TOOLS_DEBUG_CHECK_PARSER_STACK_OVERFLOW()    \
-  do                                                         \
-  {                                                          \
-    if (counter_++ > 10000)                                  \
-    {                                                        \
-      std::cerr << "ERROR: stack overflow in parser\n";      \
-      return Node::create(token_);                           \
-    }                                                        \
-  } while (0)
-
-#else
-
-# define SOURCE_TOOLS_DEBUG_CHECK_PARSER_STACK_OVERFLOW()    \
-  do                                                         \
-  {                                                          \
-  } while (0)
-
-#endif
-
 namespace sourcetools {
 namespace parser {
-
-#define CHECK(__TYPE__)                                           \
-  do                                                              \
-  {                                                               \
-    if (!current().isType(__TYPE__))                              \
-    {                                                             \
-      DEBUG(unexpectedTokenString(current(), __TYPE__));          \
-      return ::sourcetools::parser::Node::create(current());      \
-    }                                                             \
-  } while (0)
-
-#define CHECK_AND_ADVANCE(__TYPE__) \
-  do                                \
-  {                                 \
-    CHECK(__TYPE__);                \
-    advance();                      \
-  } while (0)
-
-#define CHECK_NOT(__TYPE__)                                        \
-  do                                                               \
-  {                                                                \
-    if (!current().isType(__TYPE__))                               \
-    {                                                              \
-      DEBUG(unexpectedTokenString(current()));                     \
-      return Node::create(INVALID);                                \
-    }                                                              \
-  } while (0)
-
-#define CHECK_UNEXPECTED_END()                                 \
-  do                                                           \
-  {                                                            \
-    if (current().isType(::sourcetools::tokens::END))          \
-    {                                                          \
-      ::std::cerr << "unexpected end of input" << ::std::endl; \
-      return Node::create(INVALID);                            \
-    }                                                          \
-  } while (0)
 
 class Parser
 {
   typedef tokenizer::Tokenizer Tokenizer;
   typedef tokens::Token Token;
+  typedef tokens::TokenType TokenType;
 
   enum ParseState
   {
@@ -122,19 +62,11 @@ class Parser
   ParseState state_;
   std::vector<ParseError> errors_;
 
-#ifdef SOURCE_TOOLS_DEBUG_PARSER_STACK_OVERFLOW
-  int counter_;
-#endif
-
 public:
   explicit Parser(const char* code, std::size_t n)
     : tokenizer_(code, n), state_(PARSE_STATE_TOP_LEVEL)
   {
     advance();
-
-#ifdef SOURCE_TOOLS_DEBUG_PARSER_STACK_OVERFLOW
-    counter_ = 0;
-#endif
   }
 
 private:
@@ -154,7 +86,7 @@ private:
   }
 
   std::string unexpectedTokenString(const Token& token,
-                                    tokens::TokenType expectedType)
+                                    TokenType expectedType)
   {
     return unexpectedTokenString(token) +
       "; expected type '" + toString(expectedType) + "'";
@@ -166,19 +98,28 @@ private:
   }
 
   void unexpectedToken(const Token& token,
+                       TokenType type)
+  {
+    unexpectedToken(token, unexpectedTokenString(token, type));
+  }
+
+  void unexpectedToken(const Token& token,
                        const std::string& message)
   {
     ParseError error(token, message);
     errors_.push_back(error);
   }
 
-  void checkUnexpectedEnd(const Token& token)
+  bool checkUnexpectedEnd(const Token& token)
   {
-    if (token.isType(tokens::END))
+    if (UNLIKELY(token.isType(tokens::END)))
     {
       ParseError error(token, "unexpected end of input");
       errors_.push_back(error);
+      return true;
     }
+
+    return false;
   }
 
   // Parser sub-routines ----
@@ -189,7 +130,7 @@ private:
     using namespace tokens;
 
     Node* pNode = Node::create(current());
-    CHECK_AND_ADVANCE(SYMBOL);
+    checkAndAdvance(SYMBOL);
     if (current().isType(OPERATOR_ASSIGN_LEFT_EQUALS))
     {
       advance();
@@ -210,7 +151,8 @@ private:
 
     while (true)
     {
-      CHECK_UNEXPECTED_END();
+      if (checkUnexpectedEnd(current()))
+        break;
 
       pNode->add(parseFunctionArgumentListOne());
       if (current().isType(RPAREN))
@@ -236,13 +178,13 @@ private:
     SOURCE_TOOLS_DEBUG_PARSER_LOG("parseFunctionDefinition()");
     using namespace tokens;
     Node* pNode = Node::create(current());
-    CHECK_AND_ADVANCE(KEYWORD_FUNCTION);
-    CHECK_AND_ADVANCE(LPAREN);
+    checkAndAdvance(KEYWORD_FUNCTION);
+    checkAndAdvance(LPAREN);
     ParseState state = state_;
     state_ = PARSE_STATE_PAREN;
     pNode->add(parseFunctionArgumentList());
     state_ = state;
-    CHECK_AND_ADVANCE(RPAREN);
+    checkAndAdvance(RPAREN);
     pNode->add(parseNonEmptyExpression());
     return pNode;
   }
@@ -252,16 +194,16 @@ private:
     SOURCE_TOOLS_DEBUG_PARSER_LOG("parseFor()");
     using namespace tokens;
     Node* pNode = Node::create(current());
-    CHECK_AND_ADVANCE(KEYWORD_FOR);
-    CHECK_AND_ADVANCE(LPAREN);
+    checkAndAdvance(KEYWORD_FOR);
+    checkAndAdvance(LPAREN);
     ParseState state = state_;
     state_ = PARSE_STATE_PAREN;
-    CHECK(SYMBOL);
+    check(SYMBOL);
     pNode->add(Node::create(consume()));
-    CHECK_AND_ADVANCE(KEYWORD_IN);
+    checkAndAdvance(KEYWORD_IN);
     pNode->add(parseNonEmptyExpression());
     state_ = state;
-    CHECK_AND_ADVANCE(RPAREN);
+    checkAndAdvance(RPAREN);
     pNode->add(parseNonEmptyExpression());
     return pNode;
   }
@@ -271,13 +213,13 @@ private:
     SOURCE_TOOLS_DEBUG_PARSER_LOG("parseIf()");
     using namespace tokens;
     Node* pNode = Node::create(current());
-    CHECK_AND_ADVANCE(KEYWORD_IF);
-    CHECK_AND_ADVANCE(LPAREN);
+    checkAndAdvance(KEYWORD_IF);
+    checkAndAdvance(LPAREN);
     ParseState state = state_;
     state_ = PARSE_STATE_PAREN;
     pNode->add(parseNonEmptyExpression());
     state_ = state;
-    CHECK_AND_ADVANCE(RPAREN);
+    checkAndAdvance(RPAREN);
     pNode->add(parseNonEmptyExpression());
     if (current().isType(KEYWORD_ELSE))
     {
@@ -292,13 +234,13 @@ private:
     SOURCE_TOOLS_DEBUG_PARSER_LOG("parseWhile()");
     using namespace tokens;
     Node* pNode = Node::create(current());
-    CHECK_AND_ADVANCE(KEYWORD_WHILE);
-    CHECK_AND_ADVANCE(LPAREN);
+    checkAndAdvance(KEYWORD_WHILE);
+    checkAndAdvance(LPAREN);
     ParseState state = state_;
     state_ = PARSE_STATE_PAREN;
     pNode->add(parseNonEmptyExpression());
     state_ = state;
-    CHECK_AND_ADVANCE(RPAREN);
+    checkAndAdvance(RPAREN);
     pNode->add(parseNonEmptyExpression());
     return pNode;
   }
@@ -308,7 +250,7 @@ private:
     SOURCE_TOOLS_DEBUG_PARSER_LOG("parseRepeat()");
     using namespace tokens;
     Node* pNode = Node::create(current());
-    CHECK_AND_ADVANCE(KEYWORD_REPEAT);
+    checkAndAdvance(KEYWORD_REPEAT);
     pNode->add(parseNonEmptyExpression());
     return pNode;
   }
@@ -340,7 +282,7 @@ private:
     using namespace tokens;
     Node* pNode = Node::create(current());
 
-    CHECK_AND_ADVANCE(LBRACE);
+    checkAndAdvance(LBRACE);
     ParseState state = state_;
     state_ = PARSE_STATE_BRACE;
     skipSemicolons();
@@ -352,13 +294,14 @@ private:
     {
       while (!current().isType(RBRACE))
       {
-        CHECK_UNEXPECTED_END();
+        if (checkUnexpectedEnd(current()))
+          break;
         pNode->add(parseNonEmptyExpression());
         skipSemicolons();
       }
     }
     state_ = state;
-    CHECK_AND_ADVANCE(RBRACE);
+    checkAndAdvance(RBRACE);
 
     return pNode;
   }
@@ -368,7 +311,7 @@ private:
     SOURCE_TOOLS_DEBUG_PARSER_LOG("parseParentheticalExpression()");
     using namespace tokens;
     Node* pNode = Node::create(current());
-    CHECK_AND_ADVANCE(LPAREN);
+    checkAndAdvance(LPAREN);
     ParseState state = state_;
     state_ = PARSE_STATE_PAREN;
     if (current().isType(RPAREN))
@@ -376,7 +319,7 @@ private:
     else
       pNode->add(parseNonEmptyExpression());
     state_ = state;
-    CHECK_AND_ADVANCE(RPAREN);
+    checkAndAdvance(RPAREN);
     return pNode;
   }
 
@@ -414,7 +357,7 @@ private:
     return Node::create(INVALID);
   }
 
-  Node* parseFunctionCallOne(tokens::TokenType rhsType)
+  Node* parseFunctionCallOne(TokenType rhsType)
   {
     using namespace tokens;
 
@@ -460,7 +403,7 @@ private:
     Node* pNode = Node::create(current());
     pNode->add(pLhs);
 
-    CHECK_AND_ADVANCE(lhsType);
+    checkAndAdvance(lhsType);
 
     ParseState state = state_;
     state_ = PARSE_STATE_PAREN;
@@ -473,7 +416,9 @@ private:
     {
       while (true)
       {
-        CHECK_UNEXPECTED_END();
+        if (checkUnexpectedEnd(current()))
+          break;
+
         pNode->add(parseFunctionCallOne(rhsType));
 
         const Token& token = current();
@@ -493,7 +438,7 @@ private:
       }
     }
 
-    CHECK_AND_ADVANCE(rhsType);
+    checkAndAdvance(rhsType);
 
     state_ = state;
 
@@ -570,6 +515,22 @@ private:
     while (success && (isComment(token_) || isWhitespace(token_)))
       success = tokenizer_.tokenize(&token_);
     return success;
+  }
+
+  bool check(TokenType type)
+  {
+    const Token& token = current();
+    bool success = token.isType(type);
+    if (!success)
+      unexpectedToken(token, type);
+    return success;
+  }
+
+  bool checkAndAdvance(TokenType type)
+  {
+    bool result = check(type);
+    advance();
+    return result;
   }
 
   Token peek(std::size_t lookahead = 1,

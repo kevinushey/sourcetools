@@ -261,6 +261,7 @@ void reportErrors(const std::vector<parser::ParseError>& errors)
 
 
   std::stringstream ss;
+  ss << "\n  ";
   typedef std::vector<parser::ParseError>::const_iterator Iterator;
   for (Iterator it = errors.begin();
        it != errors.end();
