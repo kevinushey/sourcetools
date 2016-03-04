@@ -59,6 +59,11 @@ test_that("parser handles function calls with no args", {
   expect_parse("a[[]]")
 })
 
+test_that("parser recovers from missing commas", {
+  expect_warning(expect_parse("a(1, 2, 3)", "a(1 2 3)"))
+  expect_warning(expect_parse("function(a, b, c) 1", "function(a b c) 1"))
+})
+
 test_that("parser handles missing arguments", {
   expect_parse("a(,)")
   expect_parse("a[,]")

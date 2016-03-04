@@ -1,6 +1,6 @@
-check_parse <- function(code) {
-  lhs <- base::parse(text = code, keep.source = FALSE)
-  rhs <- parse_string(code)
+check_parse <- function(R, S = R) {
+  lhs <- base::parse(text = R, keep.source = FALSE)
+  rhs <- parse_string(S)
   check_parse_impl(lhs, rhs)
 }
 
@@ -36,6 +36,6 @@ check_parse_impl <- function(lhs, rhs) {
   TRUE
 }
 
-expect_parse <- function(code) {
-  testthat::expect_true(check_parse(code))
+expect_parse <- function(R, S = R) {
+  testthat::expect_true(check_parse(R, S))
 }
