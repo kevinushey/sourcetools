@@ -9,4 +9,4 @@
 ^README\.Rmd$
 ^benchmark/
 ^notes/
-
+^src/*\.s?o
