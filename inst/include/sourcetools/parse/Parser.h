@@ -160,13 +160,13 @@ private:
       "; expected type '" + toString(expectedType) + "'";
   }
 
-  void unexpectedtoken(const Token& token)
+  void unexpectedToken(const Token& token)
   {
     unexpectedToken(token, unexpectedTokenString(token));
   }
 
   void unexpectedToken(const Token& token,
-                       const std::string& message = std::string())
+                       const std::string& message)
   {
     ParseError error(token, message);
     errors_.push_back(error);
@@ -212,9 +212,11 @@ private:
         continue;
       }
 
-      // TODO: how should we 'recover' here?
+      // TODO: how should we recover here? For now, we
+      // assume that there should have been a comma and
+      // continue parsing.
       unexpectedToken(current(), "expected ',' or ')'");
-      break;
+      continue;
     }
 
     return pNode;
@@ -478,7 +480,7 @@ private:
 
         std::string message = std::string() +
           "expected ',' or '" + toString(rhsType) + "'";
-        unexpectedToken(consume(), message);
+        unexpectedToken(current(), message);
       }
     }
 
