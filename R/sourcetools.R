@@ -17,13 +17,13 @@ read <- function(path) {
 #'
 #' Tools for tokenizing \R code.
 #'
-#' @param path A file path.
-#' @param string \R code as a character vector of length one.
+#' @param file,path A file path.
+#' @param text,string \R code as a character vector of length one.
 #'
-#' @note New rows are determined by existence of the \code{\\n}
+#' @note Line numbers are determined by existence of the \code{\\n}
 #' line feed character, under the assumption that code being tokenized
 #' will use either \code{\\n} to indicate newlines (as on modern
-#' Linux and OS X systems), or \code{\\r\\n} as on Windows.
+#' Unix systems), or \code{\\r\\n} as on Windows.
 #'
 #' @return A \code{data.frame} with the following columns:
 #'

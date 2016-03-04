@@ -13,9 +13,9 @@ tokenize_string(string)
 tokenize(file = "", text = NULL)
 }
 \arguments{
-\item{path}{A file path.}
+\item{file, path}{A file path.}
 
-\item{string}{\R code as a character vector of length one.}
+\item{text, string}{\R code as a character vector of length one.}
 }
 \value{
 A \code{data.frame} with the following columns:
@@ -31,10 +31,10 @@ A \code{data.frame} with the following columns:
 Tools for tokenizing \R code.
 }
 \note{
-New rows are determined by existence of the \code{\\n}
+Line numbers are determined by existence of the \code{\\n}
 line feed character, under the assumption that code being tokenized
 will use either \code{\\n} to indicate newlines (as on modern
-Linux and OS X systems), or \code{\\r\\n} as on Windows.
+Unix systems), or \code{\\r\\n} as on Windows.
 }
 \examples{
 tokenize_string("x <- 1 + 2")
