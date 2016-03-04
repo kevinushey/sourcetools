@@ -49,6 +49,14 @@ tokenize_string <- function(string) {
   .Call("sourcetools_tokenize_string", as.character(string), PACKAGE = "sourcetools")
 }
 
+#' @rdname tokenize-methods
+#' @export
+tokenize <- function(file = "", text = NULL) {
+  if (is.null(text))
+    text <- read(file)
+  tokenize_string(text)
+}
+
 #' Find Syntax Errors
 #'
 #' Find syntax errors in a string of \R code.
