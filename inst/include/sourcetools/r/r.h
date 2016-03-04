@@ -55,6 +55,7 @@ inline void setNames(SEXP dataSEXP, const char** names, std::size_t n)
   SEXP namesSEXP = factory.create(STRSXP, n);
   for (std::size_t i = 0; i < n; ++i)
     SET_STRING_ELT(namesSEXP, i, Rf_mkChar(names[i]));
+  Rf_setAttrib(dataSEXP, R_NamesSymbol, namesSEXP);
 }
 
 inline void listToDataFrame(SEXP listSEXP, int n)

@@ -6,8 +6,6 @@
 sourcetools
 ===========
 
-**`sourcetools` is under active development and is not yet ready for general use.**
-
 Tools for tokenizing and (eventually) parsing R code.
 
 ## Getting Started
@@ -23,7 +21,7 @@ devtools::install_github("kevinushey/sourcetools")
 
 `sourcetools` provides the `tokenize_string()` and
 `tokenize_file()` functions for generating a tokenized
-repreesntation of R code. These produce 'raw' tokenized
+representation of R code. These produce 'raw' tokenized
 representations of the code, with each token's value as a
 string, and a recorded row, column, and type:
 
