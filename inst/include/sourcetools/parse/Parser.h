@@ -172,6 +172,15 @@ private:
     errors_.push_back(error);
   }
 
+  void checkUnexpectedEnd(const Token& token)
+  {
+    if (token.isType(tokens::END))
+    {
+      ParseError error(token, "unexpected end of input");
+      errors_.push_back(error);
+    }
+  }
+
   // Parser sub-routines ----
 
   Node* parseFunctionArgumentListOne()
@@ -184,7 +193,7 @@ private:
     if (current().isType(OPERATOR_ASSIGN_LEFT_EQUALS))
     {
       advance();
-      pNode->add(parseExpression());
+      pNode->add(parseNonEmptyExpression());
     }
 
     return pNode;
@@ -234,7 +243,7 @@ private:
     pNode->add(parseFunctionArgumentList());
     state_ = state;
     CHECK_AND_ADVANCE(RPAREN);
-    pNode->add(parseExpression());
+    pNode->add(parseNonEmptyExpression());
     return pNode;
   }
 
@@ -250,10 +259,10 @@ private:
     CHECK(SYMBOL);
     pNode->add(Node::create(consume()));
     CHECK_AND_ADVANCE(KEYWORD_IN);
-    pNode->add(parseExpression());
+    pNode->add(parseNonEmptyExpression());
     state_ = state;
     CHECK_AND_ADVANCE(RPAREN);
-    pNode->add(parseExpression());
+    pNode->add(parseNonEmptyExpression());
     return pNode;
   }
 
@@ -266,14 +275,14 @@ private:
     CHECK_AND_ADVANCE(LPAREN);
     ParseState state = state_;
     state_ = PARSE_STATE_PAREN;
-    pNode->add(parseExpression());
+    pNode->add(parseNonEmptyExpression());
     state_ = state;
     CHECK_AND_ADVANCE(RPAREN);
-    pNode->add(parseExpression());
+    pNode->add(parseNonEmptyExpression());
     if (current().isType(KEYWORD_ELSE))
     {
       advance();
-      pNode->add(parseExpression());
+      pNode->add(parseNonEmptyExpression());
     }
     return pNode;
   }
@@ -287,10 +296,10 @@ private:
     CHECK_AND_ADVANCE(LPAREN);
     ParseState state = state_;
     state_ = PARSE_STATE_PAREN;
-    pNode->add(parseExpression());
+    pNode->add(parseNonEmptyExpression());
     state_ = state;
     CHECK_AND_ADVANCE(RPAREN);
-    pNode->add(parseExpression());
+    pNode->add(parseNonEmptyExpression());
     return pNode;
   }
 
@@ -300,7 +309,7 @@ private:
     using namespace tokens;
     Node* pNode = Node::create(current());
     CHECK_AND_ADVANCE(KEYWORD_REPEAT);
-    pNode->add(parseExpression());
+    pNode->add(parseNonEmptyExpression());
     return pNode;
   }
 
@@ -344,7 +353,7 @@ private:
       while (!current().isType(RBRACE))
       {
         CHECK_UNEXPECTED_END();
-        pNode->add(parseExpression());
+        pNode->add(parseNonEmptyExpression());
         skipSemicolons();
       }
     }
@@ -365,7 +374,7 @@ private:
     if (current().isType(RPAREN))
       unexpectedToken(current());
     else
-      pNode->add(parseExpression());
+      pNode->add(parseNonEmptyExpression());
     state_ = state;
     CHECK_AND_ADVANCE(RPAREN);
     return pNode;
@@ -375,7 +384,7 @@ private:
   {
     SOURCE_TOOLS_DEBUG_PARSER_LOG("parseUnaryOperator()");
     Node* pNode = Node::create(current());
-    pNode->add(parseExpression(precedence::unary(consume())));
+    pNode->add(parseNonEmptyExpression(precedence::unary(consume())));
     return pNode;
   }
 
@@ -422,12 +431,12 @@ private:
       if (current().isType(COMMA) || current().isType(rhsType))
         pNode->add(Node::create(MISSING));
       else
-        pNode->add(parseExpression());
+        pNode->add(parseNonEmptyExpression());
 
       return pNode;
     }
 
-    return parseExpression();
+    return parseNonEmptyExpression();
   }
 
   // Parse a function call, e.g.
@@ -512,7 +521,7 @@ private:
     int precedence =
       precedence::binary(token) -
       precedence::isRightAssociative(token);
-    pNew->add(parseExpression(precedence));
+    pNew->add(parseNonEmptyExpression(precedence));
 
     return pNew;
   }
@@ -532,6 +541,12 @@ private:
     while (canParseExpressionContinuation(precedence))
       pNode = parseExpressionContinuation(pNode);
     return pNode;
+  }
+
+  Node* parseNonEmptyExpression(int precedence = 0)
+  {
+    checkUnexpectedEnd(current());
+    return parseExpression(precedence);
   }
 
   // Tokenization ----
