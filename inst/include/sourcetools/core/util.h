@@ -29,7 +29,7 @@ inline bool isValidForStartOfRSymbol(char ch)
   return
     std::isalpha(ch) ||
     ch == '.' ||
-    (unsigned char) ch >= 128;
+    ch < 0;
 }
 
 inline bool isValidForRSymbol(char ch)
@@ -38,7 +38,7 @@ inline bool isValidForRSymbol(char ch)
     std::isalnum(ch) ||
     ch == '.' ||
     ch == '_' ||
-    (unsigned char) ch >= 128;
+    ch < 0;
 }
 
 inline std::string escape(char ch)
