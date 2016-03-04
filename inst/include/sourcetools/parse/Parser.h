@@ -399,7 +399,7 @@ private:
     else if (isSymbolic(token) || isKeyword(token))
       return Node::create(consume());
     else if (token.isType(END))
-      return NULL;
+      return Node::create(token);
 
     unexpectedToken(consume());
     return Node::create(INVALID);
@@ -503,7 +503,7 @@ private:
     if (isCallOperator(token))
       return parseFunctionCall(pNode);
     else if (token.isType(END))
-      return NULL;
+      return Node::create(token);
 
     Node* pNew = Node::create(token);
     pNew->add(pNode);
@@ -595,7 +595,7 @@ public:
     while (true)
     {
       Node* pNode = parseExpression();
-      if (!pNode)
+      if (pNode->token().isType(tokens::END))
         break;
 
       expression.push_back(pNode);
