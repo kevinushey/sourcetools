@@ -42,6 +42,18 @@ public:
     return new Node(type);
   }
 
+  static void destroy(const Node* pNode)
+  {
+    for (Children::const_iterator it = pNode->children().begin();
+         it != pNode->children().end();
+         ++it)
+    {
+      destroy(*it);
+    }
+
+    delete pNode;
+  }
+
   void remove(const Node* pNode)
   {
     children_.erase(

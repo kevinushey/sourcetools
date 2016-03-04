@@ -268,6 +268,6 @@ extern "C" SEXP sourcetools_parse_string(SEXP programSEXP)
   //   sourcetools::log(child);
   SEXP resultSEXP = sourcetools::SEXPConverter::asSEXP(root);
   for (std::size_t i = 0; i < root.size(); ++i)
-    delete root[i];
+    Node::destroy(root[i]);
   return resultSEXP;
 }
