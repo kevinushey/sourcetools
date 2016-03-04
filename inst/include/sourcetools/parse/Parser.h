@@ -586,9 +586,9 @@ private:
 
 public:
 
-  std::vector<Node* > parse()
+  std::vector<Node*> parse()
   {
-    std::vector<Node* > expression;
+    std::vector<Node*> expression;
 
     while (true)
     {
@@ -600,6 +600,11 @@ public:
     }
 
     return expression;
+  }
+
+  const std::vector<ParseError>& errors() const
+  {
+    return errors_;
   }
 
 };

@@ -254,6 +254,25 @@ public:
 
 };
 
+void reportErrors(const std::vector<parser::ParseError>& errors)
+{
+  if (errors.empty())
+    return;
+
+
+  std::stringstream ss;
+  typedef std::vector<parser::ParseError>::const_iterator Iterator;
+  for (Iterator it = errors.begin();
+       it != errors.end();
+       ++it)
+  {
+    ss << "[" << it->start().row << ":" << it->start().column << "]: "
+       << it->message() << std::endl << "  ";
+  }
+
+  Rf_warning(ss.str().c_str());
+}
+
 } // anonymous namespace
 
 } // namespace sourcetools
@@ -264,6 +283,7 @@ extern "C" SEXP sourcetools_parse_string(SEXP programSEXP)
   SEXP charSEXP = STRING_ELT(programSEXP, 0);
   sourcetools::parser::Parser parser(CHAR(charSEXP), Rf_length(charSEXP));
   std::vector<Node*> root = parser.parse();
+  sourcetools::reportErrors(parser.errors());
   // for (auto&& child : root)
   //   sourcetools::log(child);
   SEXP resultSEXP = sourcetools::SEXPConverter::asSEXP(root);
