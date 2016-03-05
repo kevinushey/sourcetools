@@ -24,9 +24,21 @@ public:
       ::CloseHandle(handle_);
   }
 
-  bool open() { return handle_ != INVALID_HANDLE_VALUE; }
-  bool size(std::size_t* pSize) { *pSize = ::GetFileSize(handle_, NULL); return true; }
-  operator FileDescriptor() const { return handle_; }
+  bool open()
+  {
+    return handle_ != INVALID_HANDLE_VALUE;
+  }
+
+  bool size(std::size_t* pSize)
+  {
+    *pSize = ::GetFileSize(handle_, NULL);
+    return true;
+  }
+
+  operator FileDescriptor() const
+  {
+    return handle_;
+  }
 
 private:
   FileDescriptor handle_;

@@ -23,10 +23,15 @@ public:
 
   ~FileConnection()
   {
-    ::close(fd_);
+    if (open())
+      ::close(fd_);
   }
 
-  bool open() { return fd_ != -1; }
+  bool open()
+  {
+    return fd_ != -1;
+  }
+
   bool size(std::size_t* pSize)
   {
     struct stat info;
@@ -36,7 +41,11 @@ public:
     *pSize = info.st_size;
     return true;
   }
-  operator FileDescriptor() const { return fd_; }
+
+  operator FileDescriptor() const
+  {
+    return fd_;
+  }
 
 private:
   FileDescriptor fd_;

@@ -2,6 +2,7 @@
 #define SOURCE_TOOLS_READ_MEMORY_MAPPED_READER_H
 
 #include <string>
+#include <sourcetools/core/macros.h>
 
 #ifndef _WIN32
 # include <sourcetools/read/posix/FileConnection.h>
@@ -31,7 +32,7 @@ public:
       return false;
 
     // Early return for empty files
-    if (size == 0)
+    if (UNLIKELY(size == 0))
       return true;
 
     // mmap the file

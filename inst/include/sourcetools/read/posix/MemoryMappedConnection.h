@@ -11,7 +11,7 @@ class MemoryMappedConnection
 {
 public:
 
-  MemoryMappedConnection(int fd, int size)
+  MemoryMappedConnection(int fd, std::size_t size)
     : size_(size)
   {
 #ifdef MAP_POPULATE
@@ -21,18 +21,25 @@ public:
 #endif
   }
 
-  bool open() { return map_ != MAP_FAILED; }
-  operator char*() const { return map_; }
-
   ~MemoryMappedConnection()
   {
     if (map_ != MAP_FAILED)
       ::munmap(map_, size_);
   }
 
+  bool open()
+  {
+    return map_ != MAP_FAILED;
+  }
+
+  operator char*() const
+  {
+    return map_;
+  }
+
 private:
   char* map_;
-  int size_;
+  std::size_t size_;
 };
 
 } // namespace detail

@@ -22,13 +22,20 @@ public:
     map_ = (char*) ::MapViewOfFile(handle_, FILE_MAP_READ, 0, 0, size);
   }
 
-  bool open() { return map_ != NULL; }
-  operator char*() const { return map_; }
-
   ~MemoryMappedConnection()
   {
     if (handle_ != INVALID_HANDLE_VALUE)
       ::CloseHandle(handle_);
+  }
+
+  bool open()
+  {
+    return map_ != NULL;
+  }
+
+  operator char*() const
+  {
+    return map_;
   }
 
 private:
