@@ -20,6 +20,9 @@ private:
   typedef tokens::TokenType TokenType;
 
 private:
+
+  // Tokenization ----
+
   void consumeToken(TokenType type,
                     std::size_t length,
                     Token* pToken)
@@ -89,7 +92,7 @@ private:
   void consumeWhitespace(Token* pToken)
   {
     std::size_t distance = 1;
-    while (std::isspace(cursor_.peek(distance)))
+    while (utils::isWhitespace(cursor_.peek(distance)))
       ++distance;
 
     consumeToken(tokens::WHITESPACE, distance, pToken);
@@ -100,10 +103,10 @@ private:
   bool isStartOfNumber()
   {
     char ch = cursor_.peek();
-    if (std::isdigit(ch))
+    if (utils::isDigit(ch))
       return true;
     if (ch == '.')
-      return std::isdigit(cursor_.peek(1));
+      return utils::isDigit(cursor_.peek(1));
     return false;
   }
 
@@ -147,7 +150,7 @@ private:
 
     bool success = true;
     char peek = cursor_.peek(distance);
-    while (std::isalnum(peek) && peek != '\0') {
+    while (utils::isAlphaNumeric(peek) && peek != '\0') {
 
       // If we encounter an 'i' or an 'L', assume
       // that this ends the identifier.
@@ -181,7 +184,7 @@ private:
       return;
 
     // Consume digits
-    while (std::isdigit(cursor_.peek(distance)))
+    while (utils::isDigit(cursor_.peek(distance)))
       ++distance;
 
     // Consume a dot for decimals
@@ -189,7 +192,7 @@ private:
     // So is '100.'; ie, with a trailing decimal.
     if (cursor_.peek(distance) == '.') {
       ++distance;
-      while (std::isdigit(cursor_.peek(distance)))
+      while (utils::isDigit(cursor_.peek(distance)))
         ++distance;
     }
 
@@ -202,8 +205,8 @@ private:
         ++distance;
 
       // Parse another set of numbers following the E
-      success = std::isdigit(cursor_.peek(distance));
-      while (std::isdigit(cursor_.peek(distance)))
+      success = utils::isDigit(cursor_.peek(distance));
+      while (utils::isDigit(cursor_.peek(distance)))
         ++distance;
 
       // Consume '.' and following numbers. Note that this is
@@ -212,7 +215,7 @@ private:
       if (cursor_.peek(distance) == '.') {
         success = false;
         ++distance;
-        while (std::isdigit(cursor_.peek(distance)))
+        while (utils::isDigit(cursor_.peek(distance)))
           ++distance;
       }
     }
@@ -394,7 +397,7 @@ public:
       consumeToken(tokens::SEMI, 1, pToken);
 
     // Whitespace
-    else if (std::isspace(ch))
+    else if (utils::isWhitespace(ch))
       consumeWhitespace(pToken);
 
     // Strings and symbols

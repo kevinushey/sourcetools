@@ -24,10 +24,41 @@ typedef detail::noncopyable noncopyable;
 
 namespace utils {
 
+inline bool isWhitespace(char ch)
+{
+  return
+    ch == ' ' ||
+    ch == '\t' ||
+    ch == '\r' ||
+    ch == '\n' ||
+    ch == '\v';
+}
+
+inline bool isDigit(char ch)
+{
+  return
+    (ch >= '0' && ch <= '9');
+}
+
+inline bool isAlphabetic(char ch)
+{
+  return
+    (ch >= 'a' && ch <= 'z') ||
+    (ch >= 'A' && ch <= 'Z');
+}
+
+inline bool isAlphaNumeric(char ch)
+{
+  return
+    (ch >= 'a' && ch <= 'z') ||
+    (ch >= 'A' && ch <= 'Z') ||
+    (ch >= '0' && ch <= '9');
+}
+
 inline bool isValidForStartOfRSymbol(char ch)
 {
   return
-    std::isalpha(ch) ||
+    isAlphabetic(ch) ||
     ch == '.' ||
     ch < 0;
 }
@@ -35,7 +66,7 @@ inline bool isValidForStartOfRSymbol(char ch)
 inline bool isValidForRSymbol(char ch)
 {
   return
-    std::isalnum(ch) ||
+    isAlphaNumeric(ch) ||
     ch == '.' ||
     ch == '_' ||
     ch < 0;
