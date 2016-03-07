@@ -28,9 +28,10 @@ inline bool isWhitespace(char ch)
 {
   return
     ch == ' ' ||
-    ch == '\t' ||
+    ch == '\f' ||
     ch == '\r' ||
     ch == '\n' ||
+    ch == '\t' ||
     ch == '\v';
 }
 
