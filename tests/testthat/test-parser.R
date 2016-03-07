@@ -1,6 +1,6 @@
 context("Parser")
 
-test_that("agreement on parse of expressions", {
+test_that("precedence of '?' vs '=' correctly handled", {
 
   expect_parse("foo ? bar = baz")
   expect_parse("foo ? bar <- baz")
@@ -86,11 +86,13 @@ test_that("parser handles newlines as statement delimiter", {
   expect_parse("a <- b\n+1")
   expect_parse("a <- 1\n(b)")
   expect_parse("a <- foo(1)\n(b)")
+  expect_parse("(a <- foo(1)\n(b))")
 })
 
 test_that("parser handles semi-colons as statement delimiter", {
   expect_parse("a <- 1; b <- 2; c <- 3")
   expect_parse("{a <- 1;}")
+  expect_parse("{a <- 1;;; b}")
 })
 
 test_that("parser handles various escapes in strings", {

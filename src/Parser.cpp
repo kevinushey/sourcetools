@@ -42,7 +42,7 @@ private:
     {
     case KEYWORD_FALSE:         return Rf_ScalarLogical(0);
     case KEYWORD_TRUE:          return Rf_ScalarLogical(1);
-    case KEYWORD_Inf:           return Rf_ScalarReal(INFINITY);
+    case KEYWORD_Inf:           return Rf_ScalarReal(R_PosInf);
     case KEYWORD_NA:            return Rf_ScalarLogical(NA_LOGICAL);
     case KEYWORD_NA_character_: return Rf_ScalarString(NA_STRING);
     // case KEYWORD_NA_complex_:   return NA_COM
