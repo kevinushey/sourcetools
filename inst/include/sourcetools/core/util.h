@@ -4,6 +4,7 @@
 #include <string>
 #include <memory>
 #include <cctype>
+#include <cstdlib>
 
 namespace sourcetools {
 namespace detail {
@@ -85,6 +86,34 @@ inline std::string escape(char ch)
   default:
     return std::string(1, ch);
   }
+}
+
+inline bool countWhitespaceBytes(const char* data, int* pBytes)
+{
+  wchar_t ch;
+  int bytes = 0;
+  const char* it = data;
+
+  while (true) {
+
+    int status = std::mbtowc(&ch, it, MB_CUR_MAX);
+    if (status == 0) {
+      break;
+    } else if (status == -1) {
+      break;
+    }
+
+    if (!std::iswspace(ch))
+      break;
+
+    bytes += status;
+    it += status;
+  }
+
+  if (bytes)
+    *pBytes = bytes;
+
+  return bytes != 0;
 }
 
 } // namespace utils

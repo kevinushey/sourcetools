@@ -89,15 +89,6 @@ private:
     consumeUntil('"', tokens::STRING, pToken, true);
   }
 
-  void consumeWhitespace(Token* pToken)
-  {
-    std::size_t distance = 1;
-    while (utils::isWhitespace(cursor_.peek(distance)))
-      ++distance;
-
-    consumeToken(tokens::WHITESPACE, distance, pToken);
-  }
-
   // NOTE: Don't tokenize '-' or '+' as part of number; instead
   // it's parsed as a unary operator.
   bool isStartOfNumber()
@@ -256,6 +247,7 @@ public:
     }
 
     char ch = cursor_.peek();
+    int n = 0;
 
     // Block-related tokens
     if (ch == '{')
@@ -397,8 +389,8 @@ public:
       consumeToken(tokens::SEMI, 1, pToken);
 
     // Whitespace
-    else if (utils::isWhitespace(ch))
-      consumeWhitespace(pToken);
+    else if (utils::countWhitespaceBytes(cursor_, &n))
+      consumeToken(tokens::WHITESPACE, n, pToken);
 
     // Strings and symbols
     else if (ch == '\'')
