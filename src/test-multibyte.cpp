@@ -3,8 +3,6 @@
 #include <R.h>
 #include <Rinternals.h>
 
-#include <sourcetools/utf8/utf8.h>
-
 std::string type(wchar_t ch)
 {
   std::string result;
@@ -39,7 +37,7 @@ std::string type(wchar_t ch)
   return result;
 }
 
-extern "C" SEXP sourcetools_print_utf8(SEXP dataSEXP)
+extern "C" SEXP sourcetools_print_multibyte(SEXP dataSEXP)
 {
   const char* data = CHAR(STRING_ELT(dataSEXP, 0));
   std::size_t size = Rf_length(STRING_ELT(dataSEXP, 0));
@@ -48,13 +46,13 @@ extern "C" SEXP sourcetools_print_utf8(SEXP dataSEXP)
   const char* it = data;
   while (true)
   {
-    int length = sourcetools::utf8::read(it, &ch);
+    int length = std::mbtowc(&ch, it, MB_CUR_MAX);
     if (length == 0)
       break;
 
     if (length == -1)
     {
-      Rf_warning("Invalid character at index %i\n", it - data);
+      Rf_warning("Invalid multibyte character at index %i\n", it - data);
       ++it;
       continue;
     }
