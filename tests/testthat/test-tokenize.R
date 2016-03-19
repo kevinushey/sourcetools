@@ -149,13 +149,3 @@ test_that("files in packages are tokenized without errors", {
   }
 
 })
-
-test_that("multibyte spaces are detected appropriately", {
-  skip_on_os("windows")
-
-  text <- "\u00A0\u2000\u3000"
-  tokens <- tokenize_string(text)
-  expect_true(nrow(tokens) == 1)
-  expect_true(tokens$type == "whitespace")
-
-})
