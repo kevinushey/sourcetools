@@ -53,7 +53,9 @@ test_that("parser handles function calls with no args", {
   # > length(base::parse(text = "a[]")[[1]])   # [1] 3
   # > length(base::parse(text = "a[[]]")[[1]]) # [1] 3
   #
-  # R inserts an empty 'R_MissingArg' argument into the third spot.
+  # R inserts an empty 'R_MissingArg' argument
+  # into the third spot. This is sensible, albeit
+  # a bit surprising when you first see it.
   expect_parse("a()")
   expect_parse("a[]")
   expect_parse("a[[]]")
@@ -111,6 +113,11 @@ test_that("parser handles if-else", {
 
 })
 
+test_that("parser handles various escapes in strings", {
+  contents <- read("helper-utf8.R")
+  expect_parse(contents)
+})
+
 test_that("parser handles random R code in my git folder", {
   skip("TODO")
 
@@ -125,7 +132,7 @@ test_that("parser handles random R code in my git folder", {
     file <- files[[i]]
     contents <- read(file)
     cat("Checking parse: '", file, "'\n", sep = "")
-    R  <- base::parse(file, keep.source = FALSE)
+    R <- base::parse(file, keep.source = FALSE)
     S <- sourcetools:::parse_string(contents)
 
     # The following is just for easier debugging
@@ -150,7 +157,8 @@ if (FALSE) {
   unOps <- c("~", "+", "-", "?", "!")
   binOps <- c(
     # "::", ":::", ## TODO: only allowed in certain contexts
-    "$", "@", "^", ":", "%foo%",
+    # "$", "@", ## TODO: need to ensure following token is string or symbol
+    "^", ":", "%foo%",
     "*", "/", "+", "-",
     # "<", ">", "<=", ">=", "==", "!=", ## TODO: The R parser checks these are only found once in expression
     "&", "&&",
@@ -162,19 +170,24 @@ if (FALSE) {
     "?"
   )
 
-  n <- 5
+  n <- 3
   repeat {
+
+    namesSample  <- sample(names, n, TRUE)
+    binOpsSample <- sample(binOps, n, TRUE)
+    unOpsSample <- unlist(lapply(seq_len(n), function(i) {
+      paste(sample(unOps, n, TRUE), collapse = "")
+    }))
+
     code <- paste(
-      paste(sample(unOps, n), collapse = ""),
-      paste(sample(names, n, TRUE), sample(binOps, n, TRUE), collapse = " "),
-      " end",
-      sep = ""
+      paste(unOpsSample, namesSample, binOpsSample, sep = " ", collapse = " "),
+      "end"
     )
 
-    R <- parse(text = code)
-    attributes(R) <- NULL
-    ST <- parse_string(code)
-    stopifnot(all.equal(R, ST))
+    R <- base::parse(text = code, keep.source = FALSE)
+    S <- parse_string(code)
+    stopifnot(all.equal(R, S))
+
   }
 
 }
