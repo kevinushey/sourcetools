@@ -294,8 +294,9 @@ extern "C" SEXP sourcetools_parse_string(SEXP programSEXP)
   sourcetools::parser::Parser parser(CHAR(charSEXP), Rf_length(charSEXP));
   Node* root = parser.parse();
   sourcetools::diagnostics::DiagnosticsSet diagnostics;
-  diagnostics.add(new sourcetools::diagnostics::detail::ComparisonWithNullDiagnostic);
+  diagnostics.add(new sourcetools::diagnostics::detail::ComparisonWithNullChecker);
   diagnostics.run(root);
+  diagnostics.report();
   sourcetools::reportErrors(parser.errors());
   SEXP resultSEXP = sourcetools::SEXPConverter::asSEXP(root);
   Node::destroy(root);

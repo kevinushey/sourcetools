@@ -1,6 +1,7 @@
 #ifndef SOURCE_TOOLS_COLLECTIONS_POSITION_H
 #define SOURCE_TOOLS_COLLECTIONS_POSITION_H
 
+#include <ostream>
 #include <cstddef>
 
 namespace sourcetools {
@@ -16,6 +17,13 @@ struct Position
   Position(std::size_t row, std::size_t column)
     : row(row), column(column)
   {
+  }
+
+  friend std::ostream& operator<<(std::ostream& os,
+                                  const Position& position)
+  {
+    os << position.row << ":" << position.column;
+    return os;
   }
 
   friend bool operator <(const Position& lhs, const Position& rhs)

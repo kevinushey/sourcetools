@@ -3,6 +3,7 @@
 
 #include <memory>
 
+#include <sourcetools/collection/collection.h>
 #include <sourcetools/tokenization/tokenization.h>
 
 namespace sourcetools {
@@ -11,6 +12,8 @@ namespace parser {
 class Node
 {
 public:
+  typedef collections::Position Position;
+  typedef collections::Range Range;
   typedef tokens::Token Token;
   typedef tokens::TokenType TokenType;
   typedef std::vector<Node*> Children;
@@ -68,6 +71,39 @@ public:
 
     pNode->parent_ = this;
     children_.push_back(pNode);
+  }
+
+private:
+  class FindExpressionStart
+  {
+  public:
+    FindExpressionStart(Position* pStart, Position* pEnd)
+      : pStart_(pStart), pEnd_(pEnd)
+    {
+    }
+
+    void operator()(const Node* pNode)
+    {
+      Position position = pNode->token().position();
+      if (position < *pStart_)
+        *pStart_ = position;
+      else if (position > *pEnd_)
+        *pEnd_ = position;
+    }
+
+  private:
+    Position* pStart_;
+    Position* pEnd_;
+  };
+
+public:
+  Range range() const
+  {
+    Position startPosition = token_.position();
+    Position endPosition   = token_.position();
+    FindExpressionStart f(&startPosition, &endPosition);
+    std::for_each(begin(), end(), f);
+    return Range(startPosition, endPosition);
   }
 
   const Children::const_iterator begin() const { return children_.begin(); }
