@@ -191,6 +191,16 @@ public:
     if (!pNode)
       return R_NilValue;
 
+    if (pNode->token().isType(tokens::ROOT))
+    {
+      const std::vector<Node*>& children = pNode->children();
+      std::size_t n = pNode->children().size();
+      SEXP exprSEXP = Rf_allocVector(EXPRSXP, n);
+      for (std::size_t i = 0; i < n; ++i)
+        SET_VECTOR_ELT(exprSEXP, i, asSEXP(children[i]));
+      return exprSEXP;
+    }
+
     // Handle function calls specially
     if (isFunctionCall(pNode))
       return asFunctionCallSEXP(pNode);
@@ -283,12 +293,9 @@ extern "C" SEXP sourcetools_parse_string(SEXP programSEXP)
   typedef sourcetools::parser::Node Node;
   SEXP charSEXP = STRING_ELT(programSEXP, 0);
   sourcetools::parser::Parser parser(CHAR(charSEXP), Rf_length(charSEXP));
-  std::vector<Node*> root = parser.parse();
+  Node* root = parser.parse();
   sourcetools::reportErrors(parser.errors());
-  // for (auto&& child : root)
-  //   sourcetools::log(child);
   SEXP resultSEXP = sourcetools::SEXPConverter::asSEXP(root);
-  for (std::size_t i = 0; i < root.size(); ++i)
-    Node::destroy(root[i]);
+  Node::destroy(root);
   return resultSEXP;
 }

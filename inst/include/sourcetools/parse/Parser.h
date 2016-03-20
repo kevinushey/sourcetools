@@ -564,9 +564,9 @@ private:
 
 public:
 
-  std::vector<Node*> parse()
+  Node* parse()
   {
-    std::vector<Node*> expression;
+    Node* root = Node::create(tokens::ROOT);
 
     while (true)
     {
@@ -574,10 +574,10 @@ public:
       if (pNode->token().isType(tokens::END))
         break;
 
-      expression.push_back(pNode);
+      root->add(pNode);
     }
 
-    return expression;
+    return root;
   }
 
   const std::vector<ParseError>& errors() const
