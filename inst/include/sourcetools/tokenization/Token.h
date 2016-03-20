@@ -57,7 +57,23 @@ public:
   const char* end() const { return end_; }
   std::size_t size() const { return end_ - begin_; }
 
-  std::string contents() const { return std::string(begin_, end_); }
+  std::string contents() const
+  {
+    return std::string(begin_, end_);
+  }
+
+  bool contentsEqual(const char* string)
+  {
+    return ::strcmp(begin_, string);
+  }
+
+  bool contentsEqual(const std::string& string) const
+  {
+    if (string.size() != size())
+      return false;
+
+    return ::memcmp(begin_, string.c_str(), size() - 1) == 0;
+  }
 
   const Position& position() const { return position_; }
   std::size_t row() const { return position_.row; }
