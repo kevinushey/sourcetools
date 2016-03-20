@@ -285,7 +285,6 @@ void reportErrors(const std::vector<parser::ParseError>& errors)
 }
 
 } // anonymous namespace
-
 } // namespace sourcetools
 
 extern "C" SEXP sourcetools_parse_string(SEXP programSEXP)
@@ -294,6 +293,9 @@ extern "C" SEXP sourcetools_parse_string(SEXP programSEXP)
   SEXP charSEXP = STRING_ELT(programSEXP, 0);
   sourcetools::parser::Parser parser(CHAR(charSEXP), Rf_length(charSEXP));
   Node* root = parser.parse();
+  sourcetools::diagnostics::DiagnosticsSet diagnostics;
+  diagnostics.add(new sourcetools::diagnostics::detail::ComparisonWithNullDiagnostic);
+  diagnostics.run(root);
   sourcetools::reportErrors(parser.errors());
   SEXP resultSEXP = sourcetools::SEXPConverter::asSEXP(root);
   Node::destroy(root);

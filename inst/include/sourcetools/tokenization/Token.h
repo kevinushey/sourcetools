@@ -155,6 +155,26 @@ inline bool isNonUnaryOperator(const Token& token)
   return isOperator(token) && !isUnaryOperator(token);
 }
 
+inline bool isComparisonOperator(const Token& token)
+{
+  switch (token.type())
+  {
+  case OPERATOR_AND_SCALAR:
+  case OPERATOR_AND_VECTOR:
+  case OPERATOR_OR_SCALAR:
+  case OPERATOR_OR_VECTOR:
+  case OPERATOR_EQUAL:
+  case OPERATOR_NOT_EQUAL:
+  case OPERATOR_LESS:
+  case OPERATOR_LESS_OR_EQUAL:
+  case OPERATOR_GREATER:
+  case OPERATOR_GREATER_OR_EQUAL:
+    return true;
+  default:
+    return false;
+  }
+}
+
 inline bool isWhitespace(const Token& token)
 {
   return token.type() == WHITESPACE;
