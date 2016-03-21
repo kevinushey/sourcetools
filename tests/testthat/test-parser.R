@@ -129,6 +129,7 @@ test_that("parser handles random R code in my git folder", {
   files <- list.files(folders, full.names = TRUE, pattern = "[rR]$")
 
   for (i in seq_along(files)) {
+    Sys.sleep(0.1)
     file <- files[[i]]
     contents <- read(file)
     cat("Checking parse: '", file, "'\n", sep = "")

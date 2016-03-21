@@ -119,7 +119,18 @@ public:
 };
 
 /**
- * Warn about unused computations.
+ * Warn about unused computations, e.g.
+ *
+ *    foo <- function(x) {
+ *       x < 1
+ *       print(x)
+ *    }
+ *
+ * For example, in the above code, it's possible that the user
+ * intended to assign 1 to x, or use that result elsewhere.
+ *
+ * Don't warn if the expression shows up as the last statement
+ * within a parent function's body.
  */
 class UnusedResultChecker : public CheckerBase
 {
@@ -137,12 +148,20 @@ public:
     if (!isTopLevelContext)
       return;
 
+    if (parentToken.isType(tokens::LBRACE))
+    {
+      const std::vector<Node*> siblings = pNode->parent()->children();
+      if (pNode == siblings[siblings.size() - 1])
+        return;
+    }
+
     const Token& token = pNode->token();
     if (!tokens::isOperator(token))
       return;
 
     if (tokens::isAssignmentOperator(token))
       return;
+
 
     pDiagnostics->addInfo(
       "result of computation is not used",
