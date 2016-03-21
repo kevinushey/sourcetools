@@ -150,7 +150,7 @@ public:
 
     if (parentToken.isType(tokens::LBRACE))
     {
-      const std::vector<Node*> siblings = pNode->parent()->children();
+      const std::vector<Node*>& siblings = pNode->parent()->children();
       if (pNode == siblings[siblings.size() - 1])
         return;
     }
