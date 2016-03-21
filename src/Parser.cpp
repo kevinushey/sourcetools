@@ -289,16 +289,20 @@ void reportErrors(const std::vector<parser::ParseError>& errors)
 
 extern "C" SEXP sourcetools_parse_string(SEXP programSEXP)
 {
-  typedef sourcetools::parser::Node Node;
+  using namespace sourcetools;
+
   SEXP charSEXP = STRING_ELT(programSEXP, 0);
   sourcetools::parser::Parser parser(CHAR(charSEXP), Rf_length(charSEXP));
-  Node* root = parser.parse();
-  sourcetools::diagnostics::DiagnosticsSet diagnostics;
-  diagnostics.add(new sourcetools::diagnostics::detail::ComparisonWithNullChecker);
-  diagnostics.run(root);
-  diagnostics.report();
+  parser::Node* pRoot = parser.parse();
   sourcetools::reportErrors(parser.errors());
-  SEXP resultSEXP = sourcetools::SEXPConverter::asSEXP(root);
-  Node::destroy(root);
+
+  using namespace sourcetools::diagnostics;
+  DiagnosticsSet* pDiagnostics = createDefaultDiagnosticsSet();
+  pDiagnostics->run(pRoot);
+  pDiagnostics->report();
+  destroy(pDiagnostics);
+
+  SEXP resultSEXP = sourcetools::SEXPConverter::asSEXP(pRoot);
+  destroy(pRoot);
   return resultSEXP;
 }

@@ -115,6 +115,12 @@ public:
 };
 
 } // namespace parser
+
+inline void destroy(const parser::Node* pNode)
+{
+  parser::Node::destroy(pNode);
+}
+
 } // namespace sourcetools
 
 #endif /* SOURCE_TOOLS_PARSE_NODE_H */
