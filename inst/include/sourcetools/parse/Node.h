@@ -74,10 +74,10 @@ public:
   }
 
 private:
-  class FindExpressionStart
+  class FindExpressionBounds
   {
   public:
-    FindExpressionStart(Position* pStart, Position* pEnd)
+    FindExpressionBounds(Position* pStart, Position* pEnd)
       : pStart_(pStart), pEnd_(pEnd)
     {
     }
@@ -101,7 +101,7 @@ public:
   {
     Position startPosition = token_.position();
     Position endPosition   = token_.position();
-    FindExpressionStart f(&startPosition, &endPosition);
+    FindExpressionBounds f(&startPosition, &endPosition);
     std::for_each(begin(), end(), f);
     return Range(startPosition, endPosition);
   }

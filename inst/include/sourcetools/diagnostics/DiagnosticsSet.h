@@ -69,6 +69,8 @@ inline DiagnosticsSet* createDefaultDiagnosticsSet()
   DiagnosticsSet* pSet = new DiagnosticsSet();
   pSet->add(new checkers::AssignmentInIfChecker);
   pSet->add(new checkers::ComparisonWithNullChecker);
+  pSet->add(new checkers::ScalarOpsInIfChecker);
+  pSet->add(new checkers::UnusedResultChecker);
   return pSet;
 }
 

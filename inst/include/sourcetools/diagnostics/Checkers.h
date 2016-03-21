@@ -19,6 +19,14 @@ public:
   virtual ~CheckerBase() {}
 };
 
+/**
+ * Warn about code of the form:
+ *
+ *    x == NULL
+ *
+ * The user likely intended to check if a value was NULL,
+ * and in such a case should use `is.null()` instead.
+ */
 class ComparisonWithNullChecker : public CheckerBase
 {
 public:
@@ -74,6 +82,71 @@ public:
       "Using '=' for assignment in 'if' condition",
       pCondition->range());
 
+  }
+};
+
+/**
+ * Warn about vectorized '&' or '|' used in
+ * 'if' statements. The scalar forms, '&&' and '||',
+ * are likely preferred.
+ */
+class ScalarOpsInIfChecker : public CheckerBase
+{
+public:
+  void apply(const Node* pNode, Diagnostics* pDiagnostics) const
+  {
+    if (!pNode->token().isType(tokens::KEYWORD_IF))
+      return;
+
+    if (pNode->children().size() < 1)
+      return;
+
+    Node* pCondition = pNode->children()[0];
+    const Token& token = pCondition->token();
+    if (token.isType(tokens::OPERATOR_AND_VECTOR))
+    {
+      pDiagnostics->addInfo(
+        "Prefer '&&' to '&' in 'if' statement condition",
+        pCondition->range());
+    }
+    else if (token.isType(tokens::OPERATOR_OR_VECTOR))
+    {
+      pDiagnostics->addInfo(
+        "Prefer '||' to '|' in 'if' statement condition",
+        pCondition->range());
+    }
+  }
+};
+
+/**
+ * Warn about unused computations.
+ */
+class UnusedResultChecker : public CheckerBase
+{
+public:
+  void apply(const Node* pNode, Diagnostics* pDiagnostics) const
+  {
+    if (pNode->parent() == NULL)
+      return;
+
+    const Token& parentToken = pNode->parent()->token();
+    bool isTopLevelContext =
+      parentToken.isType(tokens::ROOT) ||
+      parentToken.isType(tokens::LBRACE);
+
+    if (!isTopLevelContext)
+      return;
+
+    const Token& token = pNode->token();
+    if (!tokens::isOperator(token))
+      return;
+
+    if (tokens::isAssignmentOperator(token))
+      return;
+
+    pDiagnostics->addInfo(
+      "result of computation is not used",
+      pNode->range());
   }
 };
 

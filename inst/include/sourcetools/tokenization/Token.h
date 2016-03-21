@@ -218,6 +218,22 @@ inline bool isCallOperator(const Token& token)
          token.type() == LDBRACKET;
 }
 
+inline bool isAssignmentOperator(const Token& token)
+{
+  switch (token.type())
+  {
+  case OPERATOR_ASSIGN_LEFT:
+  case OPERATOR_ASSIGN_LEFT_COLON:
+  case OPERATOR_ASSIGN_LEFT_EQUALS:
+  case OPERATOR_ASSIGN_LEFT_PARENT:
+  case OPERATOR_ASSIGN_RIGHT:
+  case OPERATOR_ASSIGN_RIGHT_PARENT:
+    return true;
+  default:
+    return false;
+  }
+}
+
 namespace detail {
 
 inline bool isHexDigit(char c)
