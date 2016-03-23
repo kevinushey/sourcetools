@@ -270,7 +270,6 @@ void reportErrors(const std::vector<parser::ParseError>& errors)
   if (errors.empty())
     return;
 
-
   std::stringstream ss;
   ss << "\n  ";
   typedef std::vector<parser::ParseError>::const_iterator Iterator;
@@ -291,10 +290,12 @@ void reportErrors(const std::vector<parser::ParseError>& errors)
 extern "C" SEXP sourcetools_parse_string(SEXP programSEXP)
 {
   using namespace sourcetools;
+  using parser::Parser;
+  using parser::Node;
 
   SEXP charSEXP = STRING_ELT(programSEXP, 0);
-  sourcetools::parser::Parser parser(CHAR(charSEXP), Rf_length(charSEXP));
-  scoped_ptr<parser::Node> pRoot(parser.parse());
+  Parser parser(CHAR(charSEXP), Rf_length(charSEXP));
+  scoped_ptr<Node> pRoot(parser.parse());
   sourcetools::reportErrors(parser.errors());
 
   // using namespace sourcetools::diagnostics;
