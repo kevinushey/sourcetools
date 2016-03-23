@@ -294,16 +294,13 @@ extern "C" SEXP sourcetools_parse_string(SEXP programSEXP)
 
   SEXP charSEXP = STRING_ELT(programSEXP, 0);
   sourcetools::parser::Parser parser(CHAR(charSEXP), Rf_length(charSEXP));
-  parser::Node* pRoot = parser.parse();
+  scoped_ptr<parser::Node> pRoot(parser.parse());
   sourcetools::reportErrors(parser.errors());
 
-  using namespace sourcetools::diagnostics;
-  DiagnosticsSet* pDiagnostics = createDefaultDiagnosticsSet();
-  pDiagnostics->run(pRoot);
-  pDiagnostics->report();
-  destroy(pDiagnostics);
+  // using namespace sourcetools::diagnostics;
+  // scoped_ptr<DiagnosticsSet> pDiagnostics(createDefaultDiagnosticsSet());
+  // pDiagnostics->run(pRoot);
+  // pDiagnostics->report();
 
-  SEXP resultSEXP = sourcetools::SEXPConverter::asSEXP(pRoot);
-  destroy(pRoot);
-  return resultSEXP;
+  return sourcetools::SEXPConverter::asSEXP(pRoot);
 }
