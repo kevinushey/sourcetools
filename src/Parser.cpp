@@ -195,9 +195,10 @@ public:
     {
       const std::vector<Node*>& children = pNode->children();
       std::size_t n = pNode->children().size();
-      SEXP exprSEXP = Rf_allocVector(EXPRSXP, n);
+      SEXP exprSEXP = PROTECT(Rf_allocVector(EXPRSXP, n));
       for (std::size_t i = 0; i < n; ++i)
         SET_VECTOR_ELT(exprSEXP, i, asSEXP(children[i]));
+      UNPROTECT(1);
       return exprSEXP;
     }
 

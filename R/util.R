@@ -1,6 +1,16 @@
+.sourcetools <- new.env(parent = emptyenv())
+.sourcetools$gctorture <- TRUE
+
+with_gctorture <- function(expr) {
+  gctorture(.sourcetools$gctorture)
+  result <- expr
+  gctorture(FALSE)
+  result
+}
+
 check_parse <- function(R, S = R) {
   lhs <- base::parse(text = R, keep.source = FALSE)
-  rhs <- parse_string(S)
+  rhs <- with_gctorture(parse_string(S))
   check_parse_impl(lhs, rhs)
 }
 

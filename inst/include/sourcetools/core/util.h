@@ -23,6 +23,25 @@ private:
 } // namespace detail
 typedef detail::noncopyable noncopyable;
 
+template <typename T>
+void destroy(T* pData)
+{
+  delete pData;
+}
+
+template <typename T>
+class scoped_ptr : public noncopyable
+{
+public:
+  explicit scoped_ptr(T* pData) : pData_(pData) {}
+  T& operator*() const { return *pData_; }
+  T* operator->() const { return pData_; }
+  operator T*() const { return pData_; }
+  ~scoped_ptr() { destroy(pData_); }
+private:
+  T* pData_;
+};
+
 namespace utils {
 
 inline bool isWhitespace(char ch)
