@@ -48,6 +48,7 @@ class Parser
   typedef tokenizer::Tokenizer Tokenizer;
   typedef tokens::Token Token;
   typedef tokens::TokenType TokenType;
+  typedef collections::Position Position;
 
   enum ParseState
   {
@@ -61,6 +62,7 @@ class Parser
   Token previous_;
   ParseState state_;
   std::vector<ParseError> errors_;
+  std::map<Position, Node*> map_;
 
 public:
   explicit Parser(const char* code, std::size_t n)
@@ -129,7 +131,7 @@ private:
     SOURCE_TOOLS_DEBUG_PARSER_LOG("parseFunctionArgument()");
     using namespace tokens;
 
-    Node* pNode = Node::create(current());
+    Node* pNode = createNode(current());
     checkAndAdvance(SYMBOL);
     if (current().isType(OPERATOR_ASSIGN_LEFT_EQUALS))
     {
@@ -145,7 +147,7 @@ private:
     SOURCE_TOOLS_DEBUG_PARSER_LOG("parseFunctionArgumentList()");
     using namespace tokens;
 
-    Node* pNode = Node::create(EMPTY);
+    Node* pNode = createNode(EMPTY);
     if (token_.isType(RPAREN))
       return pNode;
 
@@ -177,7 +179,7 @@ private:
   {
     SOURCE_TOOLS_DEBUG_PARSER_LOG("parseFunctionDefinition()");
     using namespace tokens;
-    Node* pNode = Node::create(current());
+    Node* pNode = createNode(current());
     checkAndAdvance(KEYWORD_FUNCTION);
     checkAndAdvance(LPAREN);
     ParseState state = state_;
@@ -193,13 +195,13 @@ private:
   {
     SOURCE_TOOLS_DEBUG_PARSER_LOG("parseFor()");
     using namespace tokens;
-    Node* pNode = Node::create(current());
+    Node* pNode = createNode(current());
     checkAndAdvance(KEYWORD_FOR);
     checkAndAdvance(LPAREN);
     ParseState state = state_;
     state_ = PARSE_STATE_PAREN;
     check(SYMBOL);
-    pNode->add(Node::create(consume()));
+    pNode->add(createNode(consume()));
     checkAndAdvance(KEYWORD_IN);
     pNode->add(parseNonEmptyExpression());
     state_ = state;
@@ -212,7 +214,7 @@ private:
   {
     SOURCE_TOOLS_DEBUG_PARSER_LOG("parseIf()");
     using namespace tokens;
-    Node* pNode = Node::create(current());
+    Node* pNode = createNode(current());
     checkAndAdvance(KEYWORD_IF);
     checkAndAdvance(LPAREN);
     ParseState state = state_;
@@ -233,7 +235,7 @@ private:
   {
     SOURCE_TOOLS_DEBUG_PARSER_LOG("parseWhile()");
     using namespace tokens;
-    Node* pNode = Node::create(current());
+    Node* pNode = createNode(current());
     checkAndAdvance(KEYWORD_WHILE);
     checkAndAdvance(LPAREN);
     ParseState state = state_;
@@ -249,7 +251,7 @@ private:
   {
     SOURCE_TOOLS_DEBUG_PARSER_LOG("parseRepeat()");
     using namespace tokens;
-    Node* pNode = Node::create(current());
+    Node* pNode = createNode(current());
     checkAndAdvance(KEYWORD_REPEAT);
     pNode->add(parseNonEmptyExpression());
     return pNode;
@@ -273,14 +275,14 @@ private:
       return parseRepeat();
 
     unexpectedToken(consume(), "expected control-flow keyword");
-    return Node::create(INVALID);
+    return createNode(INVALID);
   }
 
   Node* parseBracedExpression()
   {
     SOURCE_TOOLS_DEBUG_PARSER_LOG("parseBracedExpression()");
     using namespace tokens;
-    Node* pNode = Node::create(current());
+    Node* pNode = createNode(current());
 
     checkAndAdvance(LBRACE);
     ParseState state = state_;
@@ -288,7 +290,7 @@ private:
     skipSemicolons();
     if (current().isType(RBRACE))
     {
-      pNode->add(Node::create(EMPTY));
+      pNode->add(createNode(EMPTY));
     }
     else
     {
@@ -310,7 +312,7 @@ private:
   {
     SOURCE_TOOLS_DEBUG_PARSER_LOG("parseParentheticalExpression()");
     using namespace tokens;
-    Node* pNode = Node::create(current());
+    Node* pNode = createNode(current());
     checkAndAdvance(LPAREN);
     ParseState state = state_;
     state_ = PARSE_STATE_PAREN;
@@ -326,7 +328,7 @@ private:
   Node* parseUnaryOperator()
   {
     SOURCE_TOOLS_DEBUG_PARSER_LOG("parseUnaryOperator()");
-    Node* pNode = Node::create(current());
+    Node* pNode = createNode(current());
     pNode->add(parseNonEmptyExpression(precedence::unary(consume())));
     return pNode;
   }
@@ -349,12 +351,12 @@ private:
     else if (isUnaryOperator(token))
       return parseUnaryOperator();
     else if (isSymbolic(token) || isKeyword(token))
-      return Node::create(consume());
+      return createNode(consume());
     else if (token.isType(END))
-      return Node::create(token);
+      return createNode(token);
 
     unexpectedToken(consume());
-    return Node::create(INVALID);
+    return createNode(INVALID);
   }
 
   Node* parseFunctionCallOne(TokenType rhsType)
@@ -363,16 +365,16 @@ private:
 
     const Token& token = current();
     if (token.isType(COMMA) || token.isType(rhsType))
-      return Node::create(Token(MISSING));
+      return createNode(Token(MISSING));
 
     if (peek().isType(OPERATOR_ASSIGN_LEFT_EQUALS))
     {
-      Node* pLhs  = Node::create(consume());
-      Node* pNode = Node::create(consume());
+      Node* pLhs  = createNode(consume());
+      Node* pNode = createNode(consume());
       pNode->add(pLhs);
 
       if (current().isType(COMMA) || current().isType(rhsType))
-        pNode->add(Node::create(MISSING));
+        pNode->add(createNode(MISSING));
       else
         pNode->add(parseNonEmptyExpression());
 
@@ -400,7 +402,7 @@ private:
     TokenType lhsType = current().type();
     TokenType rhsType = complement(lhsType);
 
-    Node* pNode = Node::create(current());
+    Node* pNode = createNode(current());
     pNode->add(pLhs);
 
     checkAndAdvance(lhsType);
@@ -410,8 +412,8 @@ private:
 
     if (current().isType(rhsType))
       pNode->add(lhsType == LPAREN ?
-                   Node::create(Token(EMPTY)) :
-                   Node::create(Token(MISSING)));
+                   createNode(Token(EMPTY)) :
+                   createNode(Token(MISSING)));
     else
     {
       while (true)
@@ -457,9 +459,9 @@ private:
     if (isCallOperator(token))
       return parseFunctionCall(pNode);
     else if (token.isType(END))
-      return Node::create(token);
+      return createNode(token);
 
-    Node* pNew = Node::create(token);
+    Node* pNew = createNode(token);
     pNew->add(pNode);
 
     advance();
@@ -551,6 +553,18 @@ private:
 
   // Utils ----
 
+  Node* createNode(TokenType type)
+  {
+    return Node::create(type);
+  }
+
+  Node* createNode(const Token& token)
+  {
+    Node* pNode = Node::create(token);
+    map_[token.position()] = pNode;
+    return pNode;
+  }
+
   void skipSemicolons()
   {
     while (current().isType(tokens::SEMI))
@@ -566,7 +580,7 @@ public:
 
   Node* parse()
   {
-    Node* root = Node::create(tokens::ROOT);
+    Node* root = createNode(tokens::ROOT);
 
     while (true)
     {
@@ -583,6 +597,13 @@ public:
   const std::vector<ParseError>& errors() const
   {
     return errors_;
+  }
+
+  Node* getNode(const Position& position)
+  {
+    if (!map_.count(position))
+      return NULL;
+    return map_[position];
   }
 
 };
