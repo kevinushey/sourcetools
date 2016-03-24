@@ -153,17 +153,19 @@ public:
     return true;
   }
 
-  const Token& nextSignificantToken() const
+  const Token& nextSignificantToken(std::size_t times = 1) const
   {
     TokenCursor clone(*this);
-    clone.moveToNextSignificantToken();
+    for (std::size_t i = 0; i < times; ++i)
+      clone.moveToNextSignificantToken();
     return clone;
   }
 
-  const Token& previousSignificantToken() const
+  const Token& previousSignificantToken(std::size_t times = 1) const
   {
     TokenCursor clone(*this);
-    clone.moveToPreviousSignificantToken();
+    for (std::size_t i = 0; i < times; ++i)
+      clone.moveToPreviousSignificantToken();
     return clone;
   }
 
@@ -203,7 +205,7 @@ public:
     return false;
   }
 
-  bool findComplementFwd()
+  bool fwdToMatchingBracket()
   {
     using namespace tokens;
 
@@ -222,7 +224,7 @@ public:
     return false;
   }
 
-  bool findComplementBwd()
+  bool bwdToMatchingBracket()
   {
     using namespace tokens;
 
@@ -238,15 +240,6 @@ public:
       if (balance == 0) return true;
     }
 
-    return false;
-  }
-
-  bool findComplement()
-  {
-    if (tokens::isLeftBracket(*this))
-      return findComplementFwd();
-    else if (tokens::isRightBracket(*this))
-      return findComplementBwd();
     return false;
   }
 

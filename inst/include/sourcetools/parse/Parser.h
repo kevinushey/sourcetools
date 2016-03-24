@@ -65,8 +65,16 @@ class Parser
   std::map<Position, Node*> map_;
 
 public:
+  explicit Parser(const std::string& code)
+    : tokenizer_(code.c_str(), code.size()),
+      state_(PARSE_STATE_TOP_LEVEL)
+  {
+    advance();
+  }
+
   explicit Parser(const char* code, std::size_t n)
-    : tokenizer_(code, n), state_(PARSE_STATE_TOP_LEVEL)
+    : tokenizer_(code, n),
+      state_(PARSE_STATE_TOP_LEVEL)
   {
     advance();
   }

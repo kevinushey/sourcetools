@@ -1,10 +1,10 @@
 #include <testthat.h>
 #include <sourcetools.h>
 
-namespace {
-typedef sourcetools::tokens::Token Token;
+using namespace sourcetools;
 using namespace sourcetools::tokens;
-} // anonymous namespace
+using namespace sourcetools::cursors;
+typedef sourcetools::tokens::Token Token;
 
 context("Tokenizer") {
 
@@ -46,5 +46,16 @@ context("Tokenizer") {
       expect_true(isKeyword(token));
 
     }
+  }
+
+  test_that("TokenCursor operations work as expected") {
+    std::string code = "if (foo) { print(bar) } else {}";
+    const std::vector<Token>& tokens = sourcetools::tokenize(code);
+    TokenCursor cursor(tokens);
+    expect_true(cursor.currentToken().contentsEqual("if"));
+    cursor.moveToNextSignificantToken();
+    expect_true(cursor.currentToken().contentsEqual("("));
+    expect_true(cursor.fwdToMatchingBracket());
+    expect_true(cursor.currentToken().contentsEqual(")"));
   }
 }
