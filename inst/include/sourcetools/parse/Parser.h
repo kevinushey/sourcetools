@@ -139,6 +139,7 @@ private:
     SOURCE_TOOLS_DEBUG_PARSER_LOG("parseFunctionArgument()");
     using namespace tokens;
 
+    check(SYMBOL);
     return parseExpression();
   }
 
