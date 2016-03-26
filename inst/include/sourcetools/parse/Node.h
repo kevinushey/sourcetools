@@ -73,36 +73,81 @@ public:
     children_.push_back(pNode);
   }
 
-private:
-  class FindExpressionBounds
+  void bounds(const char** begin, const char** end)
   {
-  public:
-    FindExpressionBounds(Position* pStart, Position* pEnd)
-      : pStart_(pStart), pEnd_(pEnd)
+    *begin = token_.begin();
+    *end   = token_.end();
+
+    const Node* pNode;
+
+    pNode = this;
+    while (true)
     {
+      const Children& children = pNode->children();
+      if (children.empty())
+        break;
+
+      pNode = children[0];
+      const Token& token = pNode->token();
+      if (token.begin() < *begin)
+        *begin = token.begin();
+      else
+        break;
     }
 
-    void operator()(const Node* pNode)
+    pNode = this;
+    while (true)
     {
-      Position position = pNode->token().position();
-      if (position < *pStart_)
-        *pStart_ = position;
-      else if (position > *pEnd_)
-        *pEnd_ = position;
+      const Children& children = pNode->children();
+      if (children.empty())
+        break;
+
+      pNode = children[children.size() - 1];
+      const Token& token = pNode->token();
+      if (token.end() > *end)
+        *end = token.end();
+      else
+        break;
     }
+  }
 
-  private:
-    Position* pStart_;
-    Position* pEnd_;
-  };
-
-public:
   Range range() const
   {
     Position startPosition = token_.position();
     Position endPosition   = token_.position();
-    FindExpressionBounds f(&startPosition, &endPosition);
-    std::for_each(begin(), end(), f);
+
+    const Node* pNode;
+
+    pNode = this;
+    while (true)
+    {
+      const Children& children = pNode->children();
+      if (children.empty())
+        break;
+
+      pNode = children[0];
+      const Position& candidatePosition = pNode->token().position();
+      if (candidatePosition < startPosition)
+        startPosition = candidatePosition;
+      else
+        break;
+    }
+
+    pNode = this;
+    while (true)
+    {
+      const Children& children = pNode->children();
+      if (children.empty())
+        break;
+
+      pNode = children[children.size() - 1];
+      const Position& candidatePosition = pNode->token().position();
+      if (candidatePosition > startPosition)
+        endPosition = candidatePosition;
+      else
+        break;
+    }
+
     return Range(startPosition, endPosition);
   }
 

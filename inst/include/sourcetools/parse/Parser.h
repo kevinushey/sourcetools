@@ -139,15 +139,7 @@ private:
     SOURCE_TOOLS_DEBUG_PARSER_LOG("parseFunctionArgument()");
     using namespace tokens;
 
-    Node* pNode = createNode(current());
-    checkAndAdvance(SYMBOL);
-    if (current().isType(OPERATOR_ASSIGN_LEFT_EQUALS))
-    {
-      advance();
-      pNode->add(parseNonEmptyExpression());
-    }
-
-    return pNode;
+    return parseExpression();
   }
 
   Node* parseFunctionArgumentList()

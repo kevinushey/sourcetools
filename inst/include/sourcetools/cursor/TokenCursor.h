@@ -214,6 +214,36 @@ public:
     return false;
   }
 
+  bool findFwd(const char* contents)
+  {
+    return findFwd(std::string(contents, ::strlen(contents)));
+  }
+
+  bool findFwd(const std::string& contents)
+  {
+    do {
+      if (currentToken().contentsEqual(contents))
+        return true;
+    } while (moveToNextToken());
+
+    return false;
+  }
+
+  bool findBwd(const char* contents)
+  {
+    return findBwd(std::string(contents, ::strlen(contents)));
+  }
+
+  bool findBwd(const std::string& contents)
+  {
+    do {
+      if (currentToken().contentsEqual(contents))
+        return true;
+    } while (moveToPreviousToken());
+
+    return false;
+  }
+
   bool fwdToMatchingBracket()
   {
     using namespace tokens;

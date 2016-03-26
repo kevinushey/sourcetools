@@ -72,7 +72,7 @@ public:
     if (string.size() != size())
       return false;
 
-    return ::memcmp(begin_, string.c_str(), size() - 1) == 0;
+    return ::memcmp(begin_, string.c_str(), size()) == 0;
   }
 
   const Position& position() const { return position_; }
