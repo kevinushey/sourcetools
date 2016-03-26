@@ -151,9 +151,6 @@ public:
     return Range(startPosition, endPosition);
   }
 
-  const Children::const_iterator begin() const { return children_.begin(); }
-  const Children::const_iterator end() const { return children_.end(); }
-
   const Token& token() const { return token_; }
   const Node* parent() const { return parent_; }
   const Children& children() const { return children_; }

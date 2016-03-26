@@ -130,14 +130,24 @@ private:
          it != pNode->children().end();
          ++it)
     {
-      const Node* child = *it;
-      const tokens::Token& token = child->token();
-      if (token.isType(tokens::SYMBOL))
-        SET_TAG(headSEXP, Rf_install(tokens::stringValue(token).c_str()));
-      if (child->children().empty())
+      const Node* pChild = *it;
+      const tokens::Token& token = pChild->token();
+
+      if (token.isType(tokens::OPERATOR_ASSIGN_LEFT_EQUALS))
+      {
+        const Node* pLhs = pChild->children()[0];
+        const Node* pRhs = pChild->children()[1];
+
+        if (pLhs->token().isType(tokens::SYMBOL))
+          SET_TAG(headSEXP, Rf_install(tokens::stringValue(pLhs->token()).c_str()));
+        SETCAR(headSEXP, asSEXP(pRhs));
+      }
+      else if (token.isType(tokens::SYMBOL))
+      {
         SETCAR(headSEXP, R_MissingArg);
-      else
-        SETCAR(headSEXP, asSEXP(child->children()[0]));
+        SET_TAG(headSEXP, Rf_install(tokens::stringValue(token).c_str()));
+      }
+
       headSEXP = CDR(headSEXP);
     }
 
