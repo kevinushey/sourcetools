@@ -24,12 +24,6 @@ private:
 typedef detail::noncopyable noncopyable;
 
 template <typename T>
-void destroy(T* pData)
-{
-  delete pData;
-}
-
-template <typename T>
 class scoped_ptr : public noncopyable
 {
 public:
@@ -37,7 +31,7 @@ public:
   T& operator*() const { return *pData_; }
   T* operator->() const { return pData_; }
   operator T*() const { return pData_; }
-  ~scoped_ptr() { destroy(pData_); }
+  ~scoped_ptr() { delete pData_; }
 private:
   T* pData_;
 };

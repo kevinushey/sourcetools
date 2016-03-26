@@ -75,12 +75,6 @@ inline DiagnosticsSet* createDefaultDiagnosticsSet()
 }
 
 } // namespace diagnostics
-
-inline void destroy(const diagnostics::DiagnosticsSet* pDiagnostics)
-{
-  delete pDiagnostics;
-}
-
 } // namespace sourcetools
 
 #endif /* SOURCE_TOOLS_DIAGNOSTICS_DIAGNOSTICS_SET_H */

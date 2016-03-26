@@ -45,6 +45,16 @@ public:
     return new Node(type);
   }
 
+  ~Node()
+  {
+    for (Children::const_iterator it = children_.begin();
+         it != children_.end();
+         ++it)
+    {
+      delete *it;
+    }
+  }
+
   void remove(const Node* pNode)
   {
     children_.erase(
@@ -145,20 +155,6 @@ public:
 };
 
 } // namespace parser
-
-inline void destroy(const parser::Node* pNode)
-{
-  typedef parser::Node::Children Children;
-  for (Children::const_iterator it = pNode->children().begin();
-       it != pNode->children().end();
-       ++it)
-  {
-    destroy(*it);
-  }
-
-  delete pNode;
-}
-
 } // namespace sourcetools
 
 #endif /* SOURCE_TOOLS_PARSE_NODE_H */
