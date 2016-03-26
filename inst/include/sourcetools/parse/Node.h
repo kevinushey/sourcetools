@@ -45,18 +45,6 @@ public:
     return new Node(type);
   }
 
-  static void destroy(const Node* pNode)
-  {
-    for (Children::const_iterator it = pNode->children().begin();
-         it != pNode->children().end();
-         ++it)
-    {
-      destroy(*it);
-    }
-
-    delete pNode;
-  }
-
   void remove(const Node* pNode)
   {
     children_.erase(
@@ -160,7 +148,15 @@ public:
 
 inline void destroy(const parser::Node* pNode)
 {
-  parser::Node::destroy(pNode);
+  typedef parser::Node::Children Children;
+  for (Children::const_iterator it = pNode->children().begin();
+       it != pNode->children().end();
+       ++it)
+  {
+    destroy(*it);
+  }
+
+  delete pNode;
 }
 
 } // namespace sourcetools
