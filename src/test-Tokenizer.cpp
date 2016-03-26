@@ -58,4 +58,40 @@ context("Tokenizer") {
     expect_true(cursor.fwdToMatchingBracket());
     expect_true(cursor.currentToken().contentsEqual(")"));
   }
+
+  test_that("Move to position works as expected") {
+    std::string code = "if (foo) { print(1) }";
+    const std::vector<Token>& tokens = sourcetools::tokenize(code);
+    TokenCursor cursor(tokens);
+
+    // move to 'if'
+    expect_true(cursor.moveToPosition(0, 0));
+    expect_true(cursor.isType(tokens::KEYWORD_IF));
+
+    // move to whitespace before print
+    expect_true(cursor.moveToPosition(0, 10));
+    expect_true(cursor.currentToken().contentsEqual(" "));
+
+    // move to 'print'
+    expect_true(cursor.moveToPosition(0, 11));
+    expect_true(cursor.currentToken().contentsEqual("print"));
+
+    // move to 'print' but target in middle
+    expect_true(cursor.moveToPosition(0, 12));
+    expect_true(cursor.currentToken().contentsEqual("print"));
+
+    expect_true(cursor.moveToPosition(0, 13));
+    expect_true(cursor.currentToken().contentsEqual("print"));
+
+    expect_true(cursor.moveToPosition(0, 14));
+    expect_true(cursor.currentToken().contentsEqual("print"));
+
+    expect_true(cursor.moveToPosition(0, 15));
+    expect_true(cursor.currentToken().contentsEqual("print"));
+
+    // move to '('
+    expect_true(cursor.moveToPosition(0, 16));
+    expect_true(cursor.currentToken().contentsEqual("("));
+
+  }
 }

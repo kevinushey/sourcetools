@@ -9,20 +9,6 @@
 namespace sourcetools {
 namespace cursors {
 
-namespace detail {
-
-class PositionComparator
-{
-public:
-  inline bool operator()(const tokens::Token& lhs,
-                         const tokens::Token& rhs)
-  {
-    return lhs.position() < rhs.position();
-  }
-};
-
-} // namespace detail
-
 class TokenCursor {
 
 private:
@@ -174,13 +160,36 @@ public:
     return moveToPosition(Position(row, column));
   }
 
-  bool moveToPosition(const Position& position)
+  bool moveToPosition(const Position& target)
   {
-    return std::binary_search(
-      tokens_.begin(),
-      tokens_.end(),
-      Token(position),
-      detail::PositionComparator());
+    if (UNLIKELY(n_ == 0))
+      return false;
+
+    if (UNLIKELY(tokens_[n_ - 1].position() <= target))
+    {
+      offset_ = n_ - 1;
+      return true;
+    }
+
+    std::size_t start  = 0;
+    std::size_t end    = n_;
+
+    std::size_t offset = 0;
+    while (true)
+    {
+      offset = (start + end) / 2;
+      const Position& current = tokens_[offset].position();
+
+      if (current == target || start == end)
+        break;
+      else if (current < target)
+        start = offset + 1;
+      else
+        end = offset - 1;
+    }
+
+    offset_ = offset;
+    return true;
   }
 
   template <typename F>
