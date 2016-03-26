@@ -354,7 +354,7 @@ private:
     else if (isSymbolic(token) || isKeyword(token))
       return createNode(consume());
     else if (token.isType(END))
-      return createNode(token);
+      return NULL;
 
     unexpectedToken(consume());
     return createNode(INVALID);
@@ -586,9 +586,7 @@ public:
     while (true)
     {
       Node* pNode = parseExpression();
-      if (pNode->token().isType(tokens::END))
-        break;
-
+      if (!pNode) break;
       root->add(pNode);
     }
 
