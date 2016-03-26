@@ -6,6 +6,22 @@ using namespace sourcetools::tokens;
 using namespace sourcetools::cursors;
 typedef sourcetools::tokens::Token Token;
 
+namespace {
+
+class OpenBracketLocator
+{
+public:
+  inline bool operator()(TokenCursor* pCursor) const {
+
+    if (pCursor->bwdToMatchingBracket())
+      return false;
+
+    return tokens::isLeftBracket(pCursor->currentToken());
+  }
+};
+
+} // anonymous namespace
+
 context("Tokenizer") {
 
   test_that("Complements are detected correctly") {
@@ -92,6 +108,22 @@ context("Tokenizer") {
     // move to '('
     expect_true(cursor.moveToPosition(0, 16));
     expect_true(cursor.currentToken().contentsEqual("("));
+  }
 
+  test_that("find operations work")
+  {
+    std::string code = "(if (foo) { print(1) })";
+    const std::vector<Token>& tokens = sourcetools::tokenize(code);
+    TokenCursor cursor(tokens);
+
+    OpenBracketLocator locator;
+    expect_true(cursor.moveToPosition(0, 13));
+    expect_true(cursor.currentToken().contentsEqual("print"));
+    expect_true(cursor.findBwd(locator));
+    expect_true(cursor.currentToken().contentsEqual("{"));
+    expect_true(cursor.fwdToMatchingBracket());
+    expect_true(cursor.currentToken().contentsEqual("}"));
+    expect_true(cursor.findBwd(locator));
+    expect_true(cursor.currentToken().contentsEqual("("));
   }
 }

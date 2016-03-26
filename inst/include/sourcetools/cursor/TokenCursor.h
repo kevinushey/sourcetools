@@ -196,7 +196,7 @@ public:
   bool findFwd(F f)
   {
     do {
-      if (f(*this))
+      if (f(this))
         return true;
     } while (moveToNextToken());
 
@@ -207,7 +207,7 @@ public:
   bool findBwd(F f)
   {
     do {
-      if (f(*this))
+      if (f(this))
         return true;
     } while (moveToPreviousToken());
 
@@ -217,6 +217,8 @@ public:
   bool fwdToMatchingBracket()
   {
     using namespace tokens;
+    if (!isLeftBracket(currentToken()))
+      return false;
 
     TokenType lhs = currentToken().type();
     TokenType rhs = complement(lhs);
@@ -236,6 +238,8 @@ public:
   bool bwdToMatchingBracket()
   {
     using namespace tokens;
+    if (!isRightBracket(currentToken()))
+      return false;
 
     TokenType lhs = currentToken().type();
     TokenType rhs = complement(lhs);
