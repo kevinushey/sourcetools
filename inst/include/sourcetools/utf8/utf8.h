@@ -65,6 +65,20 @@ public:
     return copy;
   }
 
+  bool operator==(const iterator& it)
+  {
+    return
+      data_ + offset_ ==
+      it.data_ + it.offset_;
+  }
+
+  bool operator!=(const iterator& it)
+  {
+    return
+      data_ + offset_ !=
+      it.data_ + it.offset_;
+  }
+
 private:
 
   int size()
