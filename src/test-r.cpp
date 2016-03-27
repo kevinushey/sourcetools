@@ -40,4 +40,14 @@ context("CallRecurser")
     expect_true(discoveries.size() == 1);
     expect_true(discoveries.count("all.equal"));
   }
+
+  test_that("Functions which perform non-standard evaluation are detected")
+  {
+    SEXP fnSEXP;
+    fnSEXP = Rf_findFun(Rf_install("library"), R_BaseNamespace);
+    expect_true(r::nse::performsNonStandardEvaluation(fnSEXP));
+
+    fnSEXP = Rf_findFun(Rf_install(".gtn"), R_BaseNamespace);
+    expect_false(r::nse::performsNonStandardEvaluation(fnSEXP));
+  }
 }

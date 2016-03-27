@@ -4,7 +4,10 @@
 #include <vector>
 
 #include <sourcetools/core/core.h>
+
 #include <sourcetools/r/RHeaders.h>
+#include <sourcetools/r/RFunctions.h>
+
 
 namespace sourcetools {
 namespace r {
@@ -21,8 +24,15 @@ public:
   };
 
   explicit CallRecurser(SEXP dataSEXP)
-    : dataSEXP_(dataSEXP)
   {
+    if (Rf_isPrimitive(dataSEXP))
+      dataSEXP_ = R_NilValue;
+    else if (Rf_isFunction(dataSEXP))
+      dataSEXP_ = r::util::functionBody(dataSEXP);
+    else if (TYPEOF(dataSEXP) == LANGSXP)
+      dataSEXP_ = dataSEXP;
+    else
+      dataSEXP_ = R_NilValue;
   }
 
   void add(Operation* pOperation)
