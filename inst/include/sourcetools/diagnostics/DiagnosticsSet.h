@@ -9,7 +9,7 @@ namespace diagnostics {
 
 class DiagnosticsSet
 {
-  typedef std::vector<const checkers::CheckerBase*> Checkers;
+  typedef std::vector<checkers::CheckerBase*> Checkers;
   typedef checkers::CheckerBase CheckerBase;
 
 public:
@@ -19,13 +19,13 @@ public:
     checkers_.push_back(pChecker);
   }
 
-  void run(const parser::Node* pNode)
+  void run(const parser::Node* pNode, std::size_t depth = 0)
   {
-    for (Checkers::const_iterator it = checkers_.begin();
+    for (Checkers::iterator it = checkers_.begin();
          it != checkers_.end();
          ++it)
     {
-      (*it)->apply(pNode, &diagnostics_);
+      (*it)->apply(pNode, &diagnostics_, depth);
     }
 
     typedef parser::Node::Children Children;
@@ -33,7 +33,7 @@ public:
          it != pNode->children().end();
          ++it)
     {
-      run(*it);
+      run(*it, depth + 1);
     }
   }
 
@@ -71,6 +71,7 @@ inline DiagnosticsSet* createDefaultDiagnosticsSet()
   pSet->add(new checkers::ComparisonWithNullChecker);
   pSet->add(new checkers::ScalarOpsInIfChecker);
   pSet->add(new checkers::UnusedResultChecker);
+  pSet->add(new checkers::NoSymbolInScopeChecker);
   return pSet;
 }
 

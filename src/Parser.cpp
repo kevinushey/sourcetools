@@ -308,10 +308,10 @@ extern "C" SEXP sourcetools_parse_string(SEXP programSEXP)
   scoped_ptr<Node> pRoot(parser.parse());
   sourcetools::reportErrors(parser.errors());
 
-  // using namespace sourcetools::diagnostics;
-  // scoped_ptr<DiagnosticsSet> pDiagnostics(createDefaultDiagnosticsSet());
-  // pDiagnostics->run(pRoot);
-  // pDiagnostics->report();
+  using namespace sourcetools::diagnostics;
+  scoped_ptr<DiagnosticsSet> pDiagnostics(createDefaultDiagnosticsSet());
+  pDiagnostics->run(pRoot);
+  pDiagnostics->report();
 
   return sourcetools::SEXPConverter::asSEXP(pRoot);
 }

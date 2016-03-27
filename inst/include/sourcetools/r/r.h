@@ -5,12 +5,25 @@
 #include <R.h>
 #include <Rinternals.h>
 
+#include <set>
 #include <vector>
 #include <string>
+
 #include <sourcetools/core/util.h>
 
 namespace sourcetools {
 namespace r {
+
+class Protect : noncopyable
+{
+public:
+  SEXP add(SEXP objectSEXP) { PROTECT(objectSEXP); ++n_; return objectSEXP; }
+  Protect() : n_(0) {}
+  ~Protect() { UNPROTECT(n_); }
+
+private:
+  std::size_t n_;
+};
 
 class RObjectFactory : noncopyable
 {
@@ -46,6 +59,42 @@ public:
 private:
   std::size_t n_;
 };
+
+inline SEXP eval(const std::string& fn, SEXP envSEXP = NULL)
+{
+  Protect protect;
+  if (envSEXP == NULL)
+  {
+    SEXP strSEXP = protect.add(Rf_mkString("sourcetools"));
+    envSEXP = R_FindNamespace(strSEXP);
+  }
+
+  SEXP callSEXP = protect.add(Rf_lang1(Rf_install(fn.c_str())));
+  SEXP resultSEXP = protect.add(Rf_eval(callSEXP, envSEXP));
+  return resultSEXP;
+}
+
+inline std::set<std::string> objectsOnSearchPath()
+{
+  std::set<std::string> results;
+  Protect protect;
+
+  SEXP objectsSEXP;
+  protect.add(objectsSEXP = eval("objectsOnSearchPath"));
+
+  for (R_xlen_t i = 0; i < Rf_length(objectsSEXP); ++i)
+  {
+    SEXP strSEXP = VECTOR_ELT(objectsSEXP, i);
+    for (R_xlen_t j = 0; j < Rf_length(strSEXP); ++j)
+    {
+      SEXP charSEXP = STRING_ELT(strSEXP, j);
+      std::string element(CHAR(charSEXP), Rf_length(charSEXP));
+      results.insert(element);
+    }
+  }
+
+  return results;
+}
 
 namespace util {
 

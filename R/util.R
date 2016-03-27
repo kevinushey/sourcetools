@@ -49,3 +49,9 @@ check_parse_impl <- function(lhs, rhs) {
 expect_parse <- function(R, S = R) {
   testthat::expect_true(check_parse(R, S))
 }
+
+objectsOnSearchPath <- function() {
+  lapply(seq_along(search()), function(i) {
+    ls(pos = i, all.names = TRUE)
+  })
+}

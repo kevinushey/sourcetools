@@ -1,6 +1,11 @@
 #ifndef SOURCE_TOOLS_DIAGNOSTICS_CHECKERS_H
 #define SOURCE_TOOLS_DIAGNOSTICS_CHECKERS_H
 
+#include <vector>
+#include <set>
+#include <string>
+
+#include <sourcetools/r/r.h>
 #include <sourcetools/parse/Node.h>
 #include <sourcetools/diagnostics/Diagnostic.h>
 
@@ -15,7 +20,7 @@ public:
   typedef tokens::TokenType TokenType;
   typedef parser::Node Node;
 
-  virtual void apply(const Node* pNode, Diagnostics* pDiagnostics) const = 0;
+  virtual void apply(const Node* pNode, Diagnostics* pDiagnostics, std::size_t depth) = 0;
   virtual ~CheckerBase() {}
 };
 
@@ -30,7 +35,7 @@ public:
 class ComparisonWithNullChecker : public CheckerBase
 {
 public:
-  void apply(const Node* pNode, Diagnostics* pDiagnostics) const
+  void apply(const Node* pNode, Diagnostics* pDiagnostics, std::size_t depth)
   {
     const Token& token = pNode->token();
     bool isEquals =
@@ -66,7 +71,7 @@ public:
 class AssignmentInIfChecker : public CheckerBase
 {
 public:
-  void apply(const Node* pNode, Diagnostics* pDiagnostics) const
+  void apply(const Node* pNode, Diagnostics* pDiagnostics, std::size_t depth)
   {
     if (!pNode->token().isType(tokens::KEYWORD_IF))
       return;
@@ -93,7 +98,7 @@ public:
 class ScalarOpsInIfChecker : public CheckerBase
 {
 public:
-  void apply(const Node* pNode, Diagnostics* pDiagnostics) const
+  void apply(const Node* pNode, Diagnostics* pDiagnostics, std::size_t depth)
   {
     if (!pNode->token().isType(tokens::KEYWORD_IF))
       return;
@@ -135,7 +140,7 @@ public:
 class UnusedResultChecker : public CheckerBase
 {
 public:
-  void apply(const Node* pNode, Diagnostics* pDiagnostics) const
+  void apply(const Node* pNode, Diagnostics* pDiagnostics, std::size_t depth)
   {
     if (pNode->parent() == NULL)
       return;
@@ -167,6 +172,142 @@ public:
       "result of computation is not used",
       pNode->range());
   }
+};
+
+class NoSymbolInScopeChecker : public CheckerBase
+{
+public:
+
+  NoSymbolInScopeChecker()
+  {
+    stack_.push_back(Context(0));
+    objects_ = r::objectsOnSearchPath();
+  }
+
+  void apply(const Node* pNode, Diagnostics* pDiagnostics, std::size_t depth)
+  {
+    using namespace tokens;
+    const Token& token = pNode->token();
+
+    // If we've left the last active scope, pop.
+    if (depth < current().depth())
+      pop();
+
+    // Assignments update the current scope.
+    if (token.isType(OPERATOR_ASSIGN_LEFT) ||
+        token.isType(OPERATOR_ASSIGN_LEFT_EQUALS))
+    {
+      const Node* pChild = pNode->children()[0];
+      const Token& symbol = pChild->token();
+      if (symbol.isType(SYMBOL) || symbol.isType(STRING))
+        add(symbol);
+    }
+
+    // Check if a symbol has a definition in scope.
+    if (token.isType(SYMBOL))
+      check(token, pDiagnostics);
+
+    // If we encounter a function definition, create a new scope
+    // and make the function argument names present in that scope.
+    if (token.isType(KEYWORD_FUNCTION))
+      push(pNode, depth);
+  }
+
+private:
+
+  class Context
+  {
+  public:
+    explicit Context(std::size_t depth)
+      : depth_(depth)
+    {
+    }
+
+    void add(const Token& token)
+    {
+      values_.insert(token.contents());
+    }
+
+    bool contains(const std::string& contents) const
+    {
+      return values_.count(contents);
+    }
+
+    std::size_t depth() const
+    {
+      return depth_;
+    }
+
+  private:
+    std::set<std::string> values_;
+    std::size_t depth_;
+  };
+
+  Context& current()
+  {
+    return stack_[stack_.size() - 1];
+  }
+
+  void push(const Node* pNode, std::size_t depth)
+  {
+    stack_.push_back(Context(depth));
+
+    Node* pFormals = pNode->children()[0];
+    const Node::Children& children = pFormals->children();
+    for (Node::Children::const_iterator it = children.begin();
+         it != children.end();
+         ++it)
+    {
+      const Token& token = (*it)->token();
+      if (token.isType(tokens::SYMBOL))
+        add(token);
+      else if (token.isType(tokens::OPERATOR_ASSIGN_LEFT_EQUALS))
+      {
+        const Token& lhs = (*it)->children()[0]->token();
+        if (lhs.isType(tokens::SYMBOL))
+          add(lhs);
+      }
+    }
+  }
+
+  void pop()
+  {
+    stack_.pop_back();
+  }
+
+  void add(const Token& token)
+  {
+    current().add(token);
+  }
+
+  void check(const Token& token, Diagnostics* pDiagnostics)
+  {
+    if (!token.isType(tokens::SYMBOL))
+      return;
+
+    std::string contents = token.contents();
+    for (std::vector<Context>::const_iterator it = stack_.begin();
+         it != stack_.end();
+         ++it)
+    {
+      if (it->contains(contents))
+      {
+        return;
+      }
+    }
+
+    if (objects_.count(token.contents()))
+      return;
+
+    collections::Range range(token.position(), token.position() + token.size());
+    pDiagnostics->addWarning(
+        "use of undefined symbol '" + token.contents() + "'",
+        range);
+  }
+
+  std::vector<Context> stack_;
+  std::set<std::string> objects_;
+
 };
 
 } // namespace checkers

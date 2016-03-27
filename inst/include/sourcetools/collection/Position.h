@@ -61,6 +61,11 @@ struct Position
       (lhs.row == rhs.row && lhs.column >= rhs.column);
   }
 
+  friend Position operator +(const Position& lhs, std::size_t rhs)
+  {
+    return Position(lhs.row, lhs.column + rhs);
+  }
+
   std::size_t row;
   std::size_t column;
 
