@@ -84,6 +84,12 @@ test_that("parser handles missing arguments", {
   expect_parse("a(x = ,)")
 })
 
+test_that("parser handles chained function calls", {
+  expect_parse("a(b)(c)(d)(e)")
+  expect_parse("a[b][c][d][e]")
+  expect_parse("a[[b]][[c]][[d]][[e]]")
+})
+
 test_that("parser handles newlines as statement delimiter", {
   expect_parse("a <- b\n+1")
   expect_parse("a <- 1\n(b)")
