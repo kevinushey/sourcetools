@@ -1,7 +1,10 @@
+library(sourcetools)
+library(microbenchmark)
+
 files <- list.files("R", full.names = TRUE)
 for (file in files) {
 
-  mb <- microbenchmark::microbenchmark(
+  mb <- microbenchmark(
     R  = base::parse(file, keep.source = FALSE),
     ST = sourcetools:::parse(file)
   )
@@ -10,7 +13,7 @@ for (file in files) {
 
   contents <- sourcetools:::read(file)
 
-  mb <- microbenchmark::microbenchmark(
+  mb <- microbenchmark(
     R  = base::parse(text = contents, keep.source = FALSE),
     ST = sourcetools:::parse(text = contents)
   )

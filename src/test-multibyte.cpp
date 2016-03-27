@@ -1,3 +1,4 @@
+#include <sourcetools.h>
 #include <testthat.h>
 
 #include <R.h>
@@ -68,4 +69,24 @@ extern "C" SEXP sourcetools_print_multibyte(SEXP dataSEXP)
   }
 
   return R_NilValue;
+}
+
+extern "C" SEXP sourcetools_print_utf8(SEXP dataSEXP)
+{
+  using namespace sourcetools;
+
+  const char* data = CHAR(STRING_ELT(dataSEXP, 0));
+  utf8::iterator it(data);
+
+  wchar_t ch = *it++;
+  while (true)
+  {
+    wchar_t ch = *it++;
+    if (ch == 0 || ch == -1)
+      break;
+    ::Rprintf("[%i]: %lc\n", (int) ch, ch);
+  }
+
+  return R_NilValue;
+
 }

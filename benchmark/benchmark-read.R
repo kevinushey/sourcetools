@@ -1,4 +1,6 @@
+library(sourcetools)
 library(microbenchmark)
+
 n <- 1E6
 junk <- paste(sample(letters, n, TRUE), collapse = "\n")
 
@@ -11,7 +13,8 @@ stopifnot(identical(
 ))
 
 library(microbenchmark)
-microbenchmark(
+mb <- microbenchmark(
   S = read(file),
   R = readChar(file, file.info(file)$size, TRUE)
 )
+print(mb)
