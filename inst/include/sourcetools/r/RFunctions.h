@@ -68,6 +68,15 @@ inline void listToDataFrame(SEXP listSEXP, int n)
   Rf_setAttrib(listSEXP, R_RowNamesSymbol, rownamesSEXP);
 }
 
+inline SEXP functionBody(SEXP fnSEXP)
+{
+  SEXP bodyFunctionSEXP = Rf_findFun(Rf_install("body"), R_BaseNamespace);
+
+  r::Protect protect;
+  SEXP callSEXP = protect(Rf_lang2(bodyFunctionSEXP, fnSEXP));
+  return Rf_eval(callSEXP, R_BaseNamespace);
+}
+
 } // namespace util
 
 } // namespace r

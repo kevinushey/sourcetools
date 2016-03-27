@@ -9,7 +9,6 @@ namespace nse {
 
 inline bool performsNonStandardEvaluation(SEXP fnSEXP)
 {
-  // TODO
   return false;
 }
 
