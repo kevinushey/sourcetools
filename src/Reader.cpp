@@ -1,4 +1,5 @@
 #include <sourcetools/read/read.h>
+#include <sourcetools/r/r.h>
 
 #define R_NO_REMAP
 #include <R.h>
@@ -16,9 +17,8 @@ extern "C" SEXP sourcetools_read(SEXP absolutePathSEXP)
     return R_NilValue;
   }
 
-  SEXP resultSEXP;
-  PROTECT(resultSEXP = Rf_allocVector(STRSXP, 1));
+  sourcetools::r::Protect protect;
+  SEXP resultSEXP = protect(Rf_allocVector(STRSXP, 1));
   SET_STRING_ELT(resultSEXP, 0, Rf_mkCharLen(contents.c_str(), contents.size()));
-  UNPROTECT(1);
   return resultSEXP;
 }

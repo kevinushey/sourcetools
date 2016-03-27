@@ -17,9 +17,15 @@ namespace r {
 class Protect : noncopyable
 {
 public:
-  SEXP add(SEXP objectSEXP) { PROTECT(objectSEXP); ++n_; return objectSEXP; }
-  Protect() : n_(0) {}
+  Protect(): n_(0) {}
   ~Protect() { UNPROTECT(n_); }
+
+  SEXP operator()(SEXP objectSEXP)
+  {
+    PROTECT(objectSEXP);
+    ++n_;
+    return objectSEXP;
+  }
 
 private:
   std::size_t n_;
@@ -65,12 +71,12 @@ inline SEXP eval(const std::string& fn, SEXP envSEXP = NULL)
   Protect protect;
   if (envSEXP == NULL)
   {
-    SEXP strSEXP = protect.add(Rf_mkString("sourcetools"));
+    SEXP strSEXP = protect(Rf_mkString("sourcetools"));
     envSEXP = R_FindNamespace(strSEXP);
   }
 
-  SEXP callSEXP = protect.add(Rf_lang1(Rf_install(fn.c_str())));
-  SEXP resultSEXP = protect.add(Rf_eval(callSEXP, envSEXP));
+  SEXP callSEXP = protect(Rf_lang1(Rf_install(fn.c_str())));
+  SEXP resultSEXP = protect(Rf_eval(callSEXP, envSEXP));
   return resultSEXP;
 }
 
@@ -80,7 +86,7 @@ inline std::set<std::string> objectsOnSearchPath()
   Protect protect;
 
   SEXP objectsSEXP;
-  protect.add(objectsSEXP = eval("objectsOnSearchPath"));
+  protect(objectsSEXP = eval("objectsOnSearchPath"));
 
   for (R_xlen_t i = 0; i < Rf_length(objectsSEXP); ++i)
   {
@@ -109,15 +115,14 @@ inline void setNames(SEXP dataSEXP, const char** names, std::size_t n)
 
 inline void listToDataFrame(SEXP listSEXP, int n)
 {
-  SEXP classSEXP = PROTECT(Rf_mkString("data.frame"));
+  r::Protect protect;
+  SEXP classSEXP = protect(Rf_mkString("data.frame"));
   Rf_setAttrib(listSEXP, R_ClassSymbol, classSEXP);
 
-  SEXP rownamesSEXP = PROTECT(Rf_allocVector(INTSXP, 2));
+  SEXP rownamesSEXP = protect(Rf_allocVector(INTSXP, 2));
   INTEGER(rownamesSEXP)[0] = NA_INTEGER;
   INTEGER(rownamesSEXP)[1] = -n;
   Rf_setAttrib(listSEXP, R_RowNamesSymbol, rownamesSEXP);
-
-  UNPROTECT(2);
 }
 
 } // namespace util

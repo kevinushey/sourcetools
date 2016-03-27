@@ -72,7 +72,8 @@ private:
       langSEXP = Rf_lang1(R_NilValue);
 
     // Start appending the child nodes to our list.
-    SEXP headSEXP = PROTECT(langSEXP);
+    r::Protect protect;
+    SEXP headSEXP = protect(langSEXP);
     for (Children::const_iterator it = pNode->children().begin();
          it != pNode->children().end();
          ++it)
@@ -114,7 +115,6 @@ private:
     if (TYPEOF(CAR(resultSEXP)) == STRSXP)
       SETCAR(resultSEXP, Rf_install(CHAR(STRING_ELT(CAR(resultSEXP), 0))));
 
-    UNPROTECT(1);
     return resultSEXP;
   }
 
@@ -124,7 +124,8 @@ private:
     if (n == 0)
       return R_NilValue;
 
-    SEXP listSEXP = PROTECT(Rf_allocList(n));
+    r::Protect protect;
+    SEXP listSEXP = protect(Rf_allocList(n));
     SEXP headSEXP = listSEXP;
     for (Children::const_iterator it = pNode->children().begin();
          it != pNode->children().end();
@@ -151,7 +152,6 @@ private:
       headSEXP = CDR(headSEXP);
     }
 
-    UNPROTECT(1);
     return listSEXP;
   }
 
@@ -160,13 +160,13 @@ private:
     if (pNode->children().size() != 2)
       return R_NilValue;
 
-    SEXP lhsSEXP = PROTECT(asFunctionArgumentListSEXP(pNode->children()[0]));
-    SEXP rhsSEXP = PROTECT(asSEXP(pNode->children()[1]));
+    r::Protect protect;
+    SEXP lhsSEXP = protect(asFunctionArgumentListSEXP(pNode->children()[0]));
+    SEXP rhsSEXP = protect(asSEXP(pNode->children()[1]));
     SEXP resultSEXP = Rf_lang4(Rf_install("function"),
                                lhsSEXP,
                                rhsSEXP,
                                R_NilValue);
-    UNPROTECT(2);
     return resultSEXP;
   }
 
@@ -205,10 +205,10 @@ public:
     {
       const std::vector<Node*>& children = pNode->children();
       std::size_t n = pNode->children().size();
-      SEXP exprSEXP = PROTECT(Rf_allocVector(EXPRSXP, n));
+      r::Protect protect;
+      SEXP exprSEXP = protect(Rf_allocVector(EXPRSXP, n));
       for (std::size_t i = 0; i < n; ++i)
         SET_VECTOR_ELT(exprSEXP, i, asSEXP(children[i]));
-      UNPROTECT(1);
       return exprSEXP;
     }
 
@@ -221,34 +221,32 @@ public:
       return asFunctionDeclSEXP(pNode);
 
     SEXP elSEXP;
+    r::Protect protect;
     if (token.isType(MISSING))
-      elSEXP = PROTECT(R_MissingArg);
+      elSEXP = protect(R_MissingArg);
     else if (token.isType(OPERATOR_EXPONENTATION_STARS))
-      elSEXP = PROTECT(Rf_install("^"));
+      elSEXP = protect(Rf_install("^"));
     else if (token.isType(KEYWORD_BREAK))
-      elSEXP = PROTECT(Rf_lang1(Rf_install("break")));
+      elSEXP = protect(Rf_lang1(Rf_install("break")));
     else if (token.isType(KEYWORD_NEXT))
-      elSEXP = PROTECT(Rf_lang1(Rf_install("next")));
+      elSEXP = protect(Rf_lang1(Rf_install("next")));
     else if (isKeyword(token))
-      elSEXP = PROTECT(asKeywordSEXP(token));
+      elSEXP = protect(asKeywordSEXP(token));
     else if (isOperator(token) || isLeftBracket(token))
-      elSEXP = PROTECT(Rf_install(token.contents().c_str()));
+      elSEXP = protect(Rf_install(token.contents().c_str()));
     else if (isNumeric(token))
-      elSEXP = PROTECT(asNumericSEXP(token));
+      elSEXP = protect(asNumericSEXP(token));
     else if (isSymbol(token))
-      elSEXP = PROTECT(Rf_install(tokens::stringValue(token).c_str()));
+      elSEXP = protect(Rf_install(tokens::stringValue(token).c_str()));
     else if (isString(token))
-      elSEXP = PROTECT(Rf_mkString(tokens::stringValue(token).c_str()));
+      elSEXP = protect(Rf_mkString(tokens::stringValue(token).c_str()));
     else
-      elSEXP = PROTECT(Rf_mkString(token.contents().c_str()));
+      elSEXP = protect(Rf_mkString(token.contents().c_str()));
 
     if (pNode->children().empty())
-    {
-      UNPROTECT(1);
       return elSEXP;
-    }
 
-    SEXP headSEXP = PROTECT(Rf_lang1(elSEXP));
+    SEXP headSEXP = protect(Rf_lang1(elSEXP));
     SEXP listSEXP = headSEXP;
     for (Children::const_iterator it = pNode->children().begin();
          it != pNode->children().end();
@@ -259,17 +257,16 @@ public:
         listSEXP = SETCDR(listSEXP, Rf_lang1(asSEXP(child)));
     }
 
-    UNPROTECT(2);
     return headSEXP;
   }
 
   static SEXP asSEXP(const std::vector<parser::Node*>& expression)
   {
     std::size_t n = expression.size();
-    SEXP exprSEXP = PROTECT(Rf_allocVector(EXPRSXP, n));
+    r::Protect protect;
+    SEXP exprSEXP = protect(Rf_allocVector(EXPRSXP, n));
     for (std::size_t i = 0; i < n; ++i)
       SET_VECTOR_ELT(exprSEXP, i, asSEXP(expression[i]));
-    UNPROTECT(1);
     return exprSEXP;
   }
 
