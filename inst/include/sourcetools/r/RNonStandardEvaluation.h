@@ -123,12 +123,12 @@ private:
     map_[address(dataSEXP)] = value;
   }
 
-  std::uintptr_t address(SEXP dataSEXP)
+  std::size_t address(SEXP dataSEXP)
   {
-    return reinterpret_cast<std::uintptr_t>(dataSEXP);
+    return reinterpret_cast<std::size_t>(dataSEXP);
   }
 
-  std::map<std::uintptr_t, bool> map_;
+  std::map<std::size_t, bool> map_;
 };
 
 inline Database& database()

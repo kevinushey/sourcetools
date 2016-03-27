@@ -115,12 +115,6 @@ inline std::string escape(char ch)
   }
 }
 
-template <typename T>
-inline std::uintptr_t address(T* object)
-{
-  return reinterpret_cast<std::uintptr_t>(object);
-}
-
 } // namespace utils
 } // namespace sourcetools
 
