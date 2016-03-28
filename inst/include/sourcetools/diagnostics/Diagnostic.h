@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 
+#include <sourcetools/r/r.h>
 #include <sourcetools/collection/collection.h>
 
 namespace sourcetools {
@@ -72,6 +73,51 @@ private:
 };
 
 } // namespace diagnostics
+
+namespace r {
+
+inline SEXP create(diagnostics::DiagnosticType type)
+{
+  using namespace diagnostics;
+
+  switch (type)
+  {
+  case DIAGNOSTIC_ERROR:   return Rf_mkString("error");
+  case DIAGNOSTIC_WARNING: return Rf_mkString("warning");
+  case DIAGNOSTIC_INFO:    return Rf_mkString("info");
+  case DIAGNOSTIC_STYLE:   return Rf_mkString("style");
+  }
+}
+
+inline SEXP create(const diagnostics::Diagnostic& diagnostic)
+{
+  using namespace diagnostics;
+
+  ListBuilder builder;
+
+  builder.add("type",    create(diagnostic.type()));
+  builder.add("file",    Rf_mkString(""));
+  builder.add("line",    Rf_ScalarInteger(diagnostic.start().row));
+  builder.add("column",  Rf_ScalarInteger(diagnostic.start().column));
+  builder.add("message", Rf_mkString(diagnostic.message()));
+
+  return builder;
+}
+
+inline SEXP create(const std::vector<diagnostics::Diagnostic>& diagnostics)
+{
+  using namespace diagnostics;
+
+  Protect protect;
+  std::size_t n = diagnostics.size();
+  SEXP resultSEXP = protect(Rf_allocVector(VECSXP, n));
+  for (std::size_t i = 0; i < n; ++i)
+    SET_VECTOR_ELT(resultSEXP, i, create(diagnostics[i]));
+  return resultSEXP;
+}
+
+} // namespace r
+
 } // namespace sourcetools
 
 #endif /* SOURCE_TOOLS_DIAGNOSTICS_DIAGNOSTIC_H */

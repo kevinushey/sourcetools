@@ -62,6 +62,39 @@ private:
   std::size_t n_;
 };
 
+class ListBuilder : noncopyable
+{
+public:
+
+  void add(const std::string& name, SEXP value)
+  {
+    names_.push_back(name);
+    data_.push_back(protect_(value));
+  }
+
+  operator SEXP() const
+  {
+    std::size_t n = data_.size();
+
+    SEXP resultSEXP = protect_(Rf_allocVector(VECSXP, n));
+    SEXP namesSEXP  = protect_(Rf_allocVector(STRSXP, n));
+
+    for (std::size_t i = 0; i < n; ++i)
+    {
+      SET_VECTOR_ELT(resultSEXP, i, data_[i]);
+      SET_STRING_ELT(namesSEXP, i, Rf_mkCharLen(names_[i].c_str(), names_[i].size()));
+    }
+
+    Rf_setAttrib(resultSEXP, R_NamesSymbol, namesSEXP);
+    return resultSEXP;
+  }
+
+private:
+  std::vector<std::string> names_;
+  std::vector<SEXP> data_;
+  mutable Protect protect_;
+};
+
 } // namespace r
 } // namespace sourcetools
 
