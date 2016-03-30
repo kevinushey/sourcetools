@@ -246,7 +246,7 @@ public:
     if (pNode->children().empty())
       return elSEXP;
 
-    SEXP headSEXP = protect(Rf_lang1(elSEXP));
+    SEXP headSEXP = protect(Rf_lang1(protect(elSEXP)));
     SEXP listSEXP = headSEXP;
     for (Children::const_iterator it = pNode->children().begin();
          it != pNode->children().end();
