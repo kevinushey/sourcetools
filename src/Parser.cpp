@@ -223,25 +223,25 @@ public:
     SEXP elSEXP;
     r::Protect protect;
     if (token.isType(MISSING))
-      elSEXP = protect(R_MissingArg);
+      elSEXP = R_MissingArg;
     else if (token.isType(OPERATOR_EXPONENTATION_STARS))
-      elSEXP = protect(Rf_install("^"));
+      elSEXP = Rf_install("^");
     else if (token.isType(KEYWORD_BREAK))
-      elSEXP = protect(Rf_lang1(Rf_install("break")));
+      elSEXP = Rf_lang1(Rf_install("break"));
     else if (token.isType(KEYWORD_NEXT))
-      elSEXP = protect(Rf_lang1(Rf_install("next")));
+      elSEXP = Rf_lang1(Rf_install("next"));
     else if (isKeyword(token))
-      elSEXP = protect(asKeywordSEXP(token));
+      elSEXP = asKeywordSEXP(token);
     else if (isOperator(token) || isLeftBracket(token))
-      elSEXP = protect(Rf_install(token.contents().c_str()));
+      elSEXP = Rf_install(token.contents().c_str());
     else if (isNumeric(token))
-      elSEXP = protect(asNumericSEXP(token));
+      elSEXP = asNumericSEXP(token);
     else if (isSymbol(token))
-      elSEXP = protect(Rf_install(tokens::stringValue(token).c_str()));
+      elSEXP = Rf_install(tokens::stringValue(token).c_str());
     else if (isString(token))
-      elSEXP = protect(Rf_mkString(tokens::stringValue(token).c_str()));
+      elSEXP = Rf_mkString(tokens::stringValue(token).c_str());
     else
-      elSEXP = protect(Rf_mkString(token.contents().c_str()));
+      elSEXP = Rf_mkString(token.contents().c_str());
 
     if (pNode->children().empty())
       return elSEXP;
