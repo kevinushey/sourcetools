@@ -2,12 +2,18 @@
 % Please edit documentation in R/sourcetools.R
 \name{read}
 \alias{read}
+\alias{read_bytes}
 \alias{read_lines}
+\alias{read_lines_bytes}
 \title{Read the Contents of a File}
 \usage{
 read(path)
 
 read_lines(path)
+
+read_bytes(path)
+
+read_lines_bytes(path)
 }
 \arguments{
 \item{path}{A file path.}

@@ -24,6 +24,22 @@ read_lines <- function(path) {
   .Call("sourcetools_read_lines", path, PACKAGE = "sourcetools")
 }
 
+#' @name read
+#' @rdname read
+#' @export
+read_bytes <- function(path) {
+  path <- normalizePath(path, mustWork = TRUE)
+  .Call("sourcetools_read_bytes", path, PACKAGE = "sourcetools")
+}
+
+#' @name read
+#' @rdname read
+#' @export
+read_lines_bytes <- function(path) {
+  path <- normalizePath(path, mustWork = TRUE)
+  .Call("sourcetools_read_lines_bytes", path, PACKAGE = "sourcetools")
+}
+
 #' Tokenize R Code
 #'
 #' Tools for tokenizing \R code.
