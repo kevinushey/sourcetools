@@ -25,6 +25,6 @@ mb <- microbenchmark(
   R   = readChar(file, file.info(file)$size, TRUE),
   SL  = read_lines(file),
   RL  = readLines(file),
-  RRL = readr::read_lines(file)
+  RRL = readr::read_lines(file, progress = FALSE)
 )
 print(mb)
