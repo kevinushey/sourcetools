@@ -120,6 +120,13 @@ test_that("parser handles if-else", {
 })
 
 test_that("parser handles various escapes in strings", {
+  # TODO: when deparsing UTF-8 escapes, Windows just prints
+  # the code point and so this test fails. E.g.
+  #
+  #   > format("\u2665")
+  #   [1] "<U+2665>"
+  skip_on_os("windows")
+
   contents <- read("helper-utf8.R")
   expect_parse(contents)
 })

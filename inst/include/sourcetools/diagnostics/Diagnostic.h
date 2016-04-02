@@ -87,6 +87,9 @@ inline SEXP create(diagnostics::DiagnosticType type)
   case DIAGNOSTIC_INFO:    return Rf_mkString("info");
   case DIAGNOSTIC_STYLE:   return Rf_mkString("style");
   }
+
+  // happy compiler
+  return Rf_mkString("error");
 }
 
 inline SEXP create(const diagnostics::Diagnostic& diagnostic)

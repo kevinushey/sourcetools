@@ -100,7 +100,8 @@ public:
     const char* end = map + size;
     while (true)
     {
-      upper = std::find(lower, end, '\n');
+      // (old?) gcc's std::find() does not accept raw pointers
+      upper = find(lower, end, '\n');
       if (upper == end)
         break;
 
@@ -128,6 +129,17 @@ public:
   {
     VectorReader reader(pContent);
     return read_lines(path, reader);
+  }
+
+private:
+
+  template <typename T, typename V>
+  static T find(T it, T end, V v)
+  {
+    for (; it != end; ++it)
+      if (*it == v)
+        return it;
+    return end;
   }
 
 };

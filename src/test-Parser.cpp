@@ -25,7 +25,7 @@ context("Parser") {
 
     Position position = cursor.currentToken().position();
     Node* pTarget = parser.getNode(position);
-    expect_true(pTarget != NULL);
+    expect_true((pTarget != NULL));
     if (pTarget == NULL)
       return;
 
