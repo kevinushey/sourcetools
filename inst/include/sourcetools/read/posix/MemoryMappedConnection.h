@@ -1,6 +1,7 @@
 #ifndef SOURCE_TOOLS_READ_POSIX_MEMORY_MAPPED_CONNECTION_H
 #define SOURCE_TOOLS_READ_POSIX_MEMORY_MAPPED_CONNECTION_H
 
+#include <cstdlib>
 #include <sys/mman.h>
 #include <fcntl.h>
 
@@ -19,6 +20,8 @@ public:
 #else
     map_ = (char*) ::mmap(0, size, PROT_READ, MAP_SHARED, fd, 0);
 #endif
+
+    ::madvise((void*) map_, size, MADV_SEQUENTIAL | MADV_WILLNEED);
   }
 
   ~MemoryMappedConnection()
