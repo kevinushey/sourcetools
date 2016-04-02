@@ -1,14 +1,14 @@
 ```{r setup, include=FALSE}
 library(sourcetools)
+library(microbenchmark)
 ```
 
 [![Travis-CI Build Status](https://travis-ci.org/kevinushey/sourcetools.svg?branch=master)](https://travis-ci.org/kevinushey/sourcetools) [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/kevinushey/sourcetools?branch=master&svg=true)](https://ci.appveyor.com/project/kevinushey/sourcetools)
 
 
-sourcetools
-===========
+# sourcetools
 
-Tools for tokenizing and (eventually) parsing R code.
+Tools for reading, tokenizing, and (eventually) parsing `R` code.
 
 ## Getting Started
 
@@ -16,6 +16,29 @@ Tools for tokenizing and (eventually) parsing R code.
 
 ```{r, eval=FALSE}
 devtools::install_github("kevinushey/sourcetools")
+```
+
+## Reading
+
+`sourcetools` comes with a couple fast functions for reading
+files into `R`.
+
+Use `read()` and `read_lines()` to quickly read a file into
+`R` as character vectors. `read_lines()` handles both Windows
+style `\r\n` line endings, as well as Unix-style `\n` endings.
+
+```{r}
+text <- replicate(10000, paste(sample(letters, 200, TRUE), collapse = ""))
+file <- tempfile()
+cat(text, file = file, sep = "\n")
+mb <- microbenchmark::microbenchmark(times = 10,
+  readChar   = readChar(file, file.info(file)$size, TRUE),
+  readLines  = readLines(file),
+  read       = read(file),
+  read_lines = read_lines(file)
+)
+print(mb, digits = 3)
+unlink(file)
 ```
 
 ## Tokenization
@@ -28,12 +51,4 @@ string, and a recorded row, column, and type:
 
 ```{r}
 tokenize_string("if (x < 10) 20")
-```
-
-## Syntax Validation
-
-`validate_syntax()` is provided to identify syntax errors:
-
-```{r}
-validate_syntax("{1 + 2)")
 ```
