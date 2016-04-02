@@ -3,14 +3,25 @@ NULL
 
 #' Read the Contents of a File
 #'
-#' Read the contents of a file into a string.
+#' Read the contents of a file into a string (or, in the case of
+#' \code{read_lines}, a vector of strings).
 #'
 #' @param path A file path.
 #'
+#' @name read
+#' @rdname read
 #' @export
 read <- function(path) {
   path <- normalizePath(path, mustWork = TRUE)
   .Call("sourcetools_read", path, PACKAGE = "sourcetools")
+}
+
+#' @name read
+#' @rdname read
+#' @export
+read_lines <- function(path) {
+  path <- normalizePath(path, mustWork = TRUE)
+  .Call("sourcetools_read_lines", path, PACKAGE = "sourcetools")
 }
 
 #' Tokenize R Code

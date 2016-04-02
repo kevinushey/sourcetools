@@ -22,3 +22,23 @@ extern "C" SEXP sourcetools_read(SEXP absolutePathSEXP)
   SET_STRING_ELT(resultSEXP, 0, Rf_mkCharLen(contents.c_str(), contents.size()));
   return resultSEXP;
 }
+
+extern "C" SEXP sourcetools_read_lines(SEXP absolutePathSEXP)
+{
+  const char* absolutePath = CHAR(STRING_ELT(absolutePathSEXP, 0));
+
+  std::vector<std::string> lines;
+  bool result = sourcetools::read_lines(absolutePath, &lines);
+  if (!result)
+  {
+    Rf_warning("Failed to read file");
+    return R_NilValue;
+  }
+
+  std::size_t n = lines.size();
+  sourcetools::r::Protect protect;
+  SEXP resultSEXP = protect(Rf_allocVector(STRSXP, n));
+  for (std::size_t i = 0; i < n; ++i)
+    SET_STRING_ELT(resultSEXP, i, Rf_mkCharLen(lines[i].c_str(), lines[i].size()));
+  return resultSEXP;
+}
