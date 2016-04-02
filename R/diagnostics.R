@@ -1,3 +1,7 @@
+diagnose_string <- function(string) {
+  .Call("sourcetools_diagnose_string", as.character(string))
+}
+
 diagnose_file <- function(file) {
-  diagnostics <- .Call("sourcetools_diagnose_file", file)
+  diagnose_string(read(file))
 }

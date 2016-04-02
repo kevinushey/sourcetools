@@ -305,43 +305,22 @@ extern "C" SEXP sourcetools_parse_string(SEXP programSEXP)
   scoped_ptr<Node> pRoot(parser.parse());
   sourcetools::reportErrors(parser.errors());
 
-  // using namespace sourcetools::diagnostics;
-  // scoped_ptr<DiagnosticsSet> pDiagnostics(createDefaultDiagnosticsSet());
-  // pDiagnostics->run(pRoot);
-  // pDiagnostics->report();
-
   return sourcetools::SEXPConverter::asSEXP(pRoot);
 }
 
-extern "C" SEXP sourcetools_diagnose_file(SEXP fileSEXP)
+extern "C" SEXP sourcetools_diagnose_string(SEXP strSEXP)
 {
   using namespace sourcetools;
   using parser::Parser;
   using parser::Node;
   using r::Protect;
 
-  Protect protect;
-  std::size_t n = Rf_length(fileSEXP);
+  SEXP charSEXP = STRING_ELT(strSEXP, 0);
+  Parser parser(CHAR(charSEXP), Rf_length(charSEXP));
+  scoped_ptr<Node> pNode(parser.parse());
 
-  SEXP resultSEXP = protect(Rf_allocVector(VECSXP, n));
-  for (std::size_t i = 0; i < n; ++i)
-  {
-    std::string contents;
-    if (!sourcetools::read(CHAR(STRING_ELT(fileSEXP, i)), &contents))
-    {
-      SET_VECTOR_ELT(resultSEXP, i, R_NilValue);
-      Rf_warning("Failed to read file '%s'\n", CHAR(STRING_ELT(fileSEXP, i)));
-      continue;
-    }
-
-    Parser parser(contents);
-    scoped_ptr<Node> pNode(parser.parse());
-
-    using namespace diagnostics;
-    scoped_ptr<DiagnosticsSet> pDiagnostics(createDefaultDiagnosticsSet());
-    std::vector<Diagnostic> diagnostics = pDiagnostics->run(pNode);
-    SET_VECTOR_ELT(resultSEXP, i, r::create(diagnostics));
-  }
-
-  return resultSEXP;
+  using namespace diagnostics;
+  scoped_ptr<DiagnosticsSet> pDiagnostics(createDefaultDiagnosticsSet());
+  std::vector<Diagnostic> diagnostics = pDiagnostics->run(pNode);
+  return r::create(diagnostics);
 }

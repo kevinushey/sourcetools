@@ -99,12 +99,6 @@ print.RTokens <- function(x, ...) {
   print.data.frame(x, ...)
 }
 
-parse <- function(file = "", text = NULL) {
-  if (is.null(text))
-    text <- read(file)
-  parse_string(text)
-}
-
 parse_string <- function(string) {
   .Call("sourcetools_parse_string", string, PACKAGE = "sourcetools")
 }
