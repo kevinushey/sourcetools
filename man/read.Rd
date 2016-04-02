@@ -2,14 +2,18 @@
 % Please edit documentation in R/sourcetools.R
 \name{read}
 \alias{read}
+\alias{read_lines}
 \title{Read the Contents of a File}
 \usage{
 read(path)
+
+read_lines(path)
 }
 \arguments{
 \item{path}{A file path.}
 }
 \description{
-Read the contents of a file into a string.
+Read the contents of a file into a string (or, in the case of
+\code{read_lines}, a vector of strings).
 }
 
