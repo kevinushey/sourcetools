@@ -6,7 +6,7 @@ unlink(file)
 
 n <- 1024
 for (i in seq_len(1E3)) {
-  junk <- paste(sample(letters, n, TRUE), collapse = "\n")
+  junk <- paste(sample(letters, n, TRUE), collapse = "")
   cat(junk, file = file, sep = "\n", append = TRUE)
 }
 
