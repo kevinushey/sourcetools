@@ -304,6 +304,7 @@ private:
       }
     }
     state_ = state;
+    pNode->setEnd(current());
     checkAndAdvance(RBRACE);
 
     return pNode;
@@ -322,6 +323,7 @@ private:
     else
       pNode->add(parseNonEmptyExpression());
     state_ = state;
+    pNode->setEnd(current());
     checkAndAdvance(RPAREN);
     return pNode;
   }

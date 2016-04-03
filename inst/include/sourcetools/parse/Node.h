@@ -23,15 +23,21 @@ private:
   Node* parent_;
   Children children_;
 
+  Token begin_;
+  Token end_;
+  bool pseudoNode_;
+
 public:
 
   explicit Node(const Token& token)
-    : token_(token), parent_(NULL)
+    : token_(token), parent_(NULL),
+      begin_(token), end_(token), pseudoNode_(false)
   {
   }
 
   explicit Node(const TokenType& type)
-    : token_(Token(type)), parent_(NULL)
+    : token_(Token(type)), parent_(NULL),
+      begin_(token_), end_(token_), pseudoNode_(true)
   {
   }
 
@@ -64,94 +70,59 @@ public:
 
   void add(Node* pNode)
   {
-    if (pNode->parent())
+    if (pNode->parent_ != NULL)
       pNode->parent_->remove(pNode);
-
     pNode->parent_ = this;
+
+    if (!pNode->isPseudoNode())
+    {
+      const Token& begin = pNode->begin();
+      const Token& end   = pNode->end();
+      for (Node* pParent = this; pParent != NULL; pParent = pParent->parent_)
+      {
+        if (begin.begin() < pParent->begin().begin())
+          pParent->setBegin(begin);
+        if (end.end() > pParent->end().end())
+          pParent->setEnd(end);
+      }
+    }
+
     children_.push_back(pNode);
+  }
+
+  const Token& begin() const { return begin_; }
+  void setBegin(const Token& begin)
+  {
+    for (Node* pNode = this; pNode != NULL; pNode = pNode->parent_)
+      if (begin.begin() < pNode->begin().begin())
+        pNode->begin_ = begin;
+  }
+
+  const Token& end() const { return end_; }
+  void setEnd(const Token& end)
+  {
+    end_ = end;
+    for (Node* pNode = this; pNode != NULL; pNode = pNode->parent_)
+      if (end.end() > pNode->end().end())
+        pNode->end_ = end;
   }
 
   void bounds(const char** begin, const char** end)
   {
-    *begin = token_.begin();
-    *end   = token_.end();
-
-    const Node* pNode;
-
-    pNode = this;
-    while (true)
-    {
-      const Children& children = pNode->children();
-      if (children.empty())
-        break;
-
-      pNode = children[0];
-      const Token& token = pNode->token();
-      if (token.begin() < *begin)
-        *begin = token.begin();
-      else
-        break;
-    }
-
-    pNode = this;
-    while (true)
-    {
-      const Children& children = pNode->children();
-      if (children.empty())
-        break;
-
-      pNode = children[children.size() - 1];
-      const Token& token = pNode->token();
-      if (token.end() > *end)
-        *end = token.end();
-      else
-        break;
-    }
+    *begin = begin_.begin();
+    *end   = end_.end();
   }
 
   Range range() const
   {
-    Position startPosition = token_.position();
-    Position endPosition   = token_.position();
-
-    const Node* pNode;
-
-    pNode = this;
-    while (true)
-    {
-      const Children& children = pNode->children();
-      if (children.empty())
-        break;
-
-      pNode = children[0];
-      const Position& candidatePosition = pNode->token().position();
-      if (candidatePosition < startPosition)
-        startPosition = candidatePosition;
-      else
-        break;
-    }
-
-    pNode = this;
-    while (true)
-    {
-      const Children& children = pNode->children();
-      if (children.empty())
-        break;
-
-      pNode = children[children.size() - 1];
-      const Position& candidatePosition = pNode->token().position();
-      if (candidatePosition > startPosition)
-        endPosition = candidatePosition;
-      else
-        break;
-    }
-
-    return Range(startPosition, endPosition);
+    return Range(begin_.position(), end_.position() + end_.size());
   }
 
   const Token& token() const { return token_; }
   const Node* parent() const { return parent_; }
   const Children& children() const { return children_; }
+
+  bool isPseudoNode() const { return pseudoNode_; }
 };
 
 } // namespace parser

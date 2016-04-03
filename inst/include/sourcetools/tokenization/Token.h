@@ -490,7 +490,7 @@ inline std::string toString(const tokens::Token& token)
   char buff[1024];
   ::snprintf(buff,
              1024 - 1,
-             "[%4lu:%4lu]: %s\n",
+             "[%4lu:%4lu]: %s",
              (unsigned long) token.row(),
              (unsigned long) token.column(),
              contents.c_str());
