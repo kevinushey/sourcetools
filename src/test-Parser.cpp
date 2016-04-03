@@ -33,7 +33,8 @@ context("Parser") {
     const char* end;
     pTarget->bounds(&begin, &end);
 
-    std::cout << std::string(begin, end) << std::endl;
+    std::string contents(begin, end);
+    expect_true(contents == "a = {1 + 2}");
   }
 
 }
