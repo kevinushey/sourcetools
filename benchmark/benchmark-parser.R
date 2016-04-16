@@ -6,7 +6,7 @@ for (file in files) {
 
   mb <- microbenchmark(
     R  = base::parse(file, keep.source = FALSE),
-    ST = sourcetools:::parse(file)
+    ST = sourcetools:::parse_file(file)
   )
 
   print(mb)
@@ -15,7 +15,7 @@ for (file in files) {
 
   mb <- microbenchmark(
     R  = base::parse(text = contents, keep.source = FALSE),
-    ST = sourcetools:::parse(text = contents)
+    ST = sourcetools:::parse_string(contents)
   )
 
   sourcetools:::check_parse(contents)

@@ -11,7 +11,8 @@ microbenchmark(
 )
 
 contents <- read(file)
-microbenchmark(
+mb <- microbenchmark(
   tokenize_string(contents),
-  parse(text = contents)
+  parse(text = contents, keep.source = FALSE)
 )
+print(mb)
