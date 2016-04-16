@@ -35,6 +35,19 @@ context("Parser") {
 
     std::string contents(begin, end);
     expect_true(contents == "a = {1 + 2}");
+
+    expect_true(cursor.findFwd("{"));
+    pTarget = parser.getNode(cursor.position());
+    expect_true((pTarget != NULL));
+    expect_true((pTarget->token().contentsEqual("{")));
+    if (pTarget == NULL)
+      return;
+
+    pTarget->bounds(&begin, &end);
+    contents = std::string(begin, end);
+    expect_true(contents == "{1 + 2}");
+
+
   }
 
 }
