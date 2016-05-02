@@ -182,12 +182,12 @@ private:
     using namespace tokens;
     Node* pNode = createNode(current());
     checkAndAdvance(KEYWORD_FUNCTION);
-    checkAndAdvance(LPAREN);
+    checkAndAdvance(LPAREN, false);
     ParseState state = state_;
     state_ = PARSE_STATE_PAREN;
     pNode->add(parseFunctionArgumentList());
     state_ = state;
-    checkAndAdvance(RPAREN);
+    checkAndAdvance(RPAREN, false);
     pNode->add(parseNonEmptyExpression());
     return pNode;
   }
@@ -198,15 +198,15 @@ private:
     using namespace tokens;
     Node* pNode = createNode(current());
     checkAndAdvance(KEYWORD_FOR);
-    checkAndAdvance(LPAREN);
+    checkAndAdvance(LPAREN, false);
     ParseState state = state_;
     state_ = PARSE_STATE_PAREN;
     check(SYMBOL);
     pNode->add(createNode(consume()));
-    checkAndAdvance(KEYWORD_IN);
+    checkAndAdvance(KEYWORD_IN, false);
     pNode->add(parseNonEmptyExpression());
     state_ = state;
-    checkAndAdvance(RPAREN);
+    checkAndAdvance(RPAREN, false);
     pNode->add(parseNonEmptyExpression());
     return pNode;
   }
@@ -217,12 +217,12 @@ private:
     using namespace tokens;
     Node* pNode = createNode(current());
     checkAndAdvance(KEYWORD_IF);
-    checkAndAdvance(LPAREN);
+    checkAndAdvance(LPAREN, false);
     ParseState state = state_;
     state_ = PARSE_STATE_PAREN;
     pNode->add(parseNonEmptyExpression());
     state_ = state;
-    checkAndAdvance(RPAREN);
+    checkAndAdvance(RPAREN, false);
     pNode->add(parseNonEmptyExpression());
     if (current().isType(KEYWORD_ELSE))
     {
@@ -238,12 +238,12 @@ private:
     using namespace tokens;
     Node* pNode = createNode(current());
     checkAndAdvance(KEYWORD_WHILE);
-    checkAndAdvance(LPAREN);
+    checkAndAdvance(LPAREN, false);
     ParseState state = state_;
     state_ = PARSE_STATE_PAREN;
     pNode->add(parseNonEmptyExpression());
     state_ = state;
-    checkAndAdvance(RPAREN);
+    checkAndAdvance(RPAREN, false);
     pNode->add(parseNonEmptyExpression());
     return pNode;
   }
@@ -391,9 +391,9 @@ private:
   //
   //    <fn-call> ::= <expr> <fn-open> <fn-call-args> <fn-close>
   //
-  //  <fn-open> can be one of '(', '[' or '[[',
-  //  <fn-call-args> are (potentially named) comma-separated values
-  //  <fn-close> is the complement of the above.
+  // <fn-open> can be one of '(', '[' or '[[',
+  // <fn-call-args> are (potentially named) comma-separated values
+  // <fn-close> is the complement of the above.
   //
   // Parsing a function call is surprisingly tricky, due to the
   // nature of allowing a mixture of unnamed, named, and missing
@@ -414,9 +414,11 @@ private:
     state_ = PARSE_STATE_PAREN;
 
     if (current().isType(rhsType))
+    {
       pNode->add(lhsType == LPAREN ?
                    createNode(Token(EMPTY)) :
                    createNode(Token(MISSING)));
+    }
     else
     {
       while (true)
@@ -531,10 +533,10 @@ private:
     return success;
   }
 
-  bool checkAndAdvance(TokenType type)
+  bool checkAndAdvance(TokenType type, bool advanceOnError = true)
   {
     bool result = check(type);
-    advance();
+    if (result || advanceOnError) advance();
     return result;
   }
 
