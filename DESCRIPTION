@@ -16,3 +16,4 @@ Suggests:
 LinkingTo:
     testthat (>= 0.11.0.9000)
 RoxygenNote: 5.0.1
+BugReports: https://github.com/kevinushey/sourcetools/issues
