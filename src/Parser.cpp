@@ -297,13 +297,17 @@ void reportErrors(const std::vector<parser::ParseError>& errors)
 extern "C" SEXP sourcetools_parse_string(SEXP programSEXP)
 {
   using namespace sourcetools;
+  using parser::ParseStatus;
   using parser::Parser;
   using parser::Node;
 
   SEXP charSEXP = STRING_ELT(programSEXP, 0);
   Parser parser(CHAR(charSEXP), Rf_length(charSEXP));
-  scoped_ptr<Node> pRoot(parser.parse());
-  sourcetools::reportErrors(parser.errors());
+
+  ParseStatus status;
+  scoped_ptr<Node> pRoot(parser.parse(&status));
+
+  sourcetools::reportErrors(status.getErrors());
 
   return sourcetools::SEXPConverter::asSEXP(pRoot);
 }
@@ -312,12 +316,15 @@ extern "C" SEXP sourcetools_diagnose_string(SEXP strSEXP)
 {
   using namespace sourcetools;
   using parser::Parser;
+  using parser::ParseStatus;
   using parser::Node;
   using r::Protect;
 
   SEXP charSEXP = STRING_ELT(strSEXP, 0);
   Parser parser(CHAR(charSEXP), Rf_length(charSEXP));
-  scoped_ptr<Node> pNode(parser.parse());
+
+  ParseStatus status;
+  scoped_ptr<Node> pNode(parser.parse(&status));
 
   using namespace diagnostics;
   scoped_ptr<DiagnosticsSet> pDiagnostics(createDefaultDiagnosticsSet());

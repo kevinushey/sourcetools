@@ -11,6 +11,7 @@
 #include <sourcetools/parse/Node.h>
 #include <sourcetools/parse/Precedence.h>
 #include <sourcetools/parse/ParseError.h>
+#include <sourcetools/parse/ParseStatus.h>
 
 // Defines that will go away once the parser is more tested / game ready
 // #define SOURCE_TOOLS_DEBUG_PARSER_TRACE
@@ -61,8 +62,7 @@ class Parser
   Token token_;
   Token previous_;
   ParseState state_;
-  std::vector<ParseError> errors_;
-  std::map<Position, Node*> map_;
+  ParseStatus* pStatus_;
 
 public:
   explicit Parser(const std::string& code)
@@ -86,7 +86,7 @@ private:
   void unexpectedEndOfInput()
   {
     ParseError error("unexpected end of input");
-    errors_.push_back(error);
+    pStatus_->addError(error);
   }
 
   std::string unexpectedTokenString(const Token& token)
@@ -117,7 +117,7 @@ private:
                        const std::string& message)
   {
     ParseError error(token, message);
-    errors_.push_back(error);
+    pStatus_->addError(error);
   }
 
   bool checkUnexpectedEnd(const Token& token)
@@ -125,7 +125,7 @@ private:
     if (UNLIKELY(token.isType(tokens::END)))
     {
       ParseError error(token, "unexpected end of input");
-      errors_.push_back(error);
+      pStatus_->addError(error);
       return true;
     }
 
@@ -566,7 +566,7 @@ private:
   Node* createNode(const Token& token)
   {
     Node* pNode = Node::create(token);
-    map_[token.position()] = pNode;
+    pStatus_->recordNodeLocation(token.position(), pNode);
     return pNode;
   }
 
@@ -583,8 +583,9 @@ private:
 
 public:
 
-  Node* parse()
+  Node* parse(ParseStatus* pStatus)
   {
+    pStatus_ = pStatus;
     Node* root = createNode(tokens::ROOT);
 
     while (true)
@@ -595,18 +596,6 @@ public:
     }
 
     return root;
-  }
-
-  const std::vector<ParseError>& errors() const
-  {
-    return errors_;
-  }
-
-  Node* getNode(const Position& position)
-  {
-    if (!map_.count(position))
-      return NULL;
-    return map_[position];
   }
 
 };
