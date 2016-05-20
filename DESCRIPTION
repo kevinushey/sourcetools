@@ -9,11 +9,9 @@ License: MIT + file LICENSE
 LazyData: TRUE
 Depends:
     R (>= 3.0.2)
-Remotes:
-    hadley/testthat
 Suggests:
     testthat
 LinkingTo:
-    testthat (>= 0.11.0.9000)
+    testthat
 RoxygenNote: 5.0.1
 BugReports: https://github.com/kevinushey/sourcetools/issues
