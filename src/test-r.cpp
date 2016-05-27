@@ -1,4 +1,4 @@
-#include "tests.h"
+#include <testthat.h>
 #include <sourcetools.h>
 
 using namespace sourcetools;

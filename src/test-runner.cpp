@@ -1,2 +1,2 @@
 #define TESTTHAT_TEST_RUNNER
-#include "tests.h"
+#include <testthat.h>
