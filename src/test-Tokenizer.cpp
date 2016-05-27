@@ -2,8 +2,8 @@
 #include <sourcetools.h>
 
 using namespace sourcetools;
-using namespace sourcetools::tokens;
 using namespace sourcetools::cursors;
+
 typedef sourcetools::tokens::Token Token;
 
 namespace {

@@ -2,8 +2,6 @@
 #include <sourcetools.h>
 
 using namespace sourcetools;
-using namespace sourcetools::tokens;
-using namespace sourcetools::cursors;
 using namespace sourcetools::parser;
 using namespace sourcetools::cursors;
 using namespace sourcetools::collections;
