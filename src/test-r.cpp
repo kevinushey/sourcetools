@@ -1,5 +1,5 @@
+#include "tests.h"
 #include <sourcetools.h>
-#include <testthat.h>
 
 using namespace sourcetools;
 
