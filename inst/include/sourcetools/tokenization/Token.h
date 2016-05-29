@@ -1,5 +1,5 @@
-#ifndef SOURCETOOLS__TOKENIZATION__TOKEN_H
-#define SOURCETOOLS__TOKENIZATION__TOKEN_H
+#ifndef SOURCETOOLS_TOKENIZATION_TOKEN_H
+#define SOURCETOOLS_TOKENIZATION_TOKEN_H
 
 #include <cstring>
 
@@ -516,4 +516,4 @@ inline std::ostream& operator<<(std::ostream& os, const std::vector<tokens::Toke
 
 } // namespace sourcetools
 
-#endif /* SOURCETOOLS__TOKENIZATION__TOKEN_H */
+#endif /* SOURCETOOLS_TOKENIZATION_TOKEN_H */

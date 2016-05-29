@@ -1,5 +1,5 @@
-#ifndef SOURCETOOLS__CORE__UTIL_H
-#define SOURCETOOLS__CORE__UTIL_H
+#ifndef SOURCETOOLS_CORE_UTIL_H
+#define SOURCETOOLS_CORE_UTIL_H
 
 #include <string>
 #include <memory>
@@ -139,4 +139,4 @@ inline std::string escape(char ch)
 } // namespace utils
 } // namespace sourcetools
 
-#endif /* SOURCETOOLS__CORE__UTIL_H */
+#endif /* SOURCETOOLS_CORE_UTIL_H */

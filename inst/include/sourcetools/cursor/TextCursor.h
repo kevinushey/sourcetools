@@ -1,5 +1,5 @@
-#ifndef SOURCETOOLS__CURSOR__TEXT_CURSOR_H
-#define SOURCETOOLS__CURSOR__TEXT_CURSOR_H
+#ifndef SOURCETOOLS_CURSOR_TEXT_CURSOR_H
+#define SOURCETOOLS_CURSOR_TEXT_CURSOR_H
 
 #include <string>
 
@@ -63,4 +63,4 @@ private:
 } // namespace cursors
 } // namespace sourcetools
 
-#endif /* SOURCETOOLS__CURSOR__TEXT_CURSOR_H */
+#endif /* SOURCETOOLS_CURSOR_TEXT_CURSOR_H */

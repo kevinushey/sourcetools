@@ -1,5 +1,5 @@
-#ifndef SOURCETOOLS__PARSE__PARSE_STATUS_H
-#define SOURCETOOLS__PARSE__PARSE_STATUS_H
+#ifndef SOURCETOOLS_PARSE_PARSE_STATUS_H
+#define SOURCETOOLS_PARSE_PARSE_STATUS_H
 
 #include <sourcetools/collection/Position.h>
 
@@ -45,4 +45,4 @@ private:
 } // namespace parser
 } // namespace sourcetools
 
-#endif /* SOURCETOOLS__PARSE__PARSE_STATUS_H */
+#endif /* SOURCETOOLS_PARSE_PARSE_STATUS_H */

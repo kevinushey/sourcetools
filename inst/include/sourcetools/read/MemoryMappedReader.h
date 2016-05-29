@@ -1,5 +1,5 @@
-#ifndef SOURCETOOLS__READ__MEMORY_MAPPED_READER_H
-#define SOURCETOOLS__READ__MEMORY_MAPPED_READER_H
+#ifndef SOURCETOOLS_READ_MEMORY_MAPPED_READER_H
+#define SOURCETOOLS_READ_MEMORY_MAPPED_READER_H
 
 #include <vector>
 #include <string>
@@ -136,4 +136,4 @@ public:
 } // namespace detail
 } // namespace sourcetools
 
-#endif /* SOURCETOOLS__READ__MEMORY_MAPPED_READER_H */
+#endif /* SOURCETOOLS_READ_MEMORY_MAPPED_READER_H */

@@ -1,5 +1,5 @@
-#ifndef SOURCETOOLS__DIAGNOSTICS__DIAGNOSTICS_SET_H
-#define SOURCETOOLS__DIAGNOSTICS__DIAGNOSTICS_SET_H
+#ifndef SOURCETOOLS_DIAGNOSTICS_DIAGNOSTICS_SET_H
+#define SOURCETOOLS_DIAGNOSTICS_DIAGNOSTICS_SET_H
 
 #include <sourcetools/diagnostics/Diagnostic.h>
 #include <sourcetools/diagnostics/Checkers.h>
@@ -86,4 +86,4 @@ inline DiagnosticsSet* createDefaultDiagnosticsSet()
 } // namespace diagnostics
 } // namespace sourcetools
 
-#endif /* SOURCETOOLS__DIAGNOSTICS__DIAGNOSTICS_SET_H */
+#endif /* SOURCETOOLS_DIAGNOSTICS_DIAGNOSTICS_SET_H */

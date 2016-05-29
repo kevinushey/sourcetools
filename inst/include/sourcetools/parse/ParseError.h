@@ -1,5 +1,5 @@
-#ifndef SOURCETOOLS__PARSE__PARSE_ERROR_H
-#define SOURCETOOLS__PARSE__PARSE_ERROR_H
+#ifndef SOURCETOOLS_PARSE_PARSE_ERROR_H
+#define SOURCETOOLS_PARSE_PARSE_ERROR_H
 
 #include <sourcetools/collection/collection.h>
 #include <sourcetools/tokenization/tokenization.h>
@@ -51,4 +51,4 @@ public:
 } // namespace parser
 } // namespace sourcetools
 
-#endif /* SOURCETOOLS__PARSE__PARSE_ERROR_H */
+#endif /* SOURCETOOLS_PARSE_PARSE_ERROR_H */

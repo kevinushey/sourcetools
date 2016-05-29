@@ -13,7 +13,7 @@ guarded_name <- function(path) {
     for (f in transformations)
       transformed <- f(transformed)
     transformed
-  }), collapse = "__")
+  }), collapse = "_")
 
 }
 

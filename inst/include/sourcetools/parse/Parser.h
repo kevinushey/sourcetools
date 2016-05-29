@@ -1,5 +1,5 @@
-#ifndef SOURCETOOLS__PARSE__PARSER_H
-#define SOURCETOOLS__PARSE__PARSER_H
+#ifndef SOURCETOOLS_PARSE_PARSER_H
+#define SOURCETOOLS_PARSE_PARSER_H
 #define SOURCE_TOOLS_PARSE_PARSER_H
 
 #include <iostream>
@@ -614,4 +614,4 @@ void log(parser::ParseNode* pNode, int depth = 0);
 
 } // namespace sourcetools
 
-#endif /* SOURCETOOLS__PARSE__PARSER_H */
+#endif /* SOURCETOOLS_PARSE_PARSER_H */

@@ -1,5 +1,5 @@
-#ifndef SOURCETOOLS__R__R_CONVERTER_H
-#define SOURCETOOLS__R__R_CONVERTER_H
+#ifndef SOURCETOOLS_R_R_CONVERTER_H
+#define SOURCETOOLS_R_R_CONVERTER_H
 
 #include <vector>
 #include <string>
@@ -36,4 +36,4 @@ inline SEXP create(const std::vector<std::string>& vector)
 } // namespace r
 } // namespace sourcetools
 
-#endif /* SOURCETOOLS__R__R_CONVERTER_H */
+#endif /* SOURCETOOLS_R_R_CONVERTER_H */
