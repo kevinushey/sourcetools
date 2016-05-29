@@ -6,7 +6,7 @@
 #include <string>
 
 #include <sourcetools/r/r.h>
-#include <sourcetools/parse/Node.h>
+#include <sourcetools/parse/ParseNode.h>
 #include <sourcetools/diagnostics/Diagnostic.h>
 
 namespace sourcetools {
@@ -18,9 +18,9 @@ class CheckerBase
 public:
   typedef tokens::Token Token;
   typedef tokens::TokenType TokenType;
-  typedef parser::Node Node;
+  typedef parser::ParseNode ParseNode;
 
-  virtual void apply(const Node* pNode, Diagnostics* pDiagnostics, std::size_t depth) = 0;
+  virtual void apply(const ParseNode* pNode, Diagnostics* pDiagnostics, std::size_t depth) = 0;
   virtual ~CheckerBase() {}
 };
 
@@ -35,7 +35,7 @@ public:
 class ComparisonWithNullChecker : public CheckerBase
 {
 public:
-  void apply(const Node* pNode, Diagnostics* pDiagnostics, std::size_t depth)
+  void apply(const ParseNode* pNode, Diagnostics* pDiagnostics, std::size_t depth)
   {
     const Token& token = pNode->token();
     bool isEquals =
@@ -48,8 +48,8 @@ public:
     if (pNode->children().size() != 2)
       return;
 
-    Node* pLhs = pNode->children()[0];
-    Node* pRhs = pNode->children()[1];
+    ParseNode* pLhs = pNode->children()[0];
+    ParseNode* pRhs = pNode->children()[1];
 
     if (pLhs->token().isType(tokens::KEYWORD_NULL) ||
         pRhs->token().isType(tokens::KEYWORD_NULL))
@@ -71,7 +71,7 @@ public:
 class AssignmentInIfChecker : public CheckerBase
 {
 public:
-  void apply(const Node* pNode, Diagnostics* pDiagnostics, std::size_t depth)
+  void apply(const ParseNode* pNode, Diagnostics* pDiagnostics, std::size_t depth)
   {
     if (!pNode->token().isType(tokens::KEYWORD_IF))
       return;
@@ -79,7 +79,7 @@ public:
     if (pNode->children().size() < 1)
       return;
 
-    Node* pCondition = pNode->children()[0];
+    ParseNode* pCondition = pNode->children()[0];
     if (!pCondition->token().isType(tokens::OPERATOR_ASSIGN_LEFT_EQUALS))
       return;
 
@@ -98,7 +98,7 @@ public:
 class ScalarOpsInIfChecker : public CheckerBase
 {
 public:
-  void apply(const Node* pNode, Diagnostics* pDiagnostics, std::size_t depth)
+  void apply(const ParseNode* pNode, Diagnostics* pDiagnostics, std::size_t depth)
   {
     if (!pNode->token().isType(tokens::KEYWORD_IF))
       return;
@@ -106,7 +106,7 @@ public:
     if (pNode->children().size() < 1)
       return;
 
-    Node* pCondition = pNode->children()[0];
+    ParseNode* pCondition = pNode->children()[0];
     const Token& token = pCondition->token();
     if (token.isType(tokens::OPERATOR_AND_VECTOR))
     {
@@ -140,7 +140,7 @@ public:
 class UnusedResultChecker : public CheckerBase
 {
 public:
-  void apply(const Node* pNode, Diagnostics* pDiagnostics, std::size_t depth)
+  void apply(const ParseNode* pNode, Diagnostics* pDiagnostics, std::size_t depth)
   {
     if (pNode->parent() == NULL)
       return;
@@ -155,7 +155,7 @@ public:
 
     if (parentToken.isType(tokens::LBRACE))
     {
-      const std::vector<Node*>& siblings = pNode->parent()->children();
+      const std::vector<ParseNode*>& siblings = pNode->parent()->children();
       if (pNode == siblings[siblings.size() - 1])
         return;
     }
@@ -184,7 +184,7 @@ public:
     objects_ = r::objectsOnSearchPath();
   }
 
-  void apply(const Node* pNode, Diagnostics* pDiagnostics, std::size_t depth)
+  void apply(const ParseNode* pNode, Diagnostics* pDiagnostics, std::size_t depth)
   {
     using namespace tokens;
     const Token& token = pNode->token();
@@ -197,7 +197,7 @@ public:
     if (token.isType(OPERATOR_ASSIGN_LEFT) ||
         token.isType(OPERATOR_ASSIGN_LEFT_EQUALS))
     {
-      const Node* pChild = pNode->children()[0];
+      const ParseNode* pChild = pNode->children()[0];
       const Token& symbol = pChild->token();
       if (symbol.isType(SYMBOL) || symbol.isType(STRING))
         add(symbol);
@@ -248,13 +248,13 @@ private:
     return stack_[stack_.size() - 1];
   }
 
-  void push(const Node* pNode, std::size_t depth)
+  void push(const ParseNode* pNode, std::size_t depth)
   {
     stack_.push_back(Context(depth));
 
-    Node* pFormals = pNode->children()[0];
-    const Node::Children& children = pFormals->children();
-    for (Node::Children::const_iterator it = children.begin();
+    ParseNode* pFormals = pNode->children()[0];
+    const std::vector<ParseNode*>& children = pFormals->children();
+    for (std::vector<ParseNode*>::const_iterator it = children.begin();
          it != children.end();
          ++it)
     {

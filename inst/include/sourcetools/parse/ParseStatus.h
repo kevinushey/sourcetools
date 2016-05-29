@@ -8,7 +8,7 @@
 namespace sourcetools {
 namespace parser {
 
-class Node;
+class ParseNode;
 
 class ParseStatus
 {
@@ -18,12 +18,12 @@ public:
   ParseStatus() {}
 
   void recordNodeLocation(const Position& position,
-                          Node* pNode)
+                          ParseNode* pNode)
   {
     map_[position] = pNode;
   }
 
-  Node* getNodeAtPosition(const Position& position)
+  ParseNode* getNodeAtPosition(const Position& position)
   {
     return map_[position];
   }
@@ -39,7 +39,7 @@ public:
   }
 
 private:
-  std::map<Position, Node*> map_;
+  std::map<Position, ParseNode*> map_;
   std::vector<ParseError> errors_;
 };
 } // namespace parser

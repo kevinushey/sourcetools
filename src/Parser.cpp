@@ -6,7 +6,7 @@
 
 namespace sourcetools {
 
-void log(parser::Node* pNode, int depth)
+void log(parser::ParseNode* pNode, int depth)
 {
   if (!pNode)
     return;
@@ -16,9 +16,9 @@ void log(parser::Node* pNode, int depth)
 
   ::Rprintf(toString(pNode->token()).c_str());
 
-  typedef parser::Node::Children Children;
-  const Children& children = pNode->children();
-  for (Children::const_iterator it = children.begin();
+  using parser::ParseNode;
+  const std::vector<ParseNode*>& children = pNode->children();
+  for (std::vector<ParseNode*>::const_iterator it = children.begin();
        it != children.end();
        ++it)
   {
@@ -31,8 +31,7 @@ namespace {
 class SEXPConverter
 {
 private:
-  typedef parser::Node Node;
-  typedef parser::Node::Children Children;
+  typedef parser::ParseNode ParseNode;
 
   static SEXP asKeywordSEXP(const tokens::Token& token)
   {
@@ -54,7 +53,7 @@ private:
     }
   }
 
-  static SEXP asFunctionCallSEXP(const Node* pNode)
+  static SEXP asFunctionCallSEXP(const ParseNode* pNode)
   {
     using namespace tokens;
 
@@ -74,11 +73,11 @@ private:
     // Start appending the child nodes to our list.
     r::Protect protect;
     SEXP headSEXP = protect(langSEXP);
-    for (Children::const_iterator it = pNode->children().begin();
+    for (std::vector<ParseNode*>::const_iterator it = pNode->children().begin();
          it != pNode->children().end();
          ++it)
     {
-      const Node* node = *it;
+      const ParseNode* node = *it;
       const Token& token = node->token();
       if (token.isType(EMPTY))
         break;
@@ -87,8 +86,8 @@ private:
 
       else if (token.isType(tokens::OPERATOR_ASSIGN_LEFT_EQUALS))
       {
-        const Node* lhs = node->children()[0];
-        const Node* rhs = node->children()[1];
+        const ParseNode* lhs = node->children()[0];
+        const ParseNode* rhs = node->children()[1];
 
         if (rhs->token().isType(MISSING))
           SETCDR(langSEXP, Rf_lang1(R_MissingArg));
@@ -118,7 +117,7 @@ private:
     return resultSEXP;
   }
 
-  static SEXP asFunctionArgumentListSEXP(const Node* pNode)
+  static SEXP asFunctionArgumentListSEXP(const ParseNode* pNode)
   {
     std::size_t n = pNode->children().size();
     if (n == 0)
@@ -127,17 +126,17 @@ private:
     r::Protect protect;
     SEXP listSEXP = protect(Rf_allocList(n));
     SEXP headSEXP = listSEXP;
-    for (Children::const_iterator it = pNode->children().begin();
+    for (std::vector<ParseNode*>::const_iterator it = pNode->children().begin();
          it != pNode->children().end();
          ++it)
     {
-      const Node* pChild = *it;
+      const ParseNode* pChild = *it;
       const tokens::Token& token = pChild->token();
 
       if (token.isType(tokens::OPERATOR_ASSIGN_LEFT_EQUALS))
       {
-        const Node* pLhs = pChild->children()[0];
-        const Node* pRhs = pChild->children()[1];
+        const ParseNode* pLhs = pChild->children()[0];
+        const ParseNode* pRhs = pChild->children()[1];
 
         if (pLhs->token().isType(tokens::SYMBOL))
           SET_TAG(headSEXP, Rf_install(tokens::stringValue(pLhs->token()).c_str()));
@@ -155,7 +154,7 @@ private:
     return listSEXP;
   }
 
-  static SEXP asFunctionDeclSEXP(const Node* pNode)
+  static SEXP asFunctionDeclSEXP(const ParseNode* pNode)
   {
     if (pNode->children().size() != 2)
       return R_NilValue;
@@ -178,7 +177,7 @@ private:
       return Rf_ScalarReal(::atof(token.begin()));
   }
 
-  static bool isFunctionCall(const Node* pNode)
+  static bool isFunctionCall(const ParseNode* pNode)
   {
     const tokens::Token& token = pNode->token();
     if (token.isType(tokens::LBRACKET) || token.isType(tokens::LDBRACKET))
@@ -189,12 +188,12 @@ private:
 
     // Differentiate between '(a, b)' and 'a(b)' by looking at
     // the token positions. Not great, I know...
-    const Node* child = pNode->children()[0];
+    const ParseNode* child = pNode->children()[0];
     return child->token().begin() < token.begin();
   }
 
 public:
-  static SEXP asSEXP(const Node* pNode)
+  static SEXP asSEXP(const ParseNode* pNode)
   {
     using namespace tokens;
 
@@ -203,7 +202,7 @@ public:
 
     if (pNode->token().isType(tokens::ROOT))
     {
-      const std::vector<Node*>& children = pNode->children();
+      const std::vector<ParseNode*>& children = pNode->children();
       std::size_t n = pNode->children().size();
       r::Protect protect;
       SEXP exprSEXP = protect(Rf_allocVector(EXPRSXP, n));
@@ -248,11 +247,11 @@ public:
 
     SEXP headSEXP = protect(Rf_lang1(protect(elSEXP)));
     SEXP listSEXP = headSEXP;
-    for (Children::const_iterator it = pNode->children().begin();
+    for (std::vector<ParseNode*>::const_iterator it = pNode->children().begin();
          it != pNode->children().end();
          ++it)
     {
-      const Node* child = *it;
+      const ParseNode* child = *it;
       if (!child->token().isType(EMPTY))
         listSEXP = SETCDR(listSEXP, Rf_lang1(asSEXP(child)));
     }
@@ -260,7 +259,7 @@ public:
     return headSEXP;
   }
 
-  static SEXP asSEXP(const std::vector<parser::Node*>& expression)
+  static SEXP asSEXP(const std::vector<ParseNode*>& expression)
   {
     std::size_t n = expression.size();
     r::Protect protect;
@@ -299,13 +298,13 @@ extern "C" SEXP sourcetools_parse_string(SEXP programSEXP)
   using namespace sourcetools;
   using parser::ParseStatus;
   using parser::Parser;
-  using parser::Node;
+  using parser::ParseNode;
 
   SEXP charSEXP = STRING_ELT(programSEXP, 0);
   Parser parser(CHAR(charSEXP), Rf_length(charSEXP));
 
   ParseStatus status;
-  scoped_ptr<Node> pRoot(parser.parse(&status));
+  scoped_ptr<ParseNode> pRoot(parser.parse(&status));
 
   sourcetools::reportErrors(status.getErrors());
 
@@ -317,14 +316,14 @@ extern "C" SEXP sourcetools_diagnose_string(SEXP strSEXP)
   using namespace sourcetools;
   using parser::Parser;
   using parser::ParseStatus;
-  using parser::Node;
+  using parser::ParseNode;
   using r::Protect;
 
   SEXP charSEXP = STRING_ELT(strSEXP, 0);
   Parser parser(CHAR(charSEXP), Rf_length(charSEXP));
 
   ParseStatus status;
-  scoped_ptr<Node> pNode(parser.parse(&status));
+  scoped_ptr<ParseNode> pNode(parser.parse(&status));
 
   using namespace diagnostics;
   scoped_ptr<DiagnosticsSet> pDiagnostics(createDefaultDiagnosticsSet());

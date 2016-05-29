@@ -9,19 +9,18 @@
 namespace sourcetools {
 namespace parser {
 
-class Node
+class ParseNode
 {
 public:
   typedef collections::Position Position;
   typedef collections::Range Range;
   typedef tokens::Token Token;
   typedef tokens::TokenType TokenType;
-  typedef std::vector<Node*> Children;
 
 private:
   Token token_;
-  Node* parent_;
-  Children children_;
+  ParseNode* parent_;
+  std::vector<ParseNode*> children_;
 
   Token begin_;
   Token end_;
@@ -29,31 +28,31 @@ private:
 
 public:
 
-  explicit Node(const Token& token)
+  explicit ParseNode(const Token& token)
     : token_(token), parent_(NULL),
       begin_(token), end_(token), pseudoNode_(false)
   {
   }
 
-  explicit Node(const TokenType& type)
+  explicit ParseNode(const TokenType& type)
     : token_(Token(type)), parent_(NULL),
       begin_(token_), end_(token_), pseudoNode_(true)
   {
   }
 
-  static Node* create(const Token& token)
+  static ParseNode* create(const Token& token)
   {
-    return new Node(token);
+    return new ParseNode(token);
   }
 
-  static Node* create(const TokenType& type)
+  static ParseNode* create(const TokenType& type)
   {
-    return new Node(type);
+    return new ParseNode(type);
   }
 
-  ~Node()
+  ~ParseNode()
   {
-    for (Children::const_iterator it = children_.begin();
+    for (std::vector<ParseNode*>::const_iterator it = children_.begin();
          it != children_.end();
          ++it)
     {
@@ -61,14 +60,14 @@ public:
     }
   }
 
-  void remove(const Node* pNode)
+  void remove(const ParseNode* pNode)
   {
     children_.erase(
       std::remove(children_.begin(), children_.end(), pNode),
       children_.end());
   }
 
-  void add(Node* pNode)
+  void add(ParseNode* pNode)
   {
     if (pNode->parent_ != NULL)
       pNode->parent_->remove(pNode);
@@ -78,7 +77,7 @@ public:
     {
       const Token& begin = pNode->begin();
       const Token& end   = pNode->end();
-      for (Node* pParent = this; pParent != NULL; pParent = pParent->parent_)
+      for (ParseNode* pParent = this; pParent != NULL; pParent = pParent->parent_)
       {
         if (begin.begin() < pParent->begin().begin())
           pParent->setBegin(begin);
@@ -97,7 +96,7 @@ public:
 
   void setBegin(const Token& begin)
   {
-    for (Node* pNode = this; pNode != NULL; pNode = pNode->parent_)
+    for (ParseNode* pNode = this; pNode != NULL; pNode = pNode->parent_)
       if (begin.begin() < pNode->begin().begin())
         pNode->begin_ = begin;
   }
@@ -110,7 +109,7 @@ public:
   void setEnd(const Token& end)
   {
     end_ = end;
-    for (Node* pNode = this; pNode != NULL; pNode = pNode->parent_)
+    for (ParseNode* pNode = this; pNode != NULL; pNode = pNode->parent_)
       if (end.end() > pNode->end().end())
         pNode->end_ = end;
   }
@@ -127,8 +126,8 @@ public:
   }
 
   const Token& token() const { return token_; }
-  const Node* parent() const { return parent_; }
-  const Children& children() const { return children_; }
+  const ParseNode* parent() const { return parent_; }
+  const std::vector<ParseNode*>& children() const { return children_; }
 
   bool isPseudoNode() const { return pseudoNode_; }
 };

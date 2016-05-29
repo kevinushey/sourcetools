@@ -11,7 +11,7 @@ class DiagnosticsSet
 {
   typedef std::vector<checkers::CheckerBase*> Checkers;
   typedef checkers::CheckerBase CheckerBase;
-  typedef parser::Node Node;
+  typedef parser::ParseNode ParseNode;
 
 public:
 
@@ -20,7 +20,7 @@ public:
     checkers_.push_back(pChecker);
   }
 
-  const std::vector<Diagnostic>& run(const Node* pNode)
+  const std::vector<Diagnostic>& run(const ParseNode* pNode)
   {
     runImpl(pNode);
     return diagnostics_;
@@ -49,7 +49,7 @@ public:
   }
 
 private:
-  void runImpl(const Node* pNode, std::size_t depth = 0)
+  void runImpl(const ParseNode* pNode, std::size_t depth = 0)
   {
     for (Checkers::iterator it = checkers_.begin();
          it != checkers_.end();
@@ -58,8 +58,7 @@ private:
       (*it)->apply(pNode, &diagnostics_, depth);
     }
 
-    typedef parser::Node::Children Children;
-    for (Children::const_iterator it = pNode->children().begin();
+    for (std::vector<ParseNode*>::const_iterator it = pNode->children().begin();
          it != pNode->children().end();
          ++it)
     {

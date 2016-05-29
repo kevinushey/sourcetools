@@ -18,13 +18,13 @@ context("Parser") {
     Parser parser(code);
 
     ParseStatus status;
-    scoped_ptr<Node> pRoot(parser.parse(&status));
+    scoped_ptr<ParseNode> pRoot(parser.parse(&status));
 
     TokenCursor cursor(tokens);
     expect_true(cursor.findFwd("="));
 
     Position position = cursor.currentToken().position();
-    Node* pTarget = status.getNodeAtPosition(position);
+    ParseNode* pTarget = status.getNodeAtPosition(position);
     expect_true((pTarget != NULL));
     if (pTarget == NULL)
       return;

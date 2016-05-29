@@ -8,7 +8,7 @@
 #include <sourcetools/collection/collection.h>
 #include <sourcetools/cursor/cursor.h>
 
-#include <sourcetools/parse/Node.h>
+#include <sourcetools/parse/ParseNode.h>
 #include <sourcetools/parse/Precedence.h>
 #include <sourcetools/parse/ParseError.h>
 #include <sourcetools/parse/ParseStatus.h>
@@ -134,7 +134,7 @@ private:
 
   // Parser sub-routines ----
 
-  Node* parseFunctionArgumentListOne()
+  ParseNode* parseFunctionArgumentListOne()
   {
     SOURCE_TOOLS_DEBUG_PARSER_LOG("parseFunctionArgument()");
     using namespace tokens;
@@ -143,12 +143,12 @@ private:
     return parseExpression();
   }
 
-  Node* parseFunctionArgumentList()
+  ParseNode* parseFunctionArgumentList()
   {
     SOURCE_TOOLS_DEBUG_PARSER_LOG("parseFunctionArgumentList()");
     using namespace tokens;
 
-    Node* pNode = createNode(EMPTY);
+    ParseNode* pNode = createNode(EMPTY);
     if (token_.isType(RPAREN))
       return pNode;
 
@@ -176,11 +176,11 @@ private:
     return pNode;
   }
 
-  Node* parseFunctionDefinition()
+  ParseNode* parseFunctionDefinition()
   {
     SOURCE_TOOLS_DEBUG_PARSER_LOG("parseFunctionDefinition()");
     using namespace tokens;
-    Node* pNode = createNode(current());
+    ParseNode* pNode = createNode(current());
     checkAndAdvance(KEYWORD_FUNCTION);
     checkAndAdvance(LPAREN, false);
     ParseState state = state_;
@@ -192,11 +192,11 @@ private:
     return pNode;
   }
 
-  Node* parseFor()
+  ParseNode* parseFor()
   {
     SOURCE_TOOLS_DEBUG_PARSER_LOG("parseFor()");
     using namespace tokens;
-    Node* pNode = createNode(current());
+    ParseNode* pNode = createNode(current());
     checkAndAdvance(KEYWORD_FOR);
     checkAndAdvance(LPAREN, false);
     ParseState state = state_;
@@ -211,11 +211,11 @@ private:
     return pNode;
   }
 
-  Node* parseIf()
+  ParseNode* parseIf()
   {
     SOURCE_TOOLS_DEBUG_PARSER_LOG("parseIf()");
     using namespace tokens;
-    Node* pNode = createNode(current());
+    ParseNode* pNode = createNode(current());
     checkAndAdvance(KEYWORD_IF);
     checkAndAdvance(LPAREN, false);
     ParseState state = state_;
@@ -232,11 +232,11 @@ private:
     return pNode;
   }
 
-  Node* parseWhile()
+  ParseNode* parseWhile()
   {
     SOURCE_TOOLS_DEBUG_PARSER_LOG("parseWhile()");
     using namespace tokens;
-    Node* pNode = createNode(current());
+    ParseNode* pNode = createNode(current());
     checkAndAdvance(KEYWORD_WHILE);
     checkAndAdvance(LPAREN, false);
     ParseState state = state_;
@@ -248,17 +248,17 @@ private:
     return pNode;
   }
 
-  Node* parseRepeat()
+  ParseNode* parseRepeat()
   {
     SOURCE_TOOLS_DEBUG_PARSER_LOG("parseRepeat()");
     using namespace tokens;
-    Node* pNode = createNode(current());
+    ParseNode* pNode = createNode(current());
     checkAndAdvance(KEYWORD_REPEAT);
     pNode->add(parseNonEmptyExpression());
     return pNode;
   }
 
-  Node* parseControlFlowKeyword()
+  ParseNode* parseControlFlowKeyword()
   {
     SOURCE_TOOLS_DEBUG_PARSER_LOG("parseControlFlowKeyword('" << token_.contents() << "')");
     using namespace tokens;
@@ -279,11 +279,11 @@ private:
     return createNode(INVALID);
   }
 
-  Node* parseBracedExpression()
+  ParseNode* parseBracedExpression()
   {
     SOURCE_TOOLS_DEBUG_PARSER_LOG("parseBracedExpression()");
     using namespace tokens;
-    Node* pNode = createNode(current());
+    ParseNode* pNode = createNode(current());
 
     checkAndAdvance(LBRACE);
     ParseState state = state_;
@@ -310,11 +310,11 @@ private:
     return pNode;
   }
 
-  Node* parseParentheticalExpression()
+  ParseNode* parseParentheticalExpression()
   {
     SOURCE_TOOLS_DEBUG_PARSER_LOG("parseParentheticalExpression()");
     using namespace tokens;
-    Node* pNode = createNode(current());
+    ParseNode* pNode = createNode(current());
     checkAndAdvance(LPAREN);
     ParseState state = state_;
     state_ = PARSE_STATE_PAREN;
@@ -328,15 +328,15 @@ private:
     return pNode;
   }
 
-  Node* parseUnaryOperator()
+  ParseNode* parseUnaryOperator()
   {
     SOURCE_TOOLS_DEBUG_PARSER_LOG("parseUnaryOperator()");
-    Node* pNode = createNode(current());
+    ParseNode* pNode = createNode(current());
     pNode->add(parseNonEmptyExpression(precedence::unary(consume())));
     return pNode;
   }
 
-  Node* parseExpressionStart()
+  ParseNode* parseExpressionStart()
   {
     SOURCE_TOOLS_DEBUG_PARSER_LOG("parseExpressionStart('" << current().contents() << "')");
     SOURCE_TOOLS_DEBUG_PARSER_LOG("Type: " << toString(current().type()));
@@ -362,7 +362,7 @@ private:
     return createNode(INVALID);
   }
 
-  Node* parseFunctionCallOne(TokenType rhsType)
+  ParseNode* parseFunctionCallOne(TokenType rhsType)
   {
     using namespace tokens;
 
@@ -372,8 +372,8 @@ private:
 
     if (peek(1).isType(OPERATOR_ASSIGN_LEFT_EQUALS))
     {
-      Node* pLhs  = createNode(consume());
-      Node* pNode = createNode(consume());
+      ParseNode* pLhs  = createNode(consume());
+      ParseNode* pNode = createNode(consume());
       pNode->add(pLhs);
 
       if (current().isType(COMMA) || current().isType(rhsType))
@@ -398,14 +398,14 @@ private:
   // Parsing a function call is surprisingly tricky, due to the
   // nature of allowing a mixture of unnamed, named, and missing
   // arguments.
-  Node* parseFunctionCall(Node* pLhs)
+  ParseNode* parseFunctionCall(ParseNode* pLhs)
   {
     SOURCE_TOOLS_DEBUG_PARSER_LOG("parseFunctionCall('" << current().contents() << "')");
     using namespace tokens;
     TokenType lhsType = current().type();
     TokenType rhsType = complement(lhsType);
 
-    Node* pNode = createNode(current());
+    ParseNode* pNode = createNode(current());
     pNode->add(pLhs);
 
     checkAndAdvance(lhsType);
@@ -454,7 +454,7 @@ private:
     return pNode;
   }
 
-  Node* parseExpressionContinuation(Node* pNode)
+  ParseNode* parseExpressionContinuation(ParseNode* pNode)
   {
     using namespace tokens;
     SOURCE_TOOLS_DEBUG_PARSER_LOG("parseExpressionContinuation('" << current().contents() << "')");
@@ -466,7 +466,7 @@ private:
     else if (token.isType(END))
       return createNode(token);
 
-    Node* pNew = createNode(token);
+    ParseNode* pNew = createNode(token);
     pNew->add(pNode);
 
     advance();
@@ -485,17 +485,17 @@ private:
       previous().row() == current().row());
   }
 
-  Node* parseExpression(int precedence = 0)
+  ParseNode* parseExpression(int precedence = 0)
   {
     SOURCE_TOOLS_DEBUG_PARSER_LOG("parseExpression(" << precedence << ")");
     using namespace tokens;
-    Node* pNode = parseExpressionStart();
+    ParseNode* pNode = parseExpressionStart();
     while (canParseExpressionContinuation(precedence))
       pNode = parseExpressionContinuation(pNode);
     return pNode;
   }
 
-  Node* parseNonEmptyExpression(int precedence = 0)
+  ParseNode* parseNonEmptyExpression(int precedence = 0)
   {
     checkUnexpectedEnd(current());
     return parseExpression(precedence);
@@ -566,14 +566,14 @@ private:
 
   // Utils ----
 
-  Node* createNode(TokenType type)
+  ParseNode* createNode(TokenType type)
   {
-    return Node::create(type);
+    return ParseNode::create(type);
   }
 
-  Node* createNode(const Token& token)
+  ParseNode* createNode(const Token& token)
   {
-    Node* pNode = Node::create(token);
+    ParseNode* pNode = ParseNode::create(token);
     pStatus_->recordNodeLocation(token.position(), pNode);
     return pNode;
   }
@@ -591,14 +591,14 @@ private:
 
 public:
 
-  Node* parse(ParseStatus* pStatus)
+  ParseNode* parse(ParseStatus* pStatus)
   {
     pStatus_ = pStatus;
-    Node* root = createNode(tokens::ROOT);
+    ParseNode* root = createNode(tokens::ROOT);
 
     while (true)
     {
-      Node* pNode = parseExpression();
+      ParseNode* pNode = parseExpression();
       if (!pNode) break;
       root->add(pNode);
     }
@@ -610,7 +610,7 @@ public:
 
 } // namespace parser
 
-void log(parser::Node* pNode, int depth = 0);
+void log(parser::ParseNode* pNode, int depth = 0);
 
 } // namespace sourcetools
 
