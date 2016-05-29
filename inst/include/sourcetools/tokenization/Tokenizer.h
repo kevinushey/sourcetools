@@ -31,7 +31,7 @@ private:
     cursor_.advance(length);
   }
 
-  template <bool SkipEscaped>
+  template <bool SkipEscaped, bool InvalidOnError>
   void consumeUntil(char ch,
                     TokenType type,
                     Token* pToken)
@@ -60,33 +60,37 @@ private:
     if (success) {
       consumeToken(type, distance + 1, pToken);
     } else {
-      consumeToken(tokens::INVALID, distance + 1, pToken);
+      consumeToken(
+        InvalidOnError ? tokens::INVALID : type,
+        distance,
+        pToken
+      );
     }
   }
 
   void consumeUserOperator(Token* pToken)
   {
-    consumeUntil<false>('%', tokens::OPERATOR_USER, pToken);
+    consumeUntil<false, true>('%', tokens::OPERATOR_USER, pToken);
   }
 
   void consumeComment(Token* pToken)
   {
-    consumeUntil<false>('\n', tokens::COMMENT, pToken);
+    consumeUntil<false, false>('\n', tokens::COMMENT, pToken);
   }
 
   void consumeQuotedSymbol(Token* pToken)
   {
-    consumeUntil<true>('`', tokens::SYMBOL, pToken);
+    consumeUntil<true, true>('`', tokens::SYMBOL, pToken);
   }
 
   void consumeQString(Token* pToken)
   {
-    consumeUntil<true>('\'', tokens::STRING, pToken);
+    consumeUntil<true, true>('\'', tokens::STRING, pToken);
   }
 
   void consumeQQString(Token* pToken)
   {
-    consumeUntil<true>('"', tokens::STRING, pToken);
+    consumeUntil<true, true>('"', tokens::STRING, pToken);
   }
 
   // NOTE: Don't tokenize '-' or '+' as part of number; instead

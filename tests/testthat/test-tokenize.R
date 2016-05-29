@@ -132,6 +132,18 @@ test_that("keywords are tokenized as keywords", {
   expect_true(all(types == "keyword"))
 })
 
+test_that("comments without a trailing newline are tokenized", {
+  tokens <- tokenize_string("# abc")
+  expect_identical(tokens$type, "comment")
+})
+
+test_that("tokenization errors handled correctly", {
+  tokenize_string("`abc")
+  tokenize_string("'abc")
+  tokenize_string("\"abc")
+  tokenize_string("%abc")
+})
+
 test_that("files in packages are tokenized without errors", {
   skip_on_cran()
 
