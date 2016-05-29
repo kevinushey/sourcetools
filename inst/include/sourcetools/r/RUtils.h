@@ -23,7 +23,7 @@ public:
   }
 
 private:
-  std::size_t n_;
+  int n_;
 };
 
 class RObjectFactory : noncopyable

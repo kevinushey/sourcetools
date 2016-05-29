@@ -369,8 +369,8 @@ inline bool parseUnicode(const char*& it, char*& output)
 
   std::mbstate_t state;
   ::memset(&state, 0, sizeof(state));
-  int bytes = ::wcrtomb(output, value, &state);
-  if (bytes == -1)
+  std::size_t bytes = ::wcrtomb(output, value, &state);
+  if (bytes == static_cast<std::size_t>(-1))
     return false;
 
   // Update iterator state
@@ -491,8 +491,8 @@ inline std::string toString(const tokens::Token& token)
   ::snprintf(buff,
              1024 - 1,
              "[%4lu:%4lu]: %s",
-             (unsigned long) token.row(),
-             (unsigned long) token.column(),
+             static_cast<unsigned long>(token.row()),
+             static_cast<unsigned long>(token.column()),
              contents.c_str());
   return buff;
 }
