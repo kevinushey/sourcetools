@@ -1,4 +1,4 @@
-library(testthat)
-library(sourcetools)
-
-test_check("sourcetools")
+if (require("testthat", quietly = TRUE)) {
+  library(sourcetools)
+  test_check("sourcetools")
+}
