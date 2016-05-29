@@ -370,7 +370,7 @@ private:
     if (token.isType(COMMA) || token.isType(rhsType))
       return createNode(Token(MISSING));
 
-    if (peek().isType(OPERATOR_ASSIGN_LEFT_EQUALS))
+    if (peek(1).isType(OPERATOR_ASSIGN_LEFT_EQUALS))
     {
       Node* pLhs  = createNode(consume());
       Node* pNode = createNode(consume());
@@ -540,20 +540,28 @@ private:
     return result;
   }
 
-  Token peek(std::size_t lookahead = 1,
+  Token peek(std::size_t lookahead = 0,
              bool skipWhitespace = true,
              bool skipComments = true)
   {
-    for (; lookahead < 100; ++lookahead)
+    std::size_t offset = lookahead;
+
+    while (true)
     {
-      Token result = tokenizer_.peek(lookahead);
-      if (skipWhitespace && result.isType(tokens::WHITESPACE))
+      Token result = tokenizer_.peek(offset);
+      if ((skipWhitespace && result.isType(tokens::WHITESPACE)) ||
+          (skipComments && result.isType(tokens::COMMENT)))
+      {
+        ++offset;
         continue;
-      if (skipComments && result.isType(tokens::COMMENT))
-        continue;
-      return result;
+      }
+
+      if (lookahead == 0)
+        return result;
+
+      --lookahead;
     }
-    return Token(tokens::INVALID);
+
   }
 
   // Utils ----
