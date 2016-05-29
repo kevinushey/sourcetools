@@ -1,5 +1,5 @@
-#ifndef SOURCETOOLS__PARSE__NODE_H
-#define SOURCETOOLS__PARSE__NODE_H
+#ifndef SOURCETOOLS__PARSE__PARSE_NODE_H
+#define SOURCETOOLS__PARSE__PARSE_NODE_H
 
 #include <memory>
 
@@ -135,4 +135,4 @@ public:
 } // namespace parser
 } // namespace sourcetools
 
-#endif /* SOURCETOOLS__PARSE__NODE_H */
+#endif /* SOURCETOOLS__PARSE__PARSE_NODE_H */
