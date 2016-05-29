@@ -8,6 +8,7 @@
 #include <map>
 #include <sstream>
 
+#include <sourcetools/core/core.h>
 #include <sourcetools/tokenization/Registration.h>
 #include <sourcetools/collection/Position.h>
 #include <sourcetools/cursor/TextCursor.h>
@@ -386,7 +387,7 @@ inline std::string stringValue(const char* begin, const char* end)
     return std::string();
 
   std::size_t n = end - begin;
-  char* buffer = new char[n + 1];
+  scoped_array<char> buffer(new char[n + 1]);
 
   const char* it = begin;
   char* output = buffer;
@@ -429,7 +430,6 @@ inline std::string stringValue(const char* begin, const char* end)
 
   // Construct the result string and return
   std::string result(buffer, output - buffer);
-  delete[] buffer;
   return result;
 }
 

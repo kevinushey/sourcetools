@@ -24,7 +24,7 @@ private:
 typedef detail::noncopyable noncopyable;
 
 template <typename T>
-class scoped_ptr : public noncopyable
+class scoped_ptr : noncopyable
 {
 public:
   explicit scoped_ptr(T* pData) : pData_(pData) {}
@@ -32,6 +32,19 @@ public:
   T* operator->() const { return pData_; }
   operator T*() const { return pData_; }
   ~scoped_ptr() { delete pData_; }
+private:
+  T* pData_;
+};
+
+template <typename T>
+class scoped_array : noncopyable
+{
+public:
+  explicit scoped_array(T* pData) : pData_(pData) {}
+  T& operator*() const { return *pData_; }
+  T* operator->() const { return pData_; }
+  operator T*() const { return pData_; }
+  ~scoped_array() { delete[] pData_; }
 private:
   T* pData_;
 };
