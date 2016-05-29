@@ -18,9 +18,8 @@ public:
 
   SEXP operator()(SEXP objectSEXP)
   {
-    PROTECT(objectSEXP);
     ++n_;
-    return objectSEXP;
+    return PROTECT(objectSEXP);
   }
 
 private:
@@ -39,7 +38,7 @@ public:
   template <typename T, typename F>
   SEXP create(SEXPTYPE type, const std::vector<T>& vector, F f)
   {
-    n_ += 1;
+    ++n_;
     std::size_t n = vector.size();
     SEXP resultSEXP = PROTECT(Rf_allocVector(type, n));
     for (std::size_t i = 0; i < n; ++i)
@@ -49,7 +48,7 @@ public:
 
   SEXP create(SEXPTYPE type, std::size_t n)
   {
-    n_ += 1;
+    ++n_;
     return PROTECT(Rf_allocVector(type, n));
   }
 
