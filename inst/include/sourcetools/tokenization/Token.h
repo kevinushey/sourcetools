@@ -94,12 +94,6 @@ private:
 
   Position position_;
   TokenType type_;
-
-  static const std::string& empty()
-  {
-    static std::string instance;
-    return instance;
-  }
 };
 
 inline bool isBracket(const Token& token)
