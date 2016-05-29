@@ -90,7 +90,11 @@ public:
     children_.push_back(pNode);
   }
 
-  const Token& begin() const { return begin_; }
+  const Token& begin() const
+  {
+    return begin_;
+  }
+
   void setBegin(const Token& begin)
   {
     for (Node* pNode = this; pNode != NULL; pNode = pNode->parent_)
@@ -98,7 +102,11 @@ public:
         pNode->begin_ = begin;
   }
 
-  const Token& end() const { return end_; }
+  const Token& end() const
+  {
+    return end_;
+  }
+
   void setEnd(const Token& end)
   {
     end_ = end;

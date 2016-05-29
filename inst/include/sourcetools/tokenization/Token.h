@@ -26,6 +26,7 @@ public:
   Token()
     : begin_(NULL),
       end_(NULL),
+      offset_(0),
       type_(INVALID)
   {
   }
@@ -33,6 +34,7 @@ public:
   explicit Token(TokenType type)
     : begin_(NULL),
       end_(NULL),
+      offset_(0),
       type_(type)
   {
   }
@@ -40,6 +42,7 @@ public:
   Token(const Position& position)
     : begin_(NULL),
       end_(NULL),
+      offset_(0),
       position_(position),
       type_(INVALID)
   {
@@ -48,6 +51,7 @@ public:
   Token(const TextCursor& cursor, TokenType type, std::size_t length)
     : begin_(cursor.begin() + cursor.offset()),
       end_(cursor.begin() + cursor.offset() + length),
+      offset_(cursor.offset()),
       position_(cursor.position()),
       type_(type)
   {
@@ -55,6 +59,7 @@ public:
 
   const char* begin() const { return begin_; }
   const char* end() const { return end_; }
+  std::size_t offset() const { return offset_; }
   std::size_t size() const { return end_ - begin_; }
 
   std::string contents() const
@@ -85,6 +90,7 @@ public:
 private:
   const char* begin_;
   const char* end_;
+  std::size_t offset_;
 
   Position position_;
   TokenType type_;
