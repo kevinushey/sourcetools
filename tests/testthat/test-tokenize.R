@@ -138,6 +138,9 @@ test_that("comments without a trailing newline are tokenized", {
 })
 
 test_that("tokenization errors handled correctly", {
+  # previously, these reported an error where a NUL
+  # byte was accidentally included as part of the
+  # token value
   tokenize_string("`abc")
   tokenize_string("'abc")
   tokenize_string("\"abc")
