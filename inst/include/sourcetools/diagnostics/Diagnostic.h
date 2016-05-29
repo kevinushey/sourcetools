@@ -1,5 +1,5 @@
-#ifndef SOURCE_TOOLS_DIAGNOSTICS_DIAGNOSTIC_H
-#define SOURCE_TOOLS_DIAGNOSTICS_DIAGNOSTIC_H
+#ifndef SOURCETOOLS__DIAGNOSTICS__DIAGNOSTIC_H
+#define SOURCETOOLS__DIAGNOSTICS__DIAGNOSTIC_H
 
 #include <vector>
 #include <string>
@@ -123,4 +123,4 @@ inline SEXP create(const std::vector<diagnostics::Diagnostic>& diagnostics)
 
 } // namespace sourcetools
 
-#endif /* SOURCE_TOOLS_DIAGNOSTICS_DIAGNOSTIC_H */
+#endif /* SOURCETOOLS__DIAGNOSTICS__DIAGNOSTIC_H */

@@ -1,5 +1,5 @@
-#ifndef SOURCE_TOOLS_VALIDATORS_SYNTAX_VALIDATOR_H
-#define SOURCE_TOOLS_VALIDATORS_SYNTAX_VALIDATOR_H
+#ifndef SOURCETOOLS__VALIDATION__SYNTAX_VALIDATOR_H
+#define SOURCETOOLS__VALIDATION__SYNTAX_VALIDATOR_H
 
 #include <sstream>
 #include <vector>
@@ -147,4 +147,4 @@ private:
 } // namespace validators
 } // namespace sourcetools
 
-#endif /* SOURCE_TOOLS_VALIDATORS_SYNTAX_VALIDATOR_H */
+#endif /* SOURCETOOLS__VALIDATION__SYNTAX_VALIDATOR_H */

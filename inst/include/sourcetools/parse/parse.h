@@ -1,5 +1,5 @@
-#ifndef SOURCE_TOOLS_PARSE_PARSE_H
-#define SOURCE_TOOLS_PARSE_PARSE_H
+#ifndef SOURCETOOLS__PARSE__PARSE_H
+#define SOURCETOOLS__PARSE__PARSE_H
 
 #include <sourcetools/parse/Node.h>
 #include <sourcetools/parse/Precedence.h>
@@ -7,4 +7,4 @@
 #include <sourcetools/parse/ParseStatus.h>
 #include <sourcetools/parse/Parser.h>
 
-#endif /* SOURCE_TOOLS_PARSE_PARSE_H */
+#endif /* SOURCETOOLS__PARSE__PARSE_H */

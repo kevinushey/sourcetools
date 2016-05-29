@@ -1,5 +1,5 @@
-#ifndef SOURCE_TOOLS_PARSE_PRECEDENCE_H
-#define SOURCE_TOOLS_PARSE_PRECEDENCE_H
+#ifndef SOURCETOOLS__PARSE__PRECEDENCE_H
+#define SOURCETOOLS__PARSE__PRECEDENCE_H
 
 #include <sourcetools/tokenization/tokenization.h>
 
@@ -112,4 +112,4 @@ inline bool isRightAssociative(const tokens::Token& token)
 } // namespace parser
 } // namespace sourcetools
 
-#endif /* SOURCE_TOOLS_PARSE_PRECEDENCE_H */
+#endif /* SOURCETOOLS__PARSE__PRECEDENCE_H */

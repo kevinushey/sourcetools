@@ -1,5 +1,5 @@
-#ifndef SOURCE_TOOLS_R_CALL_RECURSER_H
-#define SOURCE_TOOLS_R_CALL_RECURSER_H
+#ifndef SOURCETOOLS__R__R_CALL_RECURSER_H
+#define SOURCETOOLS__R__R_CALL_RECURSER_H
 
 #include <vector>
 
@@ -72,4 +72,4 @@ private:
 } // namespace r
 } // namespace sourcetools
 
-#endif /* SOURCE_TOOLS_R_CALL_RECURSER_H */
+#endif /* SOURCETOOLS__R__R_CALL_RECURSER_H */

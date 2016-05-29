@@ -1,5 +1,5 @@
-#ifndef SOURCE_TOOLS_UTF8_UTF8_H
-#define SOURCE_TOOLS_UTF8_UTF8_H
+#ifndef SOURCETOOLS__UTF8__UTF8_H
+#define SOURCETOOLS__UTF8__UTF8_H
 
 #include <cstddef>
 
@@ -112,4 +112,4 @@ private:
 } // namespace utf8
 } // namespace sourcetools
 
-#endif /* SOURCE_TOOLS_UTF8_UTF8_H */
+#endif /* SOURCETOOLS__UTF8__UTF8_H */

@@ -1,8 +1,8 @@
-#ifndef SOURCE_TOOLS_TOKENIZATION_TOKENIZATION_H
-#define SOURCE_TOOLS_TOKENIZATION_TOKENIZATION_H
+#ifndef SOURCETOOLS__TOKENIZATION__TOKENIZATION_H
+#define SOURCETOOLS__TOKENIZATION__TOKENIZATION_H
 
 #include <sourcetools/tokenization/Registration.h>
 #include <sourcetools/tokenization/Token.h>
 #include <sourcetools/tokenization/Tokenizer.h>
 
-#endif /* SOURCE_TOOLS_TOKENIZATION_TOKENIZATION_H */
+#endif /* SOURCETOOLS__TOKENIZATION__TOKENIZATION_H */

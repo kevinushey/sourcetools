@@ -1,5 +1,5 @@
-// [[Rcpp::export]]
-#ifndef SOURCE_TOOLS_PARSE_PARSER_H
+#ifndef SOURCETOOLS__PARSE__PARSER_H
+#define SOURCETOOLS__PARSE__PARSER_H
 #define SOURCE_TOOLS_PARSE_PARSER_H
 
 #include <iostream>
@@ -614,4 +614,4 @@ void log(parser::Node* pNode, int depth = 0);
 
 } // namespace sourcetools
 
-#endif /* SOURCE_TOOLS_PARSE_PARSER_H */
+#endif /* SOURCETOOLS__PARSE__PARSER_H */

@@ -1,5 +1,5 @@
-#ifndef SOURCE_TOOLS_DIAGNOSTICS_CHECKERS_H
-#define SOURCE_TOOLS_DIAGNOSTICS_CHECKERS_H
+#ifndef SOURCETOOLS__DIAGNOSTICS__CHECKERS_H
+#define SOURCETOOLS__DIAGNOSTICS__CHECKERS_H
 
 #include <vector>
 #include <set>
@@ -314,4 +314,4 @@ private:
 } // namespace diagnostics
 } // namespace sourcetools
 
-#endif /* SOURCE_TOOLS_DIAGNOSTICS_CHECKERS_H */
+#endif /* SOURCETOOLS__DIAGNOSTICS__CHECKERS_H */

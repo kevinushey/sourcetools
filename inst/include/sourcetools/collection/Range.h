@@ -1,5 +1,5 @@
-#ifndef SOURCE_TOOLS_COLLECTIONS_RANGE_H
-#define SOURCE_TOOLS_COLLECTIONS_RANGE_H
+#ifndef SOURCETOOLS__COLLECTION__RANGE_H
+#define SOURCETOOLS__COLLECTION__RANGE_H
 
 #include <ostream>
 #include <sourcetools/collection/Position.h>
@@ -31,4 +31,4 @@ private:
 } // namespace collections
 } // namespace sourcetools
 
-#endif /* SOURCE_TOOLS_COLLECTIONS_RANGE_H */
+#endif /* SOURCETOOLS__COLLECTION__RANGE_H */

@@ -1,5 +1,5 @@
-#ifndef SOURCE_TOOLS_CURSORS_TOKEN_CURSOR_H
-#define SOURCE_TOOLS_CURSORS_TOKEN_CURSOR_H
+#ifndef SOURCETOOLS__CURSOR__TOKEN_CURSOR_H
+#define SOURCETOOLS__CURSOR__TOKEN_CURSOR_H
 
 #include <algorithm>
 
@@ -317,4 +317,4 @@ inline std::string toString(const cursors::TokenCursor& cursor)
 
 } // namespace sourcetools
 
-#endif /* SOURCE_TOOLS_CURSORS_TOKEN_CURSOR_H */
+#endif /* SOURCETOOLS__CURSOR__TOKEN_CURSOR_H */

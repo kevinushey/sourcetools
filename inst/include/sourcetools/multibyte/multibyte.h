@@ -1,5 +1,5 @@
-#ifndef SOURCE_TOOLS_MULTIBYTE_MULTIBYTE_H
-#define SOURCE_TOOLS_MULTIBYTE_MULTIBYTE_H
+#ifndef SOURCETOOLS__MULTIBYTE__MULTIBYTE_H
+#define SOURCETOOLS__MULTIBYTE__MULTIBYTE_H
 
 #include <cstdlib>
 #include <cwchar>
@@ -38,4 +38,4 @@ inline bool countWhitespaceBytes(const char* data,
 } // namespace multibyte
 } // namespace sourcetools
 
-#endif /* SOURCE_TOOLS_MULTIBYTE_MULTIBYTE_H */
+#endif /* SOURCETOOLS__MULTIBYTE__MULTIBYTE_H */

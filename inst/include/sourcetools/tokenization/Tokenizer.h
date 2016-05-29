@@ -1,5 +1,5 @@
-#ifndef SOURCE_TOOLS_TOKENIZATION_TOKENIZER_H
-#define SOURCE_TOOLS_TOKENIZATION_TOKENIZER_H
+#ifndef SOURCETOOLS__TOKENIZATION__TOKENIZER_H
+#define SOURCETOOLS__TOKENIZATION__TOKENIZER_H
 
 #include <sourcetools/core/core.h>
 #include <sourcetools/tokenization/Token.h>
@@ -460,4 +460,4 @@ inline std::vector<tokens::Token> tokenize(const std::string& code)
 
 } // namespace sourcetools
 
-#endif /* SOURCE_TOOLS_TOKENIZATION_TOKENIZER_H */
+#endif /* SOURCETOOLS__TOKENIZATION__TOKENIZER_H */

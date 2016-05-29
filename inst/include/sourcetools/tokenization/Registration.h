@@ -1,5 +1,5 @@
-#ifndef SOURCE_TOOLS_TOKENIZATION_REGISTRATION_H
-#define SOURCE_TOOLS_TOKENIZATION_REGISTRATION_H
+#ifndef SOURCETOOLS__TOKENIZATION__REGISTRATION_H
+#define SOURCETOOLS__TOKENIZATION__REGISTRATION_H
 
 #include <string>
 #include <cstring>
@@ -187,4 +187,4 @@ inline TokenType symbolType(const std::string& symbol)
 } // namespace tokens
 } // namespace sourcetools
 
-#endif /* SOURCE_TOOLS_TOKENIZATION_REGISTRATION_H */
+#endif /* SOURCETOOLS__TOKENIZATION__REGISTRATION_H */

@@ -1,5 +1,5 @@
-#ifndef SOURCE_TOOLS_R_FUNCTIONS_H
-#define SOURCE_TOOLS_R_FUNCTIONS_H
+#ifndef SOURCETOOLS__R__R_FUNCTIONS_H
+#define SOURCETOOLS__R__R_FUNCTIONS_H
 
 #include <string>
 #include <set>
@@ -82,4 +82,4 @@ inline SEXP functionBody(SEXP fnSEXP)
 } // namespace r
 } // namespace sourcetools
 
-#endif /* SOURCE_TOOLS_R_FUNCTIONS_H */
+#endif /* SOURCETOOLS__R__R_FUNCTIONS_H */

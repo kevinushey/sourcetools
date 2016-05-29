@@ -1,5 +1,5 @@
-#ifndef SOURCE_TOOLS_COLLECTIONS_POSITION_H
-#define SOURCE_TOOLS_COLLECTIONS_POSITION_H
+#ifndef SOURCETOOLS__COLLECTION__POSITION_H
+#define SOURCETOOLS__COLLECTION__POSITION_H
 
 #include <ostream>
 #include <cstddef>
@@ -74,4 +74,4 @@ struct Position
 } // namespace collections
 } // namespace sourcetools
 
-#endif /* SOURCE_TOOLS_COLLECTIONS_POSITION_H */
+#endif /* SOURCETOOLS__COLLECTION__POSITION_H */

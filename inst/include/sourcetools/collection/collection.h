@@ -1,7 +1,7 @@
-#ifndef SOURCE_TOOLS_COLLECTION_COLLECTION_H
-#define SOURCE_TOOLS_COLLECTION_COLLECTION_H
+#ifndef SOURCETOOLS__COLLECTION__COLLECTION_H
+#define SOURCETOOLS__COLLECTION__COLLECTION_H
 
 #include <sourcetools/collection/Position.h>
 #include <sourcetools/collection/Range.h>
 
-#endif /* SOURCE_TOOLS_COLLECTION_COLLECTION_H */
+#endif /* SOURCETOOLS__COLLECTION__COLLECTION_H */

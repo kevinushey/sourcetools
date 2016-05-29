@@ -1,5 +1,5 @@
-#ifndef SOURCE_TOOLS_READ_POSIX_FILE_CONNECTION_H
-#define SOURCE_TOOLS_READ_POSIX_FILE_CONNECTION_H
+#ifndef SOURCETOOLS__READ__POSIX__FILE_CONNECTION_H
+#define SOURCETOOLS__READ__POSIX__FILE_CONNECTION_H
 
 #include <cstddef>
 
@@ -55,4 +55,4 @@ private:
 } // namespace detail
 } // namespace sourcetools
 
-#endif /* SOURCE_TOOLS_READ_POSIX_FILE_CONNECTION_H */
+#endif /* SOURCETOOLS__READ__POSIX__FILE_CONNECTION_H */

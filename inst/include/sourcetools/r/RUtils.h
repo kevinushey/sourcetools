@@ -1,5 +1,5 @@
-#ifndef SOURCE_TOOLS_R_UTILS_H
-#define SOURCE_TOOLS_R_UTILS_H
+#ifndef SOURCETOOLS__R__R_UTILS_H
+#define SOURCETOOLS__R__R_UTILS_H
 
 #include <vector>
 
@@ -97,4 +97,4 @@ private:
 } // namespace r
 } // namespace sourcetools
 
-#endif /* SOURCE_TOOLS_R_UTILS_H */
+#endif /* SOURCETOOLS__R__R_UTILS_H */

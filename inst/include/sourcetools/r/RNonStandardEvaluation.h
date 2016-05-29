@@ -1,5 +1,5 @@
-#ifndef SOURCE_TOOLS_R_NON_STANDARD_EVALUATION_H
-#define SOURCE_TOOLS_R_NON_STANDARD_EVALUATION_H
+#ifndef SOURCETOOLS__R__R_NON_STANDARD_EVALUATION_H
+#define SOURCETOOLS__R__R_NON_STANDARD_EVALUATION_H
 
 #include <set>
 #include <map>
@@ -146,4 +146,4 @@ inline bool performsNonStandardEvaluation(SEXP fnSEXP)
 } // namespace r
 } // namespace sourcetools
 
-#endif /* SOURCE_TOOLS_R_NON_STANDARD_EVALUATION_H */
+#endif /* SOURCETOOLS__R__R_NON_STANDARD_EVALUATION_H */
