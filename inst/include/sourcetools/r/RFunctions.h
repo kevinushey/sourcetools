@@ -29,7 +29,7 @@ inline std::set<std::string> objectsOnSearchPath()
   Protect protect;
 
   SEXP objectsSEXP;
-  protect(objectsSEXP = eval("objectsOnSearchPath"));
+  protect(objectsSEXP = eval("search_objects"));
 
   for (R_xlen_t i = 0; i < Rf_length(objectsSEXP); ++i)
   {
