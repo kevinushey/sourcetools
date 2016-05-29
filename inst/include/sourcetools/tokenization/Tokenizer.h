@@ -31,10 +31,10 @@ private:
     cursor_.advance(length);
   }
 
+  template <bool SkipEscaped>
   void consumeUntil(char ch,
                     TokenType type,
-                    Token* pToken,
-                    bool skipEscaped = false)
+                    Token* pToken)
   {
     TextCursor lookahead = cursor_;
 
@@ -45,7 +45,7 @@ private:
       lookahead.advance();
       ++distance;
 
-      if (skipEscaped && lookahead.peek() == '\\') {
+      if (SkipEscaped && lookahead.peek() == '\\') {
         lookahead.advance();
         ++distance;
         continue;
@@ -66,27 +66,27 @@ private:
 
   void consumeUserOperator(Token* pToken)
   {
-    consumeUntil('%', tokens::OPERATOR_USER, pToken);
+    consumeUntil<false>('%', tokens::OPERATOR_USER, pToken);
   }
 
   void consumeComment(Token* pToken)
   {
-    consumeUntil('\n', tokens::COMMENT, pToken);
+    consumeUntil<false>('\n', tokens::COMMENT, pToken);
   }
 
   void consumeQuotedSymbol(Token* pToken)
   {
-    consumeUntil('`', tokens::SYMBOL, pToken, true);
+    consumeUntil<true>('`', tokens::SYMBOL, pToken);
   }
 
   void consumeQString(Token* pToken)
   {
-    consumeUntil('\'', tokens::STRING, pToken, true);
+    consumeUntil<true>('\'', tokens::STRING, pToken);
   }
 
   void consumeQQString(Token* pToken)
   {
-    consumeUntil('"', tokens::STRING, pToken, true);
+    consumeUntil<true>('"', tokens::STRING, pToken);
   }
 
   // NOTE: Don't tokenize '-' or '+' as part of number; instead
@@ -104,14 +104,6 @@ private:
   bool isStartOfSymbol()
   {
     return utils::isValidForStartOfRSymbol(cursor_.peek());
-  }
-
-  bool isHexDigit(char c)
-  {
-    return
-      (c >= '0' && c <= '9') ||
-      (c >= 'A' && c <= 'F') ||
-      (c >= 'a' && c <= 'f');
   }
 
   bool consumeHexadecimalNumber(Token* pToken)
@@ -133,7 +125,7 @@ private:
     // hexadecimal characters (0-9, a-f, A-F). The number
     // can also end with an 'i' (for an imaginary number)
     // or with an 'L' for an integer.
-    if (!isHexDigit(cursor_.peek(distance)))
+    if (!utils::isHexDigit(cursor_.peek(distance)))
     {
       consumeToken(tokens::INVALID, distance, pToken);
       return false;
@@ -151,7 +143,7 @@ private:
         break;
       }
 
-      if (!isHexDigit(peek))
+      if (!utils::isHexDigit(peek))
         success = false;
 
       ++distance;
@@ -442,13 +434,15 @@ private:
 
 inline std::vector<tokens::Token> tokenize(const char* code, std::size_t n)
 {
-  std::vector<tokens::Token> tokens;
+  typedef tokenizer::Tokenizer Tokenizer;
+  typedef tokens::Token Token;
+
+  std::vector<Token> tokens;
   if (n == 0)
     return tokens;
 
-  tokenizer::Tokenizer tokenizer(code, n);
-
-  tokens::Token token;
+  Token token;
+  Tokenizer tokenizer(code, n);
   while (tokenizer.tokenize(&token))
     tokens.push_back(token);
 

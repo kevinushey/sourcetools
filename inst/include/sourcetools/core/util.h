@@ -84,6 +84,14 @@ inline bool isAlphaNumeric(char ch)
     (ch >= '0' && ch <= '9');
 }
 
+inline bool isHexDigit(char ch)
+{
+  return
+    (ch >= '0' && ch <= '9') ||
+    (ch >= 'a' && ch <= 'f') ||
+    (ch >= 'A' && ch <= 'F');
+}
+
 inline bool isValidForStartOfRSymbol(char ch)
 {
   return

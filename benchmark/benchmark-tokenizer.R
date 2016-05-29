@@ -7,7 +7,7 @@ library(sourcetools)
 file <- "R/sourcetools.R"
 microbenchmark(
   tokenize_file(file),
-  parse(file)
+  parse(file, keep.source = FALSE)
 )
 
 contents <- read(file)
