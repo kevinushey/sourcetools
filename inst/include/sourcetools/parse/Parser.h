@@ -497,7 +497,8 @@ private:
 
   ParseNode* parseNonEmptyExpression(int precedence = 0)
   {
-    checkUnexpectedEnd(current());
+    if (checkUnexpectedEnd(current()))
+      return ParseNode::create(tokens::MISSING);
     return parseExpression(precedence);
   }
 
