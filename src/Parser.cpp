@@ -133,7 +133,7 @@ private:
       const ParseNode* pChild = *it;
       const tokens::Token& token = pChild->token();
 
-      if (token.isType(tokens::OPERATOR_ASSIGN_LEFT_EQUALS))
+      if (tokens::isOperator(token))
       {
         const ParseNode* pLhs = pChild->children()[0];
         const ParseNode* pRhs = pChild->children()[1];

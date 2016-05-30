@@ -148,16 +148,7 @@ private:
       return parseExpression();
 
     if (isOperator(lookahead))
-    {
       unexpectedToken(lookahead, "expected '=', ',' or ')' following argument name");
-      ParseNode* pLhs = ParseNode::create(consume());
-      ParseNode* pOp  = ParseNode::create(OPERATOR_ASSIGN_LEFT_EQUALS);
-      advance();
-      ParseNode* pRhs = parseExpression();
-      pOp->add(pLhs);
-      pOp->add(pRhs);
-      return pOp;
-    }
 
     return parseExpression();
   }
