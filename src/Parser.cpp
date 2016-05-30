@@ -160,12 +160,10 @@ private:
       return R_NilValue;
 
     r::Protect protect;
-    SEXP lhsSEXP = protect(asFunctionArgumentListSEXP(pNode->children()[0]));
-    SEXP rhsSEXP = protect(asSEXP(pNode->children()[1]));
-    SEXP resultSEXP = Rf_lang4(Rf_install("function"),
-                               lhsSEXP,
-                               rhsSEXP,
-                               R_NilValue);
+    SEXP argsSEXP = protect(asFunctionArgumentListSEXP(pNode->children()[0]));
+    SEXP bodySEXP = protect(asSEXP(pNode->children()[1]));
+    SEXP fnSEXP = Rf_install("function");
+    SEXP resultSEXP = Rf_lang4(fnSEXP, argsSEXP, bodySEXP, R_NilValue);
     return resultSEXP;
   }
 
