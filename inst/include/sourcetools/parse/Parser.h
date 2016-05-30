@@ -140,6 +140,25 @@ private:
     using namespace tokens;
 
     check(SYMBOL);
+
+    Token lookahead = peek(1);
+    if (lookahead.isType(COMMA) || lookahead.isType(RPAREN))
+      return ParseNode::create(consume());
+    else if (lookahead.isType(OPERATOR_ASSIGN_LEFT_EQUALS))
+      return parseExpression();
+
+    if (isOperator(lookahead))
+    {
+      unexpectedToken(lookahead, "expected '=', ',' or ')' following argument name");
+      ParseNode* pLhs = ParseNode::create(consume());
+      ParseNode* pOp  = ParseNode::create(OPERATOR_ASSIGN_LEFT_EQUALS);
+      advance();
+      ParseNode* pRhs = parseExpression();
+      pOp->add(pLhs);
+      pOp->add(pRhs);
+      return pOp;
+    }
+
     return parseExpression();
   }
 
