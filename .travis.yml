@@ -1,11 +1,17 @@
 language: r
-r:
-  - oldrel
-  - release
-  - devel
-compiler:
-  - clang
-  - gcc
-  - gcc-4.4
-sudo: false
 cache: packages
+
+addons:
+  apt:
+    packages:
+      - gcc-4.4
+      - g++-4.4
+
+matrix:
+  include:
+    - os: linux
+      dist: precise
+      env: CC=gcc-4.4 CXX=g++-4.4
+    - os: linux
+      dist: precise
+      env: CC=gcc CXX=g++
