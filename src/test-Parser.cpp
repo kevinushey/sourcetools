@@ -1,5 +1,5 @@
-#include <testthat.h>
 #include <sourcetools.h>
+#include <sourcetools/tests/testthat.h>
 
 using namespace sourcetools;
 using namespace sourcetools::parser;

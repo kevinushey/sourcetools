@@ -1,5 +1,5 @@
-#include <testthat.h>
 #include <sourcetools.h>
+#include <sourcetools/tests/testthat.h>
 
 #include <R.h>
 #include <Rinternals.h>
