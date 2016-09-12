@@ -84,16 +84,6 @@ tokenize <- function(file = "", text = NULL) {
   tokenize_string(text)
 }
 
-#' Find Syntax Errors
-#'
-#' Find syntax errors in a string of \R code.
-#'
-#' @param string A character vector (of length one).
-#' @export
-validate_syntax <- function(string) {
-  .Call("sourcetools_validate_syntax", as.character(string), PACKAGE = "sourcetools")
-}
-
 #' @export
 print.RTokens <- function(x, ...) {
   print.data.frame(x, ...)
