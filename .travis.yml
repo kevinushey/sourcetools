@@ -1,5 +1,11 @@
-# Sample .travis.yml for R projects
-
 language: r
-warnings_are_errors: true
-sudo: required
+r:
+  - oldrel
+  - release
+  - devel
+compiler:
+  - clang
+  - gcc
+  - gcc-4.4
+sudo: false
+cache: packages
