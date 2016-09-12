@@ -12,6 +12,6 @@ Depends:
 Suggests:
     testthat
 LinkingTo:
-    testthat
+    testthat (>= 1.0.2)
 RoxygenNote: 5.0.1
 BugReports: https://github.com/kevinushey/sourcetools/issues
