@@ -10,4 +10,5 @@
 ^benchmark/
 ^notes/
 ^tools/
+^travis/
 ^src/*\.s?o
