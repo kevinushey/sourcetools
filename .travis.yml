@@ -6,6 +6,13 @@ warnings_are_errors: true
 before_install:
   - source travis/before-install.sh
 
+addons:
+  apt:
+    sources:
+      - gcc-4.4
+      - g++-4.4
+      - clang
+
 r:
   - oldrel
   - release
@@ -14,4 +21,4 @@ r:
 env:
   - CC=gcc-4.4 CXX=g++-4.4
   - CC=gcc CXX=g++
-  - CC=clang CXX=clang
+  - CC=clang CXX=clang++
