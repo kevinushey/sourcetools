@@ -8,7 +8,7 @@ before_install:
 
 addons:
   apt:
-    sources:
+    packages:
       - gcc-4.4
       - g++-4.4
       - clang
