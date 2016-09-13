@@ -2,8 +2,10 @@
 #define SOURCETOOLS_READ_POSIX_MEMORY_MAPPED_CONNECTION_H
 
 #include <cstdlib>
-#include <sys/mman.h>
 #include <fcntl.h>
+#include <sys/mman.h>
+
+#include <sourcetools/platform/platform.h>
 
 namespace sourcetools {
 namespace detail {
@@ -21,7 +23,9 @@ public:
     map_ = (char*) ::mmap(0, size, PROT_READ, MAP_SHARED, fd, 0);
 #endif
 
-    ::madvise((void*) map_, size, MADV_SEQUENTIAL | MADV_WILLNEED);
+#if defined(POSIX_MADV_SEQUENTIAL) && defined(POSIX_MADV_WILLNEED)
+    ::posix_madvise((void*) map_, size, POSIX_MADV_SEQUENTIAL | POSIX_MADV_WILLNEED);
+#endif
   }
 
   ~MemoryMappedConnection()

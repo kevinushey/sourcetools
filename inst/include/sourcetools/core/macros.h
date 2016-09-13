@@ -40,7 +40,9 @@ inline std::string debugPosition(const char* filePath, int line)
   static const int N = 1024;
   char buffer[N + 1];
   std::string shortPath = shortFilePath(filePath);
-  ::snprintf(buffer, N, "[%s:%4i]", shortPath.c_str(), line);
+  if (shortPath.size() > N / 2)
+    shortPath = shortPath.substr(0, N / 2);
+  ::sprintf(buffer, "[%s:%4i]", shortPath.c_str(), line);
   return buffer;
 }
 

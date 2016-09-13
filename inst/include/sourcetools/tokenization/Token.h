@@ -487,13 +487,15 @@ inline std::string toString(const tokens::Token& token)
   else
     contents = token.contents();
 
-  char buff[1024];
-  ::snprintf(buff,
-             1024 - 1,
-             "[%4lu:%4lu]: %s",
-             static_cast<unsigned long>(token.row()),
-             static_cast<unsigned long>(token.column()),
-             contents.c_str());
+  static const int N = 1024;
+  if (contents.size() > N / 2)
+    contents = contents.substr(0, N / 2);
+  char buff[N];
+  ::sprintf(buff,
+            "[%4lu:%4lu]: %s",
+            static_cast<unsigned long>(token.row()),
+            static_cast<unsigned long>(token.column()),
+            contents.c_str());
   return buff;
 }
 
