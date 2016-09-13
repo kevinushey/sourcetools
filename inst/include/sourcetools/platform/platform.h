@@ -17,4 +17,8 @@
 # define SOURCETOOLS_PLATFORM_SOLARIS
 #endif
 
+#if __cplusplus >= 201103L
+# define SOURCETOOLS_COMPILER_CXX11
+#endif
+
 #endif /* SOURCETOOLS_PLATFORM_PLATFORM_H */

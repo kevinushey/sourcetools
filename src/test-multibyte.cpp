@@ -13,8 +13,10 @@ std::string type(wchar_t ch)
     result += "print,";
   if (std::iswspace(ch))
     result += "space,";
+#ifdef SOURCETOOLS_COMPILER_CXX11
   if (std::iswblank(ch))
     result += "blank,";
+#endif
   if (std::iswgraph(ch))
     result += "graph,";
   if (std::iswpunct(ch))
