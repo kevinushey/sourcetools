@@ -1,3 +1,7 @@
+# sourcetools 0.1.5
+
+- More work to ensure `sourcetools` can build on Solaris.
+
 # sourcetools 0.1.4
 
 - More work to ensure `sourcetools` can build on Solaris.
