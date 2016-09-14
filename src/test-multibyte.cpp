@@ -4,7 +4,9 @@
 #include <R.h>
 #include <Rinternals.h>
 
-std::string type(wchar_t ch)
+namespace {
+
+std::string charType(wchar_t ch)
 {
   std::string result;
   if (std::iswcntrl(ch))
@@ -40,6 +42,8 @@ std::string type(wchar_t ch)
   return result;
 }
 
+} // anonymous namespace
+
 extern "C" SEXP sourcetools_print_multibyte(SEXP dataSEXP)
 {
   const char* data = CHAR(STRING_ELT(dataSEXP, 0));
@@ -60,12 +64,8 @@ extern "C" SEXP sourcetools_print_multibyte(SEXP dataSEXP)
       continue;
     }
 
-    std::string type = ::type(ch);
-    ::Rprintf("%5i: [%s,%i] '%lc'\n",
-              (int) ch,
-              type.c_str(),
-              length,
-              ch);
+    std::string type = charType(ch);
+    Rprintf("%5i: [%s,%i] '%lc'\n", (int) ch, type.c_str(), length, ch);
 
     it += length;
   }
@@ -86,7 +86,7 @@ extern "C" SEXP sourcetools_print_utf8(SEXP dataSEXP)
     wchar_t ch = *it++;
     if (ch == 0 || ch == -1)
       break;
-    ::Rprintf("[%i]: %lc\n", (int) ch, ch);
+    Rprintf("[%i]: %lc\n", (int) ch, ch);
   }
 
   return R_NilValue;

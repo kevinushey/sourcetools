@@ -12,9 +12,9 @@ void log(parser::ParseNode* pNode, int depth)
     return;
 
   for (int i = 0; i < depth; ++i)
-    ::Rprintf("  ");
+    Rprintf("  ");
 
-  ::Rprintf(toString(pNode->token()).c_str());
+  Rprintf(toString(pNode->token()).c_str());
 
   using parser::ParseNode;
   const std::vector<ParseNode*>& children = pNode->children();

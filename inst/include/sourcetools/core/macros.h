@@ -1,8 +1,10 @@
 #ifndef SOURCETOOLS_CORE_MACROS_H
 #define SOURCETOOLS_CORE_MACROS_H
 
-#include <string>
 #include <cstdio>
+#include <cstring>
+
+#include <string>
 #include <iostream>
 
 /* Utility */
@@ -42,7 +44,7 @@ inline std::string debugPosition(const char* filePath, int line)
   std::string shortPath = shortFilePath(filePath);
   if (shortPath.size() > N / 2)
     shortPath = shortPath.substr(0, N / 2);
-  ::sprintf(buffer, "[%s:%4i]", shortPath.c_str(), line);
+  std::sprintf(buffer, "[%s:%4i]", shortPath.c_str(), line);
   return buffer;
 }
 
