@@ -1,8 +1,9 @@
 #ifndef SOURCETOOLS_CORE_MACROS_H
 #define SOURCETOOLS_CORE_MACROS_H
 
-#include <string>
 #include <cstdio>
+
+#include <string>
 #include <iostream>
 
 /* Utility */
@@ -14,7 +15,7 @@
 # define UNLIKELY(x) x
 #endif
 
-#define SOURCE_TOOLS_CHECK_MASK(__SELF__, __MASK__)                   \
+#define SOURCE_TOOLS_CHECK_MASK(__SELF__, __MASK__)                    \
   ((__MASK__ & __SELF__) == __MASK__)
 
 #define SOURCE_TOOLS_LOWER_BITS(__VALUE__, __BITS__)                   \
@@ -42,7 +43,7 @@ inline std::string debugPosition(const char* filePath, int line)
   std::string shortPath = shortFilePath(filePath);
   if (shortPath.size() > N / 2)
     shortPath = shortPath.substr(0, N / 2);
-  ::sprintf(buffer, "[%s:%4i]", shortPath.c_str(), line);
+  std::sprintf(buffer, "[%s:%4i]", shortPath.c_str(), line);
   return buffer;
 }
 

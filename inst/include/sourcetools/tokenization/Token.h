@@ -2,6 +2,7 @@
 #define SOURCETOOLS_TOKENIZATION_TOKEN_H
 
 #include <cstring>
+#include <cstdio>
 
 #include <vector>
 #include <string>
@@ -491,11 +492,11 @@ inline std::string toString(const tokens::Token& token)
   if (contents.size() > N / 2)
     contents = contents.substr(0, N / 2);
   char buff[N];
-  ::sprintf(buff,
-            "[%4lu:%4lu]: %s",
-            static_cast<unsigned long>(token.row()),
-            static_cast<unsigned long>(token.column()),
-            contents.c_str());
+  std::sprintf(buff,
+               "[%4lu:%4lu]: %s",
+               static_cast<unsigned long>(token.row()),
+               static_cast<unsigned long>(token.column()),
+               contents.c_str());
   return buff;
 }
 
