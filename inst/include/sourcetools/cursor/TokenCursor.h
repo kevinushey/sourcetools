@@ -1,6 +1,7 @@
 #ifndef SOURCETOOLS_CURSOR_TOKEN_CURSOR_H
 #define SOURCETOOLS_CURSOR_TOKEN_CURSOR_H
 
+#include <cstring>
 #include <algorithm>
 
 #include <sourcetools/collection/Position.h>
@@ -216,7 +217,7 @@ public:
 
   bool findFwd(const char* contents)
   {
-    return findFwd(std::string(contents, ::strlen(contents)));
+    return findFwd(std::string(contents, std::strlen(contents)));
   }
 
   bool findFwd(const std::string& contents)
@@ -231,7 +232,7 @@ public:
 
   bool findBwd(const char* contents)
   {
-    return findBwd(std::string(contents, ::strlen(contents)));
+    return findBwd(std::string(contents, std::strlen(contents)));
   }
 
   bool findBwd(const std::string& contents)
