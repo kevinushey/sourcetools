@@ -1,9 +1,7 @@
 # sourcetools 0.1.5
 
-- Ensure that 'sprintf' is resolved from 'std' namespace,
-  and that '<cstdio>' is included in the translation units
-  in which it is used.
-
+- Ensure that symbols included from e.g. `<cstdio>`, `<cstring>`
+  are resolved using a `std::` prefix.
 # sourcetools 0.1.4
 
 - More work to ensure `sourcetools` can build on Solaris.
