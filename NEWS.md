@@ -1,3 +1,22 @@
+# sourcetools 0.1.5
+
+- Ensure that 'sprintf' is resolved from 'std' namespace,
+  and that '<cstdio>' is included in the translation units
+  in which it is used.
+
+# sourcetools 0.1.4
+
+- More work to ensure `sourcetools` can build on Solaris.
+
+# sourcetools 0.1.3
+
+- Relax C++11 requirement, to ensure that `sourcetools` can
+  build on machines with older compilers (e.g. gcc 4.4).
+  
+# sourcetools 0.1.2
+
+- Disable failing tests on Solaris.
+
 # sourcetools 0.1.1
 
 - Rename token type `ERR` to `INVALID` to fix build errors
