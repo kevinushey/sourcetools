@@ -52,8 +52,7 @@ test_that("Numbers are tokenized correctly", {
 })
 
 test_that("The tokenizer accepts UTF-8 symbols", {
-  expect_true(nrow(tokenize_string("å√∂")) == 1)
-  expect_true(nrow(tokenize_string("¡™£¢∞§¶•ªº≠åß∂ƒ©˙∆˚¬…æΩ≈ç√∫˜µ≤≥÷")) == 1)
+  expect_true(nrow(tokenize_string("鬼")) == 1)
 })
 
 test_that("The tokenizer works correctly", {
