@@ -20,7 +20,7 @@ public:
   typedef tokens::TokenType TokenType;
   typedef parser::ParseNode ParseNode;
 
-  virtual void apply(const ParseNode* pNode, Diagnostics* pDiagnostics, std::size_t depth) = 0;
+  virtual void apply(const ParseNode* pNode, Diagnostics* pDiagnostics, index_type depth) = 0;
   virtual ~CheckerBase() {}
 };
 
@@ -35,7 +35,7 @@ public:
 class ComparisonWithNullChecker : public CheckerBase
 {
 public:
-  void apply(const ParseNode* pNode, Diagnostics* pDiagnostics, std::size_t depth)
+  void apply(const ParseNode* pNode, Diagnostics* pDiagnostics, index_type depth)
   {
     const Token& token = pNode->token();
     bool isEquals =
@@ -71,7 +71,7 @@ public:
 class AssignmentInIfChecker : public CheckerBase
 {
 public:
-  void apply(const ParseNode* pNode, Diagnostics* pDiagnostics, std::size_t depth)
+  void apply(const ParseNode* pNode, Diagnostics* pDiagnostics, index_type depth)
   {
     if (!pNode->token().isType(tokens::KEYWORD_IF))
       return;
@@ -98,7 +98,7 @@ public:
 class ScalarOpsInIfChecker : public CheckerBase
 {
 public:
-  void apply(const ParseNode* pNode, Diagnostics* pDiagnostics, std::size_t depth)
+  void apply(const ParseNode* pNode, Diagnostics* pDiagnostics, index_type depth)
   {
     if (!pNode->token().isType(tokens::KEYWORD_IF))
       return;
@@ -140,7 +140,7 @@ public:
 class UnusedResultChecker : public CheckerBase
 {
 public:
-  void apply(const ParseNode* pNode, Diagnostics* pDiagnostics, std::size_t depth)
+  void apply(const ParseNode* pNode, Diagnostics* pDiagnostics, index_type depth)
   {
     if (pNode->parent() == NULL)
       return;
@@ -184,7 +184,7 @@ public:
     objects_ = r::objectsOnSearchPath();
   }
 
-  void apply(const ParseNode* pNode, Diagnostics* pDiagnostics, std::size_t depth)
+  void apply(const ParseNode* pNode, Diagnostics* pDiagnostics, index_type depth)
   {
     using namespace tokens;
     const Token& token = pNode->token();
@@ -218,7 +218,7 @@ private:
   class Context
   {
   public:
-    explicit Context(std::size_t depth)
+    explicit Context(index_type depth)
       : depth_(depth)
     {
     }
@@ -233,14 +233,14 @@ private:
       return values_.count(contents);
     }
 
-    std::size_t depth() const
+    index_type depth() const
     {
       return depth_;
     }
 
   private:
     std::set<std::string> values_;
-    std::size_t depth_;
+    index_type depth_;
   };
 
   Context& current()
@@ -248,7 +248,7 @@ private:
     return stack_[stack_.size() - 1];
   }
 
-  void push(const ParseNode* pNode, std::size_t depth)
+  void push(const ParseNode* pNode, index_type depth)
   {
     stack_.push_back(Context(depth));
 

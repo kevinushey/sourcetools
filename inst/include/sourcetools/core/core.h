@@ -1,6 +1,7 @@
 #ifndef SOURCETOOLS_CORE_CORE_H
 #define SOURCETOOLS_CORE_CORE_H
 
+#include <sourcetools/core/config.h>
 #include <sourcetools/core/macros.h>
 #include <sourcetools/core/util.h>
 

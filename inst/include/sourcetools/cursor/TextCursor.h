@@ -13,7 +13,7 @@ class TextCursor
 {
 public:
 
-  TextCursor(const char* text, std::size_t n)
+  TextCursor(const char* text, index_type n)
       : text_(text),
         n_(n),
         offset_(0),
@@ -21,17 +21,17 @@ public:
   {
   }
 
-  char peek(std::size_t offset = 0)
+  char peek(index_type offset = 0)
   {
-    std::size_t index = offset_ + offset;
+    index_type index = offset_ + offset;
     if (UNLIKELY(index >= n_))
       return '\0';
     return text_[index];
   }
 
-  void advance(std::size_t times = 1)
+  void advance(index_type times = 1)
   {
-    for (std::size_t i = 0; i < times; ++i) {
+    for (index_type i = 0; i < times; ++i) {
       if (peek() == '\n') {
         ++position_.row;
         position_.column = 0;
@@ -44,19 +44,19 @@ public:
 
   operator const char*() const { return text_ + offset_; }
 
-  std::size_t offset() const { return offset_; }
+  index_type offset() const { return offset_; }
 
   const collections::Position& position() const { return position_; }
-  std::size_t row() const { return position_.row; }
-  std::size_t column() const { return position_.column; }
+  index_type row() const { return position_.row; }
+  index_type column() const { return position_.column; }
 
   const char* begin() const { return text_; }
   const char* end() const { return text_ + n_; }
 
 private:
   const char* text_;
-  std::size_t n_;
-  std::size_t offset_;
+  index_type n_;
+  index_type offset_;
   collections::Position position_;
 };
 

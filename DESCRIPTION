@@ -13,6 +13,6 @@ Suggests:
     testthat
 LinkingTo:
     testthat (>= 1.0.2)
-RoxygenNote: 5.0.1
+RoxygenNote: 5.0.1.9000
 BugReports: https://github.com/kevinushey/sourcetools/issues
 Encoding: UTF-8

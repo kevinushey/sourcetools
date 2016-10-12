@@ -29,7 +29,7 @@ public:
   void report()
   {
     const std::vector<Diagnostic>& diagnostics = diagnostics_;
-    for (std::size_t i = 0; i < diagnostics.size(); ++i)
+    for (index_type i = 0; i < diagnostics.size(); ++i)
     {
       Diagnostic diagnostic = diagnostics[i];
       std::cerr << diagnostic.range() << ": "
@@ -49,7 +49,7 @@ public:
   }
 
 private:
-  void runImpl(const ParseNode* pNode, std::size_t depth = 0)
+  void runImpl(const ParseNode* pNode, index_type depth = 0)
   {
     for (Checkers::iterator it = checkers_.begin();
          it != checkers_.end();

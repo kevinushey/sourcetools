@@ -47,11 +47,11 @@ inline std::set<std::string> objectsOnSearchPath()
 
 namespace util {
 
-inline void setNames(SEXP dataSEXP, const char** names, std::size_t n)
+inline void setNames(SEXP dataSEXP, const char** names, index_type n)
 {
   RObjectFactory factory;
   SEXP namesSEXP = factory.create(STRSXP, n);
-  for (std::size_t i = 0; i < n; ++i)
+  for (index_type i = 0; i < n; ++i)
     SET_STRING_ELT(namesSEXP, i, Rf_mkChar(names[i]));
   Rf_setAttrib(dataSEXP, R_NamesSymbol, namesSEXP);
 }

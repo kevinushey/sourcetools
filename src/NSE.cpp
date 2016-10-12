@@ -7,9 +7,9 @@ extern "C" SEXP sourcetools_performs_nse(SEXP fnSEXP)
   if (TYPEOF(fnSEXP) == VECSXP || TYPEOF(fnSEXP) == EXPRSXP)
   {
     Protect protect;
-    std::size_t n = Rf_length(fnSEXP);
+    index_type n = Rf_length(fnSEXP);
     SEXP resultSEXP = protect(Rf_allocVector(LGLSXP, n));
-    for (std::size_t i = 0; i < n; ++i)
+    for (index_type i = 0; i < n; ++i)
     {
       SEXP elSEXP = VECTOR_ELT(fnSEXP, i);
       LOGICAL(resultSEXP)[i] = Rf_isFunction(elSEXP)

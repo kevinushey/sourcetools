@@ -24,7 +24,7 @@ private:
   // Tokenization ----
 
   void consumeToken(TokenType type,
-                    std::size_t length,
+                    index_type length,
                     Token* pToken)
   {
     *pToken = Token(cursor_, type, length);
@@ -39,7 +39,7 @@ private:
     TextCursor lookahead = cursor_;
 
     bool success = false;
-    std::size_t distance = 0;
+    index_type distance = 0;
 
     while (lookahead != lookahead.end()) {
       lookahead.advance();
@@ -112,7 +112,7 @@ private:
 
   bool consumeHexadecimalNumber(Token* pToken)
   {
-    std::size_t distance = 0;
+    index_type distance = 0;
 
     // Detect the leading '0'.
     if (cursor_.peek(distance) != '0')
@@ -161,7 +161,7 @@ private:
   void consumeNumber(Token* pToken)
   {
     bool success = true;
-    std::size_t distance = 0;
+    index_type distance = 0;
 
     // NOTE: A leading '-' or '+' is not consumed as part of
     // the number.
@@ -216,7 +216,7 @@ private:
 
   void consumeSymbol(Token* pToken)
   {
-    std::size_t distance = 1;
+    index_type distance = 1;
     char ch = cursor_.peek(distance);
     while (utils::isValidForRSymbol(ch)) {
       ++distance;
@@ -229,7 +229,7 @@ private:
 
 public:
 
-  Tokenizer(const char* code, std::size_t n)
+  Tokenizer(const char* code, index_type n)
     : cursor_(code, n)
   {
   }
@@ -415,12 +415,12 @@ public:
     return true;
   }
 
-  Token peek(std::size_t lookahead = 1)
+  Token peek(index_type lookahead = 1)
   {
     Tokenizer clone(*this);
 
     Token result(tokens::END);
-    for (std::size_t i = 0; i < lookahead; ++i) {
+    for (index_type i = 0; i < lookahead; ++i) {
       if (!clone.tokenize(&result)) {
         break;
       }
@@ -436,7 +436,7 @@ private:
 
 } // namespace tokenizer
 
-inline std::vector<tokens::Token> tokenize(const char* code, std::size_t n)
+inline std::vector<tokens::Token> tokenize(const char* code, index_type n)
 {
   typedef tokenizer::Tokenizer Tokenizer;
   typedef tokens::Token Token;

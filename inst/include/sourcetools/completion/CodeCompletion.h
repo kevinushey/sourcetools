@@ -28,7 +28,7 @@ private:
 };
 
 std::vector<Completion> completions(const char* code,
-                                    std::size_t n,
+                                    index_type n,
                                     const collections::Position& position)
 {
   std::vector<Completion> completions;

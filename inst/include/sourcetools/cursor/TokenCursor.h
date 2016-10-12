@@ -66,21 +66,21 @@ public:
     return true;
   }
 
-  const Token& peekFwd(std::size_t offset = 1) const
+  const Token& peekFwd(index_type offset = 1) const
   {
-    std::size_t index = offset_ + offset;
+    index_type index = offset_ + offset;
     if (UNLIKELY(index >= n_))
       return noSuchToken_;
 
     return tokens_[index];
   }
 
-  const Token& peekBwd(std::size_t offset = 1) const
+  const Token& peekBwd(index_type offset = 1) const
   {
     if (UNLIKELY(offset > offset_))
       return noSuchToken_;
 
-    std::size_t index = offset_ - offset;
+    index_type index = offset_ - offset;
     return tokens_[index];
   }
 
@@ -141,23 +141,23 @@ public:
     return true;
   }
 
-  const Token& nextSignificantToken(std::size_t times = 1) const
+  const Token& nextSignificantToken(index_type times = 1) const
   {
     TokenCursor clone(*this);
-    for (std::size_t i = 0; i < times; ++i)
+    for (index_type i = 0; i < times; ++i)
       clone.moveToNextSignificantToken();
     return clone;
   }
 
-  const Token& previousSignificantToken(std::size_t times = 1) const
+  const Token& previousSignificantToken(index_type times = 1) const
   {
     TokenCursor clone(*this);
-    for (std::size_t i = 0; i < times; ++i)
+    for (index_type i = 0; i < times; ++i)
       clone.moveToPreviousSignificantToken();
     return clone;
   }
 
-  bool moveToPosition(std::size_t row, std::size_t column)
+  bool moveToPosition(index_type row, index_type column)
   {
     return moveToPosition(Position(row, column));
   }
@@ -173,10 +173,10 @@ public:
       return true;
     }
 
-    std::size_t start  = 0;
-    std::size_t end    = n_;
+    index_type start  = 0;
+    index_type end    = n_;
 
-    std::size_t offset = 0;
+    index_type offset = 0;
     while (true)
     {
       offset = (start + end) / 2;
@@ -254,7 +254,7 @@ public:
 
     TokenType lhs = currentToken().type();
     TokenType rhs = complement(lhs);
-    std::size_t balance = 1;
+    index_type balance = 1;
 
     while (moveToNextSignificantToken())
     {
@@ -275,7 +275,7 @@ public:
 
     TokenType lhs = currentToken().type();
     TokenType rhs = complement(lhs);
-    std::size_t balance = 1;
+    index_type balance = 1;
 
     while (moveToPreviousSignificantToken())
     {
@@ -296,16 +296,16 @@ public:
   tokens::TokenType type() const { return currentToken().type(); }
   bool isType(tokens::TokenType type) const { return currentToken().isType(type); }
   collections::Position position() const { return currentToken().position(); }
-  std::size_t offset() const { return offset_; }
-  std::size_t row() const { return currentToken().row(); }
-  std::size_t column() const { return currentToken().column(); }
+  index_type offset() const { return offset_; }
+  index_type row() const { return currentToken().row(); }
+  index_type column() const { return currentToken().column(); }
 
 
 private:
 
   const std::vector<Token>& tokens_;
-  std::size_t offset_;
-  std::size_t n_;
+  index_type offset_;
+  index_type n_;
   Token noSuchToken_;
 
 };

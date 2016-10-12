@@ -29,7 +29,7 @@ public:
     return handle_ != INVALID_HANDLE_VALUE;
   }
 
-  bool size(std::size_t* pSize)
+  bool size(index_type* pSize)
   {
     *pSize = ::GetFileSize(handle_, NULL);
     return true;

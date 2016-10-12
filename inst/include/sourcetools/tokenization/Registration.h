@@ -142,7 +142,7 @@ SOURCE_TOOLS_REGISTER_KEYWORD(NA_real_,             17);
 SOURCE_TOOLS_REGISTER_KEYWORD(NA_complex_,          18);
 SOURCE_TOOLS_REGISTER_KEYWORD(NA_character_,        19);
 
-inline TokenType symbolType(const char* string, std::size_t n)
+inline TokenType symbolType(const char* string, index_type n)
 {
   // TODO: Is this insanity really an optimization or am I just silly?
   if (n < 2 || n > 13) {

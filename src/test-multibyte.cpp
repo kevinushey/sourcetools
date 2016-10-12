@@ -47,7 +47,7 @@ std::string charType(wchar_t ch)
 extern "C" SEXP sourcetools_print_multibyte(SEXP dataSEXP)
 {
   const char* data = CHAR(STRING_ELT(dataSEXP, 0));
-  std::size_t size = Rf_length(STRING_ELT(dataSEXP, 0));
+  sourcetools::index_type size = Rf_length(STRING_ELT(dataSEXP, 0));
 
   wchar_t ch;
   const char* it = data;

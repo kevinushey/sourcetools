@@ -26,9 +26,9 @@ inline SEXP Rf_mkString(const std::string& data)
 inline SEXP create(const std::vector<std::string>& vector)
 {
   Protect protect;
-  std::size_t n = vector.size();
+  index_type n = vector.size();
   SEXP resultSEXP = protect(Rf_allocVector(STRSXP, n));
-  for (std::size_t i = 0; i < n; ++i)
+  for (index_type i = 0; i < n; ++i)
     SET_STRING_ELT(resultSEXP, i, Rf_mkChar(vector[i]));
   return resultSEXP;
 }

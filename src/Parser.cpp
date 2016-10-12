@@ -119,7 +119,7 @@ private:
 
   static SEXP asFunctionArgumentListSEXP(const ParseNode* pNode)
   {
-    std::size_t n = pNode->children().size();
+    index_type n = pNode->children().size();
     if (n == 0)
       return R_NilValue;
 
@@ -201,10 +201,10 @@ public:
     if (pNode->token().isType(tokens::ROOT))
     {
       const std::vector<ParseNode*>& children = pNode->children();
-      std::size_t n = pNode->children().size();
+      index_type n = pNode->children().size();
       r::Protect protect;
       SEXP exprSEXP = protect(Rf_allocVector(EXPRSXP, n));
-      for (std::size_t i = 0; i < n; ++i)
+      for (index_type i = 0; i < n; ++i)
         SET_VECTOR_ELT(exprSEXP, i, asSEXP(children[i]));
       return exprSEXP;
     }
@@ -259,10 +259,10 @@ public:
 
   static SEXP asSEXP(const std::vector<ParseNode*>& expression)
   {
-    std::size_t n = expression.size();
+    index_type n = expression.size();
     r::Protect protect;
     SEXP exprSEXP = protect(Rf_allocVector(EXPRSXP, n));
-    for (std::size_t i = 0; i < n; ++i)
+    for (index_type i = 0; i < n; ++i)
       SET_VECTOR_ELT(exprSEXP, i, asSEXP(expression[i]));
     return exprSEXP;
   }

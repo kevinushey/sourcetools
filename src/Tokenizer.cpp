@@ -22,13 +22,13 @@ void asDataFrame(SEXP listSEXP, int n)
 SEXP asSEXP(const std::vector<tokens::Token>& tokens)
 {
   r::Protect protect;
-  std::size_t n = tokens.size();
+  index_type n = tokens.size();
   SEXP resultSEXP = protect(Rf_allocVector(VECSXP, 4));
 
   // Set vector elements
   SEXP valueSEXP = protect(Rf_allocVector(STRSXP, n));
   SET_VECTOR_ELT(resultSEXP, 0, valueSEXP);
-  for (std::size_t i = 0; i < n; ++i) {
+  for (index_type i = 0; i < n; ++i) {
     const std::string& contents = tokens[i].contents();
     SEXP charSEXP = Rf_mkCharLen(contents.c_str(), contents.size());
     SET_STRING_ELT(valueSEXP, i, charSEXP);
@@ -36,17 +36,17 @@ SEXP asSEXP(const std::vector<tokens::Token>& tokens)
 
   SEXP rowSEXP = protect(Rf_allocVector(INTSXP, n));
   SET_VECTOR_ELT(resultSEXP, 1, rowSEXP);
-  for (std::size_t i = 0; i < n; ++i)
+  for (index_type i = 0; i < n; ++i)
     INTEGER(rowSEXP)[i] = tokens[i].row() + 1;
 
   SEXP columnSEXP = protect(Rf_allocVector(INTSXP, n));
   SET_VECTOR_ELT(resultSEXP, 2, columnSEXP);
-  for (std::size_t i = 0; i < n; ++i)
+  for (index_type i = 0; i < n; ++i)
     INTEGER(columnSEXP)[i] = tokens[i].column() + 1;
 
   SEXP typeSEXP = protect(Rf_allocVector(STRSXP, n));
   SET_VECTOR_ELT(resultSEXP, 3, typeSEXP);
-  for (std::size_t i = 0; i < n; ++i) {
+  for (index_type i = 0; i < n; ++i) {
     const std::string& type = toString(tokens[i].type());
     SEXP charSEXP = Rf_mkCharLen(type.c_str(), type.size());
     SET_STRING_ELT(typeSEXP, i, charSEXP);
@@ -82,6 +82,7 @@ extern "C" SEXP sourcetools_tokenize_file(SEXP absolutePathSEXP)
     return R_NilValue;
   }
 
+  if (contents.empty()) return R_NilValue;
   const std::vector<Token>& tokens = sourcetools::tokenize(contents);
   return sourcetools::asSEXP(tokens);
 }
@@ -89,6 +90,10 @@ extern "C" SEXP sourcetools_tokenize_file(SEXP absolutePathSEXP)
 extern "C" SEXP sourcetools_tokenize_string(SEXP stringSEXP)
 {
   typedef sourcetools::tokens::Token Token;
+
+  if (Rf_length(stringSEXP) == 0)
+    return sourcetools::asSEXP(std::vector<Token>());
+
   SEXP charSEXP = STRING_ELT(stringSEXP, 0);
   const std::vector<Token>& tokens =
     sourcetools::tokenize(CHAR(charSEXP), Rf_length(charSEXP));

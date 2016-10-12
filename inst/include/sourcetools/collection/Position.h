@@ -14,7 +14,7 @@ struct Position
   {
   }
 
-  Position(std::size_t row, std::size_t column)
+  Position(index_type row, index_type column)
     : row(row), column(column)
   {
   }
@@ -61,13 +61,13 @@ struct Position
       (lhs.row == rhs.row && lhs.column >= rhs.column);
   }
 
-  friend Position operator +(const Position& lhs, std::size_t rhs)
+  friend Position operator +(const Position& lhs, index_type rhs)
   {
     return Position(lhs.row, lhs.column + rhs);
   }
 
-  std::size_t row;
-  std::size_t column;
+  index_type row;
+  index_type column;
 
 };
 

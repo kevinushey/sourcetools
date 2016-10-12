@@ -52,7 +52,7 @@ public:
       return false;
 
     // Get size of file
-    std::size_t size;
+    index_type size;
     if (!conn.size(&size))
       return false;
 
@@ -77,7 +77,7 @@ public:
       return false;
 
     // Get size of file
-    std::size_t size;
+    index_type size;
     if (!conn.size(&size))
       return false;
 

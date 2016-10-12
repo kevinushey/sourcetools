@@ -112,9 +112,9 @@ inline SEXP create(const std::vector<diagnostics::Diagnostic>& diagnostics)
   using namespace diagnostics;
 
   Protect protect;
-  std::size_t n = diagnostics.size();
+  index_type n = diagnostics.size();
   SEXP resultSEXP = protect(Rf_allocVector(VECSXP, n));
-  for (std::size_t i = 0; i < n; ++i)
+  for (index_type i = 0; i < n; ++i)
     SET_VECTOR_ELT(resultSEXP, i, create(diagnostics[i]));
   return resultSEXP;
 }

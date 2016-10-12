@@ -6,7 +6,7 @@ namespace {
 typedef sourcetools::validators::SyntaxError Error;
 struct RowSetter
 {
-  void operator()(SEXP dataSEXP, std::size_t i, const Error& error)
+  void operator()(SEXP dataSEXP, index_type i, const Error& error)
   {
     INTEGER(dataSEXP)[i] = error.row() + 1;
   }
@@ -14,7 +14,7 @@ struct RowSetter
 
 struct ColSetter
 {
-  void operator()(SEXP dataSEXP, std::size_t i, const Error& error)
+  void operator()(SEXP dataSEXP, index_type i, const Error& error)
   {
     INTEGER(dataSEXP)[i] = error.column() + 1;
   }
@@ -22,7 +22,7 @@ struct ColSetter
 
 struct ErrSetter
 {
-  void operator()(SEXP dataSEXP, std::size_t i, const Error& error)
+  void operator()(SEXP dataSEXP, index_type i, const Error& error)
   {
     const std::string& msg = error.message();
     SET_STRING_ELT(dataSEXP, i, Rf_mkCharLen(msg.c_str(), msg.size()));
@@ -32,17 +32,20 @@ struct ErrSetter
 } // anonymous namespace
 
 extern "C" SEXP sourcetools_validate_syntax(SEXP contentsSEXP) {
-
-  const char* contents = CHAR(STRING_ELT(contentsSEXP, 0));
-
   using namespace sourcetools;
   using namespace sourcetools::tokens;
   using namespace sourcetools::validators;
 
+  r::Protect protect;
+  if (Rf_length(contentsSEXP) == 0)
+    contentsSEXP = protect(Rf_mkString(""));
+
+  const char* contents = CHAR(STRING_ELT(contentsSEXP, 0));
   const std::vector<tokens::Token>& tokens = sourcetools::tokenize(contents);
+
   SyntaxValidator validator(tokens);
   const std::vector<SyntaxError>& errors = validator.errors();
-  std::size_t n = errors.size();
+  index_type n = errors.size();
 
   r::RObjectFactory factory;
   SEXP resultSEXP = factory.create(VECSXP, 3);

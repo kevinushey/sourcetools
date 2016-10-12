@@ -37,13 +37,13 @@ public:
 
   wchar_t operator*()
   {
-    std::size_t n = size();
+    index_type n = size();
     if (n == 0 || n > 6)
       return -1;
 
     const unsigned char* it = data_ + offset_;
     wchar_t ch = (*it++) & detail::mask[n];
-    for (std::size_t i = 1; i < n; ++i)
+    for (index_type i = 1; i < n; ++i)
     {
       ch <<= 6;
       ch |= (*it++) & 0x3F;
@@ -106,7 +106,7 @@ private:
 private:
 
   const unsigned char* data_;
-  std::size_t offset_;
+  index_type offset_;
 };
 
 } // namespace utf8

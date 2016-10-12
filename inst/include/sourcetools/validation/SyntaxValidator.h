@@ -34,8 +34,8 @@ public:
     return os.str();
   }
 
-  std::size_t row() const { return position_.row; }
-  std::size_t column() const { return position_.column; }
+  index_type row() const { return position_.row; }
+  index_type column() const { return position_.column; }
   const Position& position() const { return position_; }
   const std::string& message() const { return message_; }
 
@@ -68,7 +68,7 @@ private:
     if (isLeftBracket(token)) {
       pStack->push_back(token.type());
     } else if (isRightBracket(token)) {
-      std::size_t size = pStack->size();
+      index_type size = pStack->size();
       TokenType last = pStack->at(size - 1);
       if (size == 1) {
         unexpectedToken(token);

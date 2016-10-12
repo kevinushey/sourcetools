@@ -72,7 +72,7 @@ public:
     advance();
   }
 
-  explicit Parser(const char* code, std::size_t n)
+  explicit Parser(const char* code, index_type n)
     : tokenizer_(code, n),
       state_(PARSE_STATE_TOP_LEVEL)
   {
@@ -551,11 +551,11 @@ private:
     return result;
   }
 
-  Token peek(std::size_t lookahead = 0,
+  Token peek(index_type lookahead = 0,
              bool skipWhitespace = true,
              bool skipComments = true)
   {
-    std::size_t offset = lookahead;
+    index_type offset = lookahead;
 
     while (true)
     {

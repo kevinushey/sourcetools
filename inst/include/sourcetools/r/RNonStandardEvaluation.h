@@ -64,7 +64,7 @@ private:
 
   bool checkCall(SEXP callSEXP)
   {
-    std::size_t n = Rf_length(callSEXP);
+    index_type n = Rf_length(callSEXP);
     if (n == 0)
       return false;
 

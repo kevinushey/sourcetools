@@ -49,7 +49,7 @@ public:
   {
   }
 
-  Token(const TextCursor& cursor, TokenType type, std::size_t length)
+  Token(const TextCursor& cursor, TokenType type, index_type length)
     : begin_(cursor.begin() + cursor.offset()),
       end_(cursor.begin() + cursor.offset() + length),
       offset_(cursor.offset()),
@@ -60,8 +60,8 @@ public:
 
   const char* begin() const { return begin_; }
   const char* end() const { return end_; }
-  std::size_t offset() const { return offset_; }
-  std::size_t size() const { return end_ - begin_; }
+  index_type offset() const { return offset_; }
+  index_type size() const { return end_ - begin_; }
 
   std::string contents() const
   {
@@ -82,8 +82,8 @@ public:
   }
 
   const Position& position() const { return position_; }
-  std::size_t row() const { return position_.row; }
-  std::size_t column() const { return position_.column; }
+  index_type row() const { return position_.row; }
+  index_type column() const { return position_.column; }
 
   TokenType type() const { return type_; }
   bool isType(TokenType type) const { return type_ == type; }
@@ -91,7 +91,7 @@ public:
 private:
   const char* begin_;
   const char* end_;
-  std::size_t offset_;
+  index_type offset_;
 
   Position position_;
   TokenType type_;
@@ -369,8 +369,8 @@ inline bool parseUnicode(const char*& it, char*& output)
 
   std::mbstate_t state;
   std::memset(&state, 0, sizeof(state));
-  std::size_t bytes = std::wcrtomb(output, value, &state);
-  if (bytes == static_cast<std::size_t>(-1))
+  index_type bytes = std::wcrtomb(output, value, &state);
+  if (bytes == static_cast<index_type>(-1))
     return false;
 
   // Update iterator state
@@ -386,7 +386,7 @@ inline std::string stringValue(const char* begin, const char* end)
   if (begin == end)
     return std::string();
 
-  std::size_t n = end - begin;
+  index_type n = end - begin;
   scoped_array<char> buffer(new char[n + 1]);
 
   const char* it = begin;

@@ -12,7 +12,7 @@ class MemoryMappedConnection
 {
 public:
 
-  MemoryMappedConnection(HANDLE handle, std::size_t size)
+  MemoryMappedConnection(HANDLE handle, index_type size)
     : map_(NULL), size_(size)
   {
     handle_ = ::CreateFileMapping(handle, NULL, PAGE_READONLY, 0, 0, NULL);
@@ -40,7 +40,7 @@ public:
 
 private:
   char* map_;
-  std::size_t size_;
+  index_type size_;
 
   HANDLE handle_;
 };

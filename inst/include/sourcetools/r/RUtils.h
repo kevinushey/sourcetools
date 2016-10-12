@@ -39,14 +39,14 @@ public:
   SEXP create(SEXPTYPE type, const std::vector<T>& vector, F f)
   {
     ++n_;
-    std::size_t n = vector.size();
+    index_type n = vector.size();
     SEXP resultSEXP = PROTECT(Rf_allocVector(type, n));
-    for (std::size_t i = 0; i < n; ++i)
+    for (index_type i = 0; i < n; ++i)
       f(resultSEXP, i, vector[i]);
     return resultSEXP;
   }
 
-  SEXP create(SEXPTYPE type, std::size_t n)
+  SEXP create(SEXPTYPE type, index_type n)
   {
     ++n_;
     return PROTECT(Rf_allocVector(type, n));
@@ -58,7 +58,7 @@ public:
   }
 
 private:
-  std::size_t n_;
+  index_type n_;
 };
 
 class ListBuilder : noncopyable
@@ -73,12 +73,12 @@ public:
 
   operator SEXP() const
   {
-    std::size_t n = data_.size();
+    index_type n = data_.size();
 
     SEXP resultSEXP = protect_(Rf_allocVector(VECSXP, n));
     SEXP namesSEXP  = protect_(Rf_allocVector(STRSXP, n));
 
-    for (std::size_t i = 0; i < n; ++i)
+    for (index_type i = 0; i < n; ++i)
     {
       SET_VECTOR_ELT(resultSEXP, i, data_[i]);
       SET_STRING_ELT(namesSEXP, i, Rf_mkCharLen(names_[i].c_str(), names_[i].size()));

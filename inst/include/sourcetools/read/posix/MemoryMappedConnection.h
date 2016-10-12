@@ -14,7 +14,7 @@ class MemoryMappedConnection
 {
 public:
 
-  MemoryMappedConnection(int fd, std::size_t size)
+  MemoryMappedConnection(int fd, index_type size)
     : size_(size)
   {
 #ifdef MAP_POPULATE
@@ -46,7 +46,7 @@ public:
 
 private:
   char* map_;
-  std::size_t size_;
+  index_type size_;
 };
 
 } // namespace detail
