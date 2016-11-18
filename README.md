@@ -9,7 +9,13 @@ Tools for reading, tokenizing, and (eventually) parsing `R` code.
 
 ## Getting Started
 
-`sourcetools` is not yet on CRAN -- install with
+You can install `sourcetools` from CRAN with:
+
+```r
+install.packages("sourcetools")
+```
+
+Or, you can install the development version from GitHub with:
 
 
 ```r
@@ -41,11 +47,11 @@ print(mb, digits = 3)
 
 ```
 ## Unit: milliseconds
-##        expr   min     lq  mean median     uq    max neval cld
-##    readChar   5.2   6.54  10.5   7.02   8.73  36.56    10 ab 
-##   readLines 155.9 159.69 162.4 161.95 163.15 171.76    10   c
-##        read   5.3   5.48   6.5   5.97   7.52   9.35    10 a  
-##  read_lines  13.5  13.95  14.4  14.09  14.50  16.97    10  b
+##        expr    min     lq   mean median     uq    max neval
+##    readChar   4.53   4.91   5.24   5.37   5.47   5.89    10
+##   readLines 156.69 157.84 160.16 159.79 161.29 165.53    10
+##        read   4.62   4.77   5.17   4.96   5.48   6.31    10
+##  read_lines  12.95  14.31  14.61  14.42  15.05  16.90    10
 ```
 
 ```r

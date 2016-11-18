@@ -12,7 +12,12 @@ Tools for reading, tokenizing, and (eventually) parsing `R` code.
 
 ## Getting Started
 
-`sourcetools` is not yet on CRAN -- install with
+You can install `sourcetools` from CRAN with:
+```{r, eval=FALSE}
+install.packages("sourcetools")
+```
+
+Or, you can install the development version from GitHub with:
 
 ```{r, eval=FALSE}
 devtools::install_github("kevinushey/sourcetools")
