@@ -12,4 +12,3 @@ performs_nse(...)
 \description{
 Detect Whether a Function Performs Non-Standard Evaluation
 }
-

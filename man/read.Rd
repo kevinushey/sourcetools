@@ -2,8 +2,11 @@
 % Please edit documentation in R/sourcetools.R
 \name{read}
 \alias{read}
-\alias{read_bytes}
+\alias{read}
 \alias{read_lines}
+\alias{read}
+\alias{read_bytes}
+\alias{read}
 \alias{read_lines_bytes}
 \title{Read the Contents of a File}
 \usage{
@@ -22,4 +25,3 @@ read_lines_bytes(path)
 Read the contents of a file into a string (or, in the case of
 \code{read_lines}, a vector of strings).
 }
-

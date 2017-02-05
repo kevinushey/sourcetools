@@ -12,4 +12,3 @@ validate_syntax(string)
 \description{
 Find syntax errors in a string of \R code.
 }
-

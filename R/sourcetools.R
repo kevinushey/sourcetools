@@ -1,4 +1,4 @@
-#' @useDynLib sourcetools
+#' @useDynLib sourcetools, .registration = TRUE
 NULL
 
 #' Read the Contents of a File
