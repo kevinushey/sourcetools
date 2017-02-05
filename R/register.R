@@ -12,9 +12,10 @@ register_routines <- function(package = ".", prefix = "C_") {
 
   # find C, C++ files in package
   srcfiles <- list.files(
-    file.path(package, "src"),
+    package,
     pattern = "\\.(?:h|c|cc|cpp)$",
-    full.names = TRUE
+    full.names = TRUE,
+    recursive = TRUE
   )
 
   # discover routines in these files
@@ -127,7 +128,7 @@ check_namespace_symbol_registration <- function(package = ".") {
   # check for namespace file
   ns_path <- file.path(package, "NAMESPACE")
   if (!file.exists(ns_path))
-    return(FALSE)
+    return(invisible(FALSE))
 
   # try parsing the namespace
   ns <- parse(ns_path)
@@ -141,11 +142,11 @@ check_namespace_symbol_registration <- function(package = ".") {
         break
 
       if (isTRUE(entry[[idx]]))
-        return(TRUE)
+        return(invisible(TRUE))
     }
   }
 
-  FALSE
+  invisible(FALSE)
 }
 
 generate_prototypes <- function(routines) {
@@ -159,7 +160,7 @@ generate_prototypes <- function(routines) {
 generate_call_methods <- function(routines, prefix = "C_") {
 
   # for each routine, generate a registration line
-  fmt <- '{"%s", (DL_FUNC) &%s, %i}'
+  fmt <- '{"%s", (DL_FUNC) &%s, %i},'
   lines <- vapply(routines, function(routine) {
     name <- tail(strsplit(routine$name, "[[:space:]+]")[[1]], 1)
     prefixed_name <- paste0(prefix, name)
@@ -168,12 +169,11 @@ generate_call_methods <- function(routines, prefix = "C_") {
   }, character(1))
 
   # indent, add commas, add null entry at end
-  lines <- paste0("\t", lines, ",")
-  lines <- c(lines, "\t{NULL, NULL, 0}")
+  lines <- c(lines, "{NULL, NULL, 0}")
 
   c(
     "static R_CallMethodDef callMethods[] = {",
-    lines,
+    paste0("\t", lines),
     "};"
   )
 
