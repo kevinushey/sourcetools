@@ -291,6 +291,7 @@ void reportErrors(const std::vector<parser::ParseError>& errors)
 } // anonymous namespace
 } // namespace sourcetools
 
+// [[export(.Call)]]
 extern "C" SEXP sourcetools_parse_string(SEXP programSEXP)
 {
   using namespace sourcetools;
@@ -309,6 +310,7 @@ extern "C" SEXP sourcetools_parse_string(SEXP programSEXP)
   return sourcetools::SEXPConverter::asSEXP(pRoot);
 }
 
+// [[export(.Call)]]
 extern "C" SEXP sourcetools_diagnose_string(SEXP strSEXP)
 {
   using namespace sourcetools;

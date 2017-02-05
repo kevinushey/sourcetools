@@ -7,6 +7,7 @@
 #include <R.h>
 #include <Rinternals.h>
 
+// [[export(.Call)]]
 extern "C" SEXP sourcetools_read(SEXP absolutePathSEXP)
 {
   const char* absolutePath = CHAR(STRING_ELT(absolutePathSEXP, 0));
@@ -25,6 +26,7 @@ extern "C" SEXP sourcetools_read(SEXP absolutePathSEXP)
   return resultSEXP;
 }
 
+// [[export(.Call)]]
 extern "C" SEXP sourcetools_read_lines(SEXP absolutePathSEXP)
 {
   const char* absolutePath = CHAR(STRING_ELT(absolutePathSEXP, 0));
@@ -45,6 +47,7 @@ extern "C" SEXP sourcetools_read_lines(SEXP absolutePathSEXP)
   return resultSEXP;
 }
 
+// [[export(.Call)]]
 extern "C" SEXP sourcetools_read_bytes(SEXP absolutePathSEXP)
 {
   const char* absolutePath = CHAR(STRING_ELT(absolutePathSEXP, 0));
@@ -63,6 +66,7 @@ extern "C" SEXP sourcetools_read_bytes(SEXP absolutePathSEXP)
   return resultSEXP;
 }
 
+// [[export(.Call)]]
 extern "C" SEXP sourcetools_read_lines_bytes(SEXP absolutePathSEXP)
 {
   const char* absolutePath = CHAR(STRING_ELT(absolutePathSEXP, 0));
