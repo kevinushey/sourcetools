@@ -197,7 +197,7 @@ generate_r_init <- function(pkg_name, call_methods, external_methods) {
   c(
     sprintf("void R_init_%s(DllInfo* info) {", pkg_name),
     r_register_routines,
-    "\tR_useDynamicSymbols(info, FALSE);",
+    "\tR_useDynamicSymbols(info, TRUE);",
     "}"
   )
 
