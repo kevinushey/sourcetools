@@ -2,13 +2,12 @@ library(sourcetools)
 library(microbenchmark)
 
 file <- tempfile()
-unlink(file)
 
 n <- 1024
-for (i in seq_len(1E3)) {
-  junk <- paste(sample(letters, n, TRUE), collapse = "")
-  cat(junk, file = file, sep = "\n", append = TRUE)
-}
+junk <- replicate(1E4, {
+  paste(sample(letters, n, TRUE), collapse = "")
+})
+writeLines(junk, con = file)
 
 stopifnot(identical(
   read(file),
@@ -20,11 +19,20 @@ stopifnot(identical(
   read_lines(file)
 ))
 
+# read a file into a string
 mb <- microbenchmark(
-  S   = read(file),
-  R   = readChar(file, file.info(file)$size, TRUE),
-  SL  = read_lines(file),
-  RL  = readLines(file),
-  RRL = readr::read_lines(file, progress = FALSE)
+  sourcetools::read(file),
+  base::readChar(file, file.info(file)$size, TRUE),
+  readr::read_file(file)
 )
 print(mb)
+
+# read a file, splitting on newline characters
+mb <- microbenchmark(
+  sourcetools::read_lines(file),
+  base::readLines(file),
+  readr::read_lines(file, progress = FALSE)
+)
+print(mb)
+
+unlink(file)
