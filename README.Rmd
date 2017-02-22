@@ -13,6 +13,7 @@ Tools for reading, tokenizing, and (eventually) parsing `R` code.
 ## Getting Started
 
 You can install `sourcetools` from CRAN with:
+
 ```{r, eval=FALSE}
 install.packages("sourcetools")
 ```
@@ -29,20 +30,25 @@ devtools::install_github("kevinushey/sourcetools")
 files into `R`.
 
 Use `read()` and `read_lines()` to quickly read a file into
-`R` as character vectors. `read_lines()` handles both Windows
-style `\r\n` line endings, as well as Unix-style `\n` endings.
+`R` as character vectors. `read_lines()` handles both
+Windows style `\r\n` line endings, as well as Unix-style
+`\n` endings. Performance is on par with the readers
+provided by the
+[readr](https://cran.r-project.org/package=readr) package.
 
 ```{r}
-text <- replicate(10000, paste(sample(letters, 200, TRUE), collapse = ""))
+text <- replicate(10000, {
+  paste(sample(letters, 200, TRUE), collapse = "")
+})
 file <- tempfile()
 cat(text, file = file, sep = "\n")
 mb <- microbenchmark::microbenchmark(times = 10,
-  readChar   = readChar(file, file.info(file)$size, TRUE),
-  readLines  = readLines(file),
-  read       = read(file),
-  read_lines = read_lines(file)
+  base::readLines(file),
+  readr::read_lines(file),
+  sourcetools::read_lines(file)
 )
-print(mb, digits = 3)
+sm <- summary(mb)
+print(sm[c("expr", "mean", "median")], digits = 3)
 unlink(file)
 ```
 
