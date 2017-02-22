@@ -10,7 +10,6 @@
 #' @param dynamic.symbols Boolean; should dynamic symbol lookup
 #'   be enabled?
 #'
-#' @export
 register_routines <- function(package = ".",
                               prefix = "C_",
                               dynamic.symbols = FALSE)
