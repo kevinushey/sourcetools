@@ -47,7 +47,7 @@ register_routines <- function(package = ".",
 
     # extract registration text and discover the interface
     pieces <- strsplit(routine$registration, "\\[\\[|\\]\\]")[[1]]
-    code <- tail(pieces, 1)
+    code <- utils::tail(pieces, 1)
     parsed <- tryCatch(
       parse(text = code)[[1]],
       error = function(e) {
