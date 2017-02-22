@@ -1,6 +1,19 @@
-# Register Native Routines
-register_routines <- function(package = ".", prefix = "C_") {
-
+#' Register Native Routines
+#'
+#' Discover and register native routines in a package.
+#' Functions to be registered should be prefixed with the
+#' `// [[export(<methods>)]]` attribute.
+#'
+#' @param package The path to an \R package.
+#' @param prefix The prefix to assign to the \R objects
+#'   generated that map to each routine.
+#' @param dynamic.symbols Boolean; should dynamic symbol lookup
+#'   be enabled?
+#' @export
+register_routines <- function(package = ".",
+                              prefix = "C_",
+                              dynamic.symbols = FALSE)
+{
   # read DESCRIPTION file
   desc_path <- file.path(package, "DESCRIPTION")
   if (!file.exists(desc_path)) {
@@ -60,7 +73,8 @@ register_routines <- function(package = ".", prefix = "C_") {
   # generate initialization routine
   r_init <- generate_r_init(pkg_name = pkg_name,
                             call_methods = call_methods,
-                            external_methods = external_methods)
+                            external_methods = external_methods,
+                            dynamic_symbols = dynamic.symbols)
 
   # generate script
   script <- c(
@@ -80,7 +94,7 @@ register_routines <- function(package = ".", prefix = "C_") {
   )
 
   # write to init file
-  init_path <- sub("^\\./", "", file.path(package, sprintf("src/%s_init.c", pkg_name)))
+  init_path <- sub("^\\./", "", file.path(package, sprintf("src/%s-init.c", pkg_name)))
   writeLines(script, init_path, sep = "\n")
   message("* Wrote registration metadata to '", init_path, "'")
 
@@ -184,8 +198,11 @@ generate_external_methods <- function(routines, prefix = "C_") {
   character()
 }
 
-generate_r_init <- function(pkg_name, call_methods, external_methods) {
-
+generate_r_init <- function(pkg_name,
+                            call_methods,
+                            external_methods,
+                            dynamic_symbols)
+{
   r_register_routines <- sprintf(
     "\tR_registerRoutines(info, %s, %s, %s, %s);",
     "NULL",
@@ -194,11 +211,14 @@ generate_r_init <- function(pkg_name, call_methods, external_methods) {
     if (length(external_methods)) "externalMethods" else "NULL"
   )
 
-  c(
-    sprintf("void R_init_%s(DllInfo* info) {", pkg_name),
+  fmt <- paste(
+    "void R_init_%s(DllInfo* info) {",
     r_register_routines,
-    "\tR_useDynamicSymbols(info, TRUE);",
-    "}"
+    "\tR_useDynamicSymbols(info, %s);",
+    "}",
+    sep = "\n", collapse = "\n"
   )
+
+  sprintf(fmt, pkg_name, if (dynamic_symbols) "TRUE" else "FALSE")
 
 }
