@@ -9,6 +9,7 @@
 #'   generated that map to each routine.
 #' @param dynamic.symbols Boolean; should dynamic symbol lookup
 #'   be enabled?
+#'
 #' @export
 register_routines <- function(package = ".",
                               prefix = "C_",

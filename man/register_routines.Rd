@@ -4,13 +4,16 @@
 \alias{register_routines}
 \title{Register Native Routines}
 \usage{
-register_routines(package = ".", prefix = "C_")
+register_routines(package = ".", prefix = "C_", dynamic.symbols = FALSE)
 }
 \arguments{
 \item{package}{The path to an \R package.}
 
 \item{prefix}{The prefix to assign to the \R objects
 generated that map to each routine.}
+
+\item{dynamic.symbols}{Boolean; should dynamic symbol lookup
+be enabled?}
 }
 \description{
 Discover and register native routines in a package.
