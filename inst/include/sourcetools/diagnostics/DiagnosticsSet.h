@@ -29,7 +29,7 @@ public:
   void report()
   {
     const std::vector<Diagnostic>& diagnostics = diagnostics_;
-    for (index_type i = 0; i < diagnostics.size(); ++i)
+    for (index_type i = 0; i < utils::size(diagnostics); ++i)
     {
       Diagnostic diagnostic = diagnostics[i];
       std::cerr << diagnostic.range() << ": "

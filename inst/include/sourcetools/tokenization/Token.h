@@ -75,7 +75,7 @@ public:
 
   bool contentsEqual(const std::string& string) const
   {
-    if (string.size() != size())
+    if (utils::size(string) != size())
       return false;
 
     return std::memcmp(begin_, string.c_str(), size()) == 0;

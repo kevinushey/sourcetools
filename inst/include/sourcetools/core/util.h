@@ -6,6 +6,8 @@
 #include <cctype>
 #include <cstdlib>
 
+#include <sourcetools/core/config.h>
+
 namespace sourcetools {
 namespace detail {
 
@@ -134,6 +136,12 @@ inline std::string escape(char ch)
   default:
     return std::string(1, ch);
   }
+}
+
+template <typename T>
+index_type size(const T& object)
+{
+  return static_cast<index_type>(object.size());
 }
 
 } // namespace utils
