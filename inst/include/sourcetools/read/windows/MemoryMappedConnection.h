@@ -3,7 +3,10 @@
 
 #undef Realloc
 #undef Free
+
 #include <windows.h>
+
+#include <sourcetools/core/core.h>
 
 namespace sourcetools {
 namespace detail {
@@ -26,6 +29,9 @@ public:
   {
     if (handle_ != INVALID_HANDLE_VALUE)
       ::CloseHandle(handle_);
+
+    if (map_ != NULL)
+      ::UnmapViewOfFile(map_);
   }
 
   bool open()
@@ -41,7 +47,6 @@ public:
 private:
   char* map_;
   index_type size_;
-
   HANDLE handle_;
 };
 
