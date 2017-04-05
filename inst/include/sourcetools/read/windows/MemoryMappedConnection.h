@@ -26,6 +26,9 @@ public:
   {
     if (handle_ != INVALID_HANDLE_VALUE)
       ::CloseHandle(handle_);
+
+    if (map_ != NULL)
+      ::UnmapViewOfFile(map_);
   }
 
   bool open()
