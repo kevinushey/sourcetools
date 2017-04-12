@@ -1,7 +1,7 @@
 Package: sourcetools
 Type: Package
 Title: Tools for Reading, Tokenizing and Parsing R Code
-Version: 0.1.5-9000
+Version: 0.1.6-9000
 Author: Kevin Ushey
 Maintainer: Kevin Ushey <kevinushey@gmail.com>
 Description: Tools for Reading, Tokenizing and Parsing R Code.
@@ -13,6 +13,6 @@ Suggests:
     testthat
 LinkingTo:
     testthat (>= 1.0.2)
-RoxygenNote: 6.0.1
+RoxygenNote: 6.0.1.9000
 BugReports: https://github.com/kevinushey/sourcetools/issues
 Encoding: UTF-8

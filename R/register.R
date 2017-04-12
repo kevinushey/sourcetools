@@ -176,7 +176,7 @@ generate_call_methods <- function(routines, prefix = "C_") {
   # for each routine, generate a registration line
   fmt <- '{"%s", (DL_FUNC) &%s, %i},'
   lines <- vapply(routines, function(routine) {
-    name <- tail(strsplit(routine$name, "[[:space:]+]")[[1]], 1)
+    name <- utils::tail(strsplit(routine$name, "[[:space:]+]")[[1]], 1)
     prefixed_name <- paste0(prefix, name)
     n <- length(routine$arguments)
     sprintf(fmt, prefixed_name, name, n)
