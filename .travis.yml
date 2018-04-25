@@ -10,8 +10,8 @@ addons:
 matrix:
   include:
     - os: linux
-      dist: precise
+      dist: trusty
       env: CC=gcc-4.4 CXX=g++-4.4
     - os: linux
-      dist: precise
+      dist: trusty
       env: CC=gcc CXX=g++
