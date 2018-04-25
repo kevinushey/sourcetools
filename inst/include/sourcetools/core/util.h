@@ -112,7 +112,7 @@ inline bool isValidForStartOfRSymbol(char ch)
   return
     isAlphabetic(ch) ||
     ch == '.' ||
-    ch < 0;
+    static_cast<signed char>(ch) < 0;
 }
 
 inline bool isValidForRSymbol(char ch)
@@ -121,7 +121,7 @@ inline bool isValidForRSymbol(char ch)
     isAlphaNumeric(ch) ||
     ch == '.' ||
     ch == '_' ||
-    ch < 0;
+    static_cast<signed char>(ch) < 0;
 }
 
 inline std::string escape(char ch)
