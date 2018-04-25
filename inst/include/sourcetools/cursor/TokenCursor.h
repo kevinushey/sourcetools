@@ -106,7 +106,7 @@ public:
     while (isType(tokens::WHITESPACE))
       if (!moveToPreviousToken())
         return false;
-      return true;
+    return true;
   }
 
   bool fwdOverComments()
