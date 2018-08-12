@@ -27,7 +27,8 @@ public:
   Token()
     : begin_(NULL),
       end_(NULL),
-      offset_(0),
+      offset_(-1),
+      position_(-1, -1),
       type_(INVALID)
   {
   }
@@ -35,7 +36,8 @@ public:
   explicit Token(TokenType type)
     : begin_(NULL),
       end_(NULL),
-      offset_(0),
+      offset_(-1),
+      position_(-1, -1),
       type_(type)
   {
   }
@@ -43,7 +45,7 @@ public:
   Token(const Position& position)
     : begin_(NULL),
       end_(NULL),
-      offset_(0),
+      offset_(-1),
       position_(position),
       type_(INVALID)
   {
@@ -492,9 +494,9 @@ inline std::string toString(const tokens::Token& token)
     contents = contents.substr(0, N / 2);
   char buff[N];
   std::sprintf(buff,
-               "[%4lu:%4lu]: %s",
-               static_cast<unsigned long>(token.row()),
-               static_cast<unsigned long>(token.column()),
+               "[%4ld:%4ld]: %s",
+               static_cast<long>(token.row()),
+               static_cast<long>(token.column()),
                contents.c_str());
   return buff;
 }

@@ -610,7 +610,9 @@ public:
     while (true)
     {
       ParseNode* pNode = parseExpression();
-      if (!pNode) break;
+      if (!pNode)
+        break;
+
       root->add(pNode);
     }
 

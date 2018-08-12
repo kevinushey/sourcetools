@@ -1,6 +1,7 @@
 #ifndef SOURCETOOLS_PARSE_PARSE_NODE_H
 #define SOURCETOOLS_PARSE_PARSE_NODE_H
 
+#include <map>
 #include <memory>
 
 #include <sourcetools/collection/collection.h>
@@ -24,19 +25,12 @@ private:
 
   Token begin_;
   Token end_;
-  bool pseudoNode_;
 
 public:
 
   explicit ParseNode(const Token& token)
     : token_(token), parent_(NULL),
-      begin_(token), end_(token), pseudoNode_(false)
-  {
-  }
-
-  explicit ParseNode(const TokenType& type)
-    : token_(Token(type)), parent_(NULL),
-      begin_(token_), end_(token_), pseudoNode_(true)
+      begin_(token), end_(token)
   {
   }
 
@@ -47,7 +41,12 @@ public:
 
   static ParseNode* create(const TokenType& type)
   {
-    return new ParseNode(type);
+    static std::map<TokenType, Token> tokens;
+    if (!tokens.count(type))
+      tokens[type] = Token(type);
+
+    const Token& token = tokens[type];
+    return new ParseNode(token);
   }
 
   ~ParseNode()
@@ -73,10 +72,10 @@ public:
       pNode->parent_->remove(pNode);
     pNode->parent_ = this;
 
-    if (!pNode->isPseudoNode())
+    const Token& begin = pNode->begin();
+    const Token& end   = pNode->end();
+    if (begin.offset() != -1 && end.offset() != -1)
     {
-      const Token& begin = pNode->begin();
-      const Token& end   = pNode->end();
       for (ParseNode* pParent = this; pParent != NULL; pParent = pParent->parent_)
       {
         if (begin.begin() < pParent->begin().begin())
@@ -128,8 +127,6 @@ public:
   const Token& token() const { return token_; }
   const ParseNode* parent() const { return parent_; }
   const std::vector<ParseNode*>& children() const { return children_; }
-
-  bool isPseudoNode() const { return pseudoNode_; }
 };
 
 } // namespace parser
