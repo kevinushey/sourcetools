@@ -14,7 +14,7 @@ void log(parser::ParseNode* pNode, int depth)
   for (int i = 0; i < depth; ++i)
     Rprintf("  ");
 
-  Rprintf(toString(pNode->token()).c_str());
+  Rprintf("%s\n", toString(pNode->token()).c_str());
 
   using parser::ParseNode;
   const std::vector<ParseNode*>& children = pNode->children();
@@ -181,13 +181,11 @@ private:
     if (token.isType(tokens::LBRACKET) || token.isType(tokens::LDBRACKET))
       return true;
 
-    if (!token.isType(tokens::LPAREN))
-      return false;
+    // Differentiate between '(a)' and 'a()'.
+    if (token.isType(tokens::LPAREN))
+      return pNode->children().size() > 1;
 
-    // Differentiate between '(a, b)' and 'a(b)' by looking at
-    // the token positions. Not great, I know...
-    const ParseNode* child = pNode->children()[0];
-    return child->token().begin() < token.begin();
+    return false;
   }
 
 public:
