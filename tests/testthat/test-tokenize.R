@@ -1,24 +1,5 @@
 context("Tokenizer")
 
-compare_tokens <- function(tokens, expected) {
-
-  if (is.character(tokens))
-    tokens <- tokenize_string(tokens)
-
-  expect_true(
-    nrow(tokens) == length(expected),
-    "different number of tokens"
-  )
-
-  for (i in 1:nrow(tokens)) {
-    expect_true(
-      tokens$value[[i]] == expected[[i]],
-      paste0("expected token '", tokens$value[[i]], "'; got '", expected[[i]], "'")
-    )
-  }
-
-}
-
 test_that("Operators are tokenized correctly", {
 
   operators <- c(
@@ -52,8 +33,7 @@ test_that("Numbers are tokenized correctly", {
 })
 
 test_that("The tokenizer accepts UTF-8 symbols", {
-  expect_true(nrow(tokenize_string("å√∂")) == 1)
-  expect_true(nrow(tokenize_string("¡™£¢∞§¶•ªº≠åß∂ƒ©˙∆˚¬…æΩ≈ç√∫˜µ≤≥÷")) == 1)
+  expect_true(nrow(tokenize_string("鬼門")) == 1)
 })
 
 test_that("The tokenizer works correctly", {
@@ -141,26 +121,8 @@ test_that("tokenization errors handled correctly", {
   # previously, these reported an error where a NUL
   # byte was accidentally included as part of the
   # token value
-  tokenize_string("`abc")
   tokenize_string("'abc")
   tokenize_string("\"abc")
   tokenize_string("%abc")
-})
-
-test_that("files in packages are tokenized without errors", {
-  skip_on_cran()
-
-  paths <- list.dirs("~/git", full.names = TRUE, recursive = FALSE)
-  packages <- paths[file.exists(file.path(paths, "DESCRIPTION"))]
-  R <- file.path(packages, "R")
-
-  for (dir in R) {
-    files <- list.files(dir, pattern = "R$", full.names = TRUE)
-    for (file in files) {
-      tokens <- tokenize_file(file)
-      errors <- tokens$type == "invalid"
-      expect_true(all(errors == FALSE))
-    }
-  }
-
+  expect_true(TRUE, "we didn't segfault")
 })

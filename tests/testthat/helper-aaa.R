@@ -5,6 +5,25 @@ with_gctorture <- function(expr) {
   result
 }
 
+compare_tokens <- function(tokens, expected) {
+
+  if (is.character(tokens))
+    tokens <- tokenize_string(tokens)
+
+  expect_true(
+    nrow(tokens) == length(expected),
+    "different number of tokens"
+  )
+
+  for (i in 1:nrow(tokens)) {
+    expect_true(
+      tokens$value[[i]] == expected[[i]],
+      paste0("expected token '", tokens$value[[i]], "'; got '", expected[[i]], "'")
+    )
+  }
+
+}
+
 check_parse <- function(R, S = R) {
   lhs <- base::parse(text = R, keep.source = FALSE)
   rhs <- with_gctorture(parse_string(S))
