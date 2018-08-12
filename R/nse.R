@@ -3,5 +3,5 @@
 #' @param ... \R functions.
 #' @export
 performs_nse <- function(...) {
-  .Call(C_sourcetools_performs_nse, list(...))
+  .Call(sourcetools_performs_nse, list(...))
 }

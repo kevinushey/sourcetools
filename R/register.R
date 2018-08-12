@@ -51,7 +51,6 @@ register_routines <- function(package = ".",
       parse(text = code)[[1]],
       error = function(e) {
         warning("failed to parse registration comment '", routine$registration, "'")
-        next
       }
     )
 
@@ -62,8 +61,8 @@ register_routines <- function(package = ".",
       external_routines[[length(external_routines) + 1]] <<- routine
     } else {
       warning("unrecognized / unsupported interface '", interface, "'")
-      next
     }
+
   })
 
   # generate method definitions for each

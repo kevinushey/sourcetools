@@ -52,10 +52,10 @@ print(sm[c("expr", "mean", "median")], digits = 3)
 ```
 
 ```
-##                            expr  mean median
-## 1         base::readLines(file) 164.5  160.8
-## 2       readr::read_lines(file)  15.1   13.3
-## 3 sourcetools::read_lines(file)  15.2   15.0
+##                            expr mean median
+## 1         base::readLines(file) 20.5   20.1
+## 2       readr::read_lines(file) 19.7   10.0
+## 3 sourcetools::read_lines(file) 14.3   14.2
 ```
 
 ```r

@@ -13,7 +13,7 @@ NULL
 #' @export
 read <- function(path) {
   path <- normalizePath(path, mustWork = TRUE)
-  .Call(C_sourcetools_read, path)
+  .Call(sourcetools_read, path)
 }
 
 #' @name read
@@ -21,7 +21,7 @@ read <- function(path) {
 #' @export
 read_lines <- function(path) {
   path <- normalizePath(path, mustWork = TRUE)
-  .Call(C_sourcetools_read_lines, path)
+  .Call(sourcetools_read_lines, path)
 }
 
 #' @name read
@@ -29,7 +29,7 @@ read_lines <- function(path) {
 #' @export
 read_bytes <- function(path) {
   path <- normalizePath(path, mustWork = TRUE)
-  .Call(C_sourcetools_read_bytes, path)
+  .Call(sourcetools_read_bytes, path)
 }
 
 #' @name read
@@ -37,7 +37,7 @@ read_bytes <- function(path) {
 #' @export
 read_lines_bytes <- function(path) {
   path <- normalizePath(path, mustWork = TRUE)
-  .Call(C_sourcetools_read_lines_bytes, path)
+  .Call(sourcetools_read_lines_bytes, path)
 }
 
 #' Tokenize R Code
@@ -67,13 +67,13 @@ read_lines_bytes <- function(path) {
 #' tokenize_string("x <- 1 + 2")
 tokenize_file <- function(path) {
   path <- normalizePath(path, mustWork = TRUE)
-  .Call(C_sourcetools_tokenize_file, path)
+  .Call(sourcetools_tokenize_file, path)
 }
 
 #' @rdname tokenize-methods
 #' @export
 tokenize_string <- function(string) {
-  .Call(C_sourcetools_tokenize_string, as.character(string))
+  .Call(sourcetools_tokenize_string, as.character(string))
 }
 
 #' @rdname tokenize-methods
@@ -91,7 +91,7 @@ tokenize <- function(file = "", text = NULL) {
 #' @param string A character vector (of length one).
 #' @export
 validate_syntax <- function(string) {
-  .Call(C_sourcetools_validate_syntax, as.character(string))
+  .Call(sourcetools_validate_syntax, as.character(string))
 }
 
 #' @export
@@ -100,7 +100,7 @@ print.RTokens <- function(x, ...) {
 }
 
 parse_string <- function(string) {
-  .Call(C_sourcetools_parse_string, string)
+  .Call(sourcetools_parse_string, string)
 }
 
 parse_file <- function(file) {
