@@ -2,11 +2,8 @@
 % Please edit documentation in R/sourcetools.R
 \name{read}
 \alias{read}
-\alias{read}
 \alias{read_lines}
-\alias{read}
 \alias{read_bytes}
-\alias{read}
 \alias{read_lines_bytes}
 \title{Read the Contents of a File}
 \usage{
