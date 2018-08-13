@@ -44,7 +44,6 @@ std::string charType(wchar_t ch)
 
 } // anonymous namespace
 
-// [[export(.Call)]]
 extern "C" SEXP sourcetools_print_multibyte(SEXP dataSEXP)
 {
   const char* data = CHAR(STRING_ELT(dataSEXP, 0));
@@ -74,7 +73,6 @@ extern "C" SEXP sourcetools_print_multibyte(SEXP dataSEXP)
   return R_NilValue;
 }
 
-// [[export(.Call)]]
 extern "C" SEXP sourcetools_print_utf8(SEXP dataSEXP)
 {
   using namespace sourcetools;

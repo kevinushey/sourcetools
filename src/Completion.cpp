@@ -8,7 +8,6 @@ namespace sourcetools {
 
 } // namespace sourcetools
 
-// [[export(.Call)]]
 extern "C" SEXP sourcetools_code_complete_at(SEXP absolutePathSEXP,
                                              SEXP positionSEXP)
 {

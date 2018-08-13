@@ -2,7 +2,6 @@
 using namespace sourcetools;
 using namespace sourcetools::r;
 
-// [[export(.Call)]]
 extern "C" SEXP sourcetools_performs_nse(SEXP fnSEXP)
 {
   if (TYPEOF(fnSEXP) == VECSXP || TYPEOF(fnSEXP) == EXPRSXP)

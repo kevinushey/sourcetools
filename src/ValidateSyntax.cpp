@@ -31,7 +31,6 @@ struct ErrSetter
 
 } // anonymous namespace
 
-// [[export(.Call)]]
 extern "C" SEXP sourcetools_validate_syntax(SEXP contentsSEXP) {
   using namespace sourcetools;
   using namespace sourcetools::tokens;

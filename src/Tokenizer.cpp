@@ -70,7 +70,6 @@ SEXP asSEXP(const std::vector<tokens::Token>& tokens)
 } // anonymous namespace
 } // namespace sourcetools
 
-// [[export(.Call)]]
 extern "C" SEXP sourcetools_tokenize_file(SEXP absolutePathSEXP)
 {
   typedef sourcetools::tokens::Token Token;
@@ -88,7 +87,6 @@ extern "C" SEXP sourcetools_tokenize_file(SEXP absolutePathSEXP)
   return sourcetools::asSEXP(tokens);
 }
 
-// [[export(.Call)]]
 extern "C" SEXP sourcetools_tokenize_string(SEXP stringSEXP)
 {
   typedef sourcetools::tokens::Token Token;
