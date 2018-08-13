@@ -1,7 +1,7 @@
 #ifndef SOURCETOOLS_COLLECTION_RANGE_H
 #define SOURCETOOLS_COLLECTION_RANGE_H
 
-#include <ostream>
+#include <iosfwd>
 #include <sourcetools/collection/Position.h>
 
 namespace sourcetools {

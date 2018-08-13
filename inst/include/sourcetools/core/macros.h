@@ -52,9 +52,7 @@ inline std::string debugPosition(const char* filePath, int line)
 } // namespace sourcetools
 
 // Flip on/off as necessary
-#define SOURCE_TOOLS_ENABLE_DEBUG_LOGGING
-
-#ifdef SOURCE_TOOLS_ENABLE_DEBUG_LOGGING
+#ifdef SOURCETOOLS_ENABLE_DEBUG_LOGGING
 
 #include <iostream>
 

@@ -4,6 +4,9 @@
 #include <cstring>
 
 #include <algorithm>
+#include <ostream>
+#include <string>
+#include <vector>
 
 #include <sourcetools/collection/Position.h>
 #include <sourcetools/tokenization/Token.h>

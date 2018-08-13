@@ -4,6 +4,8 @@
 #include <ostream>
 #include <cstddef>
 
+#include <sourcetools/core/config.h>
+
 namespace sourcetools {
 namespace collections {
 

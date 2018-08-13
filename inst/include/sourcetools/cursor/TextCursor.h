@@ -1,8 +1,6 @@
 #ifndef SOURCETOOLS_CURSOR_TEXT_CURSOR_H
 #define SOURCETOOLS_CURSOR_TEXT_CURSOR_H
 
-#include <string>
-
 #include <sourcetools/core/macros.h>
 #include <sourcetools/collection/Position.h>
 
