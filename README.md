@@ -1,7 +1,8 @@
 
 
-[![Travis-CI Build Status](https://travis-ci.org/kevinushey/sourcetools.svg?branch=master)](https://travis-ci.org/kevinushey/sourcetools) [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/kevinushey/sourcetools?branch=master&svg=true)](https://ci.appveyor.com/project/kevinushey/sourcetools)
-
+<!-- badges: start -->
+[![R-CMD-check](https://github.com/kevinushey/sourcetools/workflows/R-CMD-check/badge.svg)](https://github.com/kevinushey/sourcetools/actions)
+<!-- badges: end -->
 
 # sourcetools
 
@@ -52,10 +53,10 @@ print(sm[c("expr", "mean", "median")], digits = 3)
 ```
 
 ```
-##                            expr mean median
-## 1         base::readLines(file) 20.5   20.1
-## 2       readr::read_lines(file) 19.7   10.0
-## 3 sourcetools::read_lines(file) 14.3   14.2
+##                            expr  mean median
+## 1         base::readLines(file) 17.29  16.22
+## 2       readr::read_lines(file) 30.70   8.11
+## 3 sourcetools::read_lines(file)  6.67   6.43
 ```
 
 ```r

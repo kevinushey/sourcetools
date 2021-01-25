@@ -1,12 +1,14 @@
 #include <R.h>
 #include <Rinternals.h>
+#include <stdlib.h> // for NULL
 #include <R_ext/Rdynload.h>
 
-#include <stdlib.h> // for NULL
+/* FIXME: 
+   Check these declarations against the C/Fortran source code.
+*/
 
 /* .Call calls */
 extern SEXP run_testthat_tests();
-extern SEXP sourcetools_code_complete_at(SEXP, SEXP);
 extern SEXP sourcetools_diagnose_string(SEXP);
 extern SEXP sourcetools_parse_string(SEXP);
 extern SEXP sourcetools_performs_nse(SEXP);
@@ -20,7 +22,6 @@ extern SEXP sourcetools_validate_syntax(SEXP);
 
 static const R_CallMethodDef CallEntries[] = {
     {"run_testthat_tests",           (DL_FUNC) &run_testthat_tests,           0},
-    {"sourcetools_code_complete_at", (DL_FUNC) &sourcetools_code_complete_at, 2},
     {"sourcetools_diagnose_string",  (DL_FUNC) &sourcetools_diagnose_string,  1},
     {"sourcetools_parse_string",     (DL_FUNC) &sourcetools_parse_string,     1},
     {"sourcetools_performs_nse",     (DL_FUNC) &sourcetools_performs_nse,     1},

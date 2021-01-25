@@ -6,25 +6,11 @@
 #include <sourcetools/core/core.h>
 
 #include <sourcetools/r/RHeaders.h>
+#include <sourcetools/r/RProtect.h>
+#include <sourcetools/r/RConverter.h>
 
 namespace sourcetools {
 namespace r {
-
-class Protect : noncopyable
-{
-public:
-  Protect(): n_(0) {}
-  ~Protect() { UNPROTECT(n_); }
-
-  SEXP operator()(SEXP objectSEXP)
-  {
-    ++n_;
-    return PROTECT(objectSEXP);
-  }
-
-private:
-  int n_;
-};
 
 class RObjectFactory : noncopyable
 {
@@ -81,7 +67,7 @@ public:
     for (index_type i = 0; i < n; ++i)
     {
       SET_VECTOR_ELT(resultSEXP, i, data_[i]);
-      SET_STRING_ELT(namesSEXP, i, Rf_mkCharLen(names_[i].c_str(), names_[i].size()));
+      SET_STRING_ELT(namesSEXP, i, createChar(names_[i]));
     }
 
     Rf_setAttrib(resultSEXP, R_NamesSymbol, namesSEXP);

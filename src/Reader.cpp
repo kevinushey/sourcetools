@@ -21,7 +21,7 @@ extern "C" SEXP sourcetools_read(SEXP absolutePathSEXP)
 
   sourcetools::r::Protect protect;
   SEXP resultSEXP = protect(Rf_allocVector(STRSXP, 1));
-  SET_STRING_ELT(resultSEXP, 0, Rf_mkCharLen(contents.c_str(), contents.size()));
+  SET_STRING_ELT(resultSEXP, 0, sourcetools::r::createChar(contents));
   return resultSEXP;
 }
 
@@ -41,7 +41,10 @@ extern "C" SEXP sourcetools_read_lines(SEXP absolutePathSEXP)
   sourcetools::r::Protect protect;
   SEXP resultSEXP = protect(Rf_allocVector(STRSXP, n));
   for (sourcetools::index_type i = 0; i < n; ++i)
-    SET_STRING_ELT(resultSEXP, i, Rf_mkCharLen(lines[i].c_str(), lines[i].size()));
+  {
+    SEXP charSEXP = sourcetools::r::createChar(lines[i]);
+    SET_STRING_ELT(resultSEXP, i, charSEXP);
+  }
   return resultSEXP;
 }
 

@@ -102,7 +102,7 @@ inline SEXP create(const diagnostics::Diagnostic& diagnostic)
   builder.add("file",    Rf_mkString(""));
   builder.add("line",    Rf_ScalarInteger(diagnostic.start().row));
   builder.add("column",  Rf_ScalarInteger(diagnostic.start().column));
-  builder.add("message", Rf_mkString(diagnostic.message()));
+  builder.add("message", r::createString(diagnostic.message()));
 
   return builder;
 }

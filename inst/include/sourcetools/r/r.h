@@ -2,6 +2,7 @@
 #define SOURCETOOLS_R_R_H
 
 #include <sourcetools/r/RHeaders.h>
+#include <sourcetools/r/RProtect.h>
 #include <sourcetools/r/RUtils.h>
 #include <sourcetools/r/RConverter.h>
 #include <sourcetools/r/RFunctions.h>

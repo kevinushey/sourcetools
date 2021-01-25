@@ -30,8 +30,7 @@ SEXP asSEXP(const std::vector<tokens::Token>& tokens)
   SET_VECTOR_ELT(resultSEXP, 0, valueSEXP);
   for (index_type i = 0; i < n; ++i) {
     const std::string& contents = tokens[i].contents();
-    SEXP charSEXP = Rf_mkCharLen(contents.c_str(), contents.size());
-    SET_STRING_ELT(valueSEXP, i, charSEXP);
+    SET_STRING_ELT(valueSEXP, i, r::createChar(contents));
   }
 
   SEXP rowSEXP = protect(Rf_allocVector(INTSXP, n));
@@ -48,8 +47,7 @@ SEXP asSEXP(const std::vector<tokens::Token>& tokens)
   SET_VECTOR_ELT(resultSEXP, 3, typeSEXP);
   for (index_type i = 0; i < n; ++i) {
     const std::string& type = toString(tokens[i].type());
-    SEXP charSEXP = Rf_mkCharLen(type.c_str(), type.size());
-    SET_STRING_ELT(typeSEXP, i, charSEXP);
+    SET_STRING_ELT(typeSEXP, i, r::createChar(type));
   }
 
   // Set names

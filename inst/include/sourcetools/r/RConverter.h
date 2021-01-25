@@ -4,22 +4,22 @@
 #include <vector>
 #include <string>
 
-#include <sourcetools/r/RUtils.h>
 #include <sourcetools/r/RHeaders.h>
+#include <sourcetools/r/RProtect.h>
 
 namespace sourcetools {
 namespace r {
 
-inline SEXP Rf_mkChar(const std::string& data)
+inline SEXP createChar(const std::string& data)
 {
-  return Rf_mkCharLen(data.c_str(), data.size());
+  return Rf_mkCharLenCE(data.c_str(), data.size(), CE_UTF8);
 }
 
-inline SEXP Rf_mkString(const std::string& data)
+inline SEXP createString(const std::string& data)
 {
   Protect protect;
   SEXP resultSEXP = protect(Rf_allocVector(STRSXP, 1));
-  SET_STRING_ELT(resultSEXP, 0, Rf_mkChar(data));
+  SET_STRING_ELT(resultSEXP, 0, createChar(data));
   return resultSEXP;
 }
 
@@ -29,7 +29,7 @@ inline SEXP create(const std::vector<std::string>& vector)
   index_type n = vector.size();
   SEXP resultSEXP = protect(Rf_allocVector(STRSXP, n));
   for (index_type i = 0; i < n; ++i)
-    SET_STRING_ELT(resultSEXP, i, Rf_mkChar(vector[i]));
+    SET_STRING_ELT(resultSEXP, i, createChar(vector[i]));
   return resultSEXP;
 }
 

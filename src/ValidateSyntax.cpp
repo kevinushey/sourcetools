@@ -25,7 +25,8 @@ struct ErrSetter
   void operator()(SEXP dataSEXP, index_type i, const Error& error)
   {
     const std::string& msg = error.message();
-    SET_STRING_ELT(dataSEXP, i, Rf_mkCharLen(msg.c_str(), msg.size()));
+    SEXP charSEXP = sourcetools::r::createChar(msg);
+    SET_STRING_ELT(dataSEXP, i, charSEXP);
   }
 };
 
