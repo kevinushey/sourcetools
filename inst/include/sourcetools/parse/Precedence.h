@@ -25,6 +25,9 @@ inline int binary(const tokens::Token& token)
     return 40;
   case OPERATOR_FORMULA:
     return 50;
+  case OPERATOR_PIPE:
+  case OPERATOR_PIPE_BIND:
+    return 55;
   case OPERATOR_OR_SCALAR:
   case OPERATOR_OR_VECTOR:
     return 60;

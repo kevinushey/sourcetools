@@ -126,3 +126,29 @@ test_that("tokenization errors handled correctly", {
   tokenize_string("%abc")
   expect_true(TRUE, "we didn't segfault")
 })
+
+test_that("raw tokens are tokenized correctly", {
+
+  prefixes <- c("r", "R")
+  quotes <- c("'", '"')
+  dashes <- c("", "-", "--", "---")
+  lhs <- c("(", "{", "[")
+
+  all <- expand.grid(prefixes, quotes, dashes, lhs, stringsAsFactors = FALSE)
+
+  all$Var5 <- ""
+  all$Var5[all$Var4 == "("] <- ")"
+  all$Var5[all$Var4 == "{"] <- "}"
+  all$Var5[all$Var4 == "["] <- "]"
+
+  all$Var6 <- all$Var3
+  all$Var7 <- all$Var2
+  strings <- do.call(paste0, all)
+
+  for (string in strings) {
+    token <- tokenize_string(string)
+    expect_true(nrow(token) == 1L)
+    expect_true(token$type == "string")
+  }
+
+})

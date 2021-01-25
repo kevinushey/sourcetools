@@ -93,6 +93,129 @@ private:
     consumeUntil<true, true>('"', tokens::STRING, pToken);
   }
 
+  void consumeRawString(Token* pToken)
+  {
+    // clone cursor
+    TextCursor cursor = cursor_;
+
+    // save current position
+    index_type start = cursor.offset();
+
+    // consume a leading 'r' or 'R'
+    char ch = cursor.peek();
+    bool ok = ch == 'r' || ch == 'R';
+    if (!ok)
+      return consumeToken(tokens::INVALID, 1, pToken);
+    cursor.advance();
+
+    // consume a quote, saving what we saw
+    char quote;
+    switch (cursor.peek())
+    {
+    case '"':
+      quote = '"';
+      break;
+    case '\'':
+      quote = '\'';
+      break;
+    default:
+      return consumeToken(tokens::INVALID, 2, pToken);
+    }
+    cursor.advance();
+
+    // consume dashes, counting the number of dashes seen
+    int dashes = 0;
+    while (cursor.peek() == '-')
+    {
+      dashes += 1;
+      cursor.advance();
+    }
+
+    // consume the delimiter, saving what we saw
+    char lhs;
+    switch (cursor.peek())
+    {
+    case '(':
+    case '{':
+    case '[':
+      lhs = cursor.peek();
+      break;
+    default:
+      return consumeToken(tokens::INVALID,
+                          cursor.offset() - start + 1,
+                          pToken);
+    }
+    cursor.advance();
+
+    // compute complement for delimiter
+    char rhs;
+    switch (lhs)
+    {
+    case '(': rhs = ')'; break;
+    case '{': rhs = '}'; break;
+    case '[': rhs = ']'; break;
+    default:
+      return consumeToken(tokens::INVALID,
+                          cursor.offset() - start + 1,
+                          pToken);
+    }
+
+    // start consuming things until we find the closing delimiter
+    for (; cursor.peek() != '\0'; cursor.advance())
+    {
+      // check for right delimiter
+      if (cursor.peek() != rhs)
+        goto AGAIN;
+      cursor.advance();
+
+      // consume dashes
+      for (int i = 0; i < dashes; i++)
+      {
+        if (cursor.peek() != '-')
+          goto AGAIN;
+        cursor.advance();
+      }
+
+      // check for matching quote
+      if (cursor.peek() != quote)
+        goto AGAIN;
+      cursor.advance();
+
+      // if we got this far, we successfully matched the raw string
+      return consumeToken(
+        tokens::STRING,
+        cursor.offset() - start,
+        pToken
+      );
+
+      // if we got here, we need to restart the loop
+      AGAIN: ;
+    }
+
+    // if we got here, we failed to match
+    return consumeToken(
+      tokens::INVALID,
+      cursor.offset() - start,
+      pToken
+    );
+
+  }
+
+  bool isStartOfRawString(const TextCursor& cursor)
+  {
+    char ch = '\0';
+
+    // check for leading 'r' or 'R'
+    ch = cursor.peek(0);
+    bool ok = ch == 'r' || ch == 'R';
+    if (!ok)
+      return false;
+
+    // check for quote
+    ch = cursor.peek(1);
+    return ch == '\'' || ch == '"';
+  }
+
   // NOTE: Don't tokenize '-' or '+' as part of number; instead
   // it's parsed as a unary operator.
   bool isStartOfNumber()
@@ -298,18 +421,22 @@ public:
       else
         consumeToken(tokens::OPERATOR_GREATER, 1, pToken);
     }
-    else if (ch == '=')  // '==', '='
+    else if (ch == '=')  // '==', '=>', '='
     {
-      if (cursor_.peek(1) == '=')
+      char next = cursor_.peek(1);
+      if (next == '>')
+        consumeToken(tokens::OPERATOR_PIPE_BIND, 2, pToken);
+      else if (next == '=')
         consumeToken(tokens::OPERATOR_EQUAL, 2, pToken);
       else
         consumeToken(tokens::OPERATOR_ASSIGN_LEFT_EQUALS, 1, pToken);
     }
     else if (ch == '|')  // '||', '|>', '|'
     {
-      if (cursor_.peek(1) == '|')
-        consumeToken(tokens::OPERATOR_OR_SCALAR, 2, pToken);
-      else if (cursor_.peek(1) == '>')
+      char next = cursor_.peek(1);
+      if (next == '>')
+        consumeToken(tokens::OPERATOR_PIPE, 2, pToken);
+      else if (next == '|')
         consumeToken(tokens::OPERATOR_OR_SCALAR, 2, pToken);
       else
         consumeToken(tokens::OPERATOR_OR_VECTOR, 1, pToken);
@@ -397,6 +524,8 @@ public:
       consumeQQString(pToken);
     else if (ch == '`')
       consumeQuotedSymbol(pToken);
+    else if (isStartOfRawString(cursor_))
+      consumeRawString(pToken);
 
     // Comments
     else if (ch == '#')

@@ -19,7 +19,7 @@ public:
   {
   }
 
-  char peek(index_type offset = 0)
+  char peek(index_type offset = 0) const
   {
     index_type index = offset_ + offset;
     if (UNLIKELY(index >= n_))

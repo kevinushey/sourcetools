@@ -4,8 +4,7 @@
 \alias{register_routines}
 \title{Register Native Routines}
 \usage{
-register_routines(package = ".", prefix = "C_",
-  dynamic.symbols = FALSE)
+register_routines(package = ".", prefix = "C_", dynamic.symbols = FALSE)
 }
 \arguments{
 \item{package}{The path to an \R package.}
