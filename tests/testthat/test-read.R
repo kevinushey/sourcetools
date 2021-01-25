@@ -1,6 +1,10 @@
 context("Reader")
 
-files <- list.files()
+files <- list.files(
+  pattern = "[.]R$",
+  full.names = TRUE,
+  include.dirs = FALSE
+)
 
 test_that("read_lines and readLines agree on output", {
   for (file in files) {

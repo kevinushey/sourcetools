@@ -305,9 +305,11 @@ public:
       else
         consumeToken(tokens::OPERATOR_ASSIGN_LEFT_EQUALS, 1, pToken);
     }
-    else if (ch == '|')  // '||', '|'
+    else if (ch == '|')  // '||', '|>', '|'
     {
       if (cursor_.peek(1) == '|')
+        consumeToken(tokens::OPERATOR_OR_SCALAR, 2, pToken);
+      else if (cursor_.peek(1) == '>')
         consumeToken(tokens::OPERATOR_OR_SCALAR, 2, pToken);
       else
         consumeToken(tokens::OPERATOR_OR_VECTOR, 1, pToken);

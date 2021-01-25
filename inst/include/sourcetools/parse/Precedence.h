@@ -12,13 +12,12 @@ inline int binary(const tokens::Token& token)
   using namespace tokens;
   switch (token.type())
   {
-  case OPERATOR_ASSIGN_LEFT_EQUALS:
-    return 5;
   case OPERATOR_HELP:
     return 10;
   case OPERATOR_ASSIGN_LEFT_COLON:
     return 20;
   case OPERATOR_ASSIGN_LEFT:
+  case OPERATOR_ASSIGN_LEFT_EQUALS:
   case OPERATOR_ASSIGN_LEFT_PARENT:
     return 30;
   case OPERATOR_ASSIGN_RIGHT:
