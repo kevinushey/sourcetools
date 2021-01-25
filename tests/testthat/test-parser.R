@@ -2,6 +2,8 @@ context("Parser")
 
 test_that("precedence of '?' vs '=' correctly handled", {
 
+  skip_if(getRversion() < "4.0.3")
+
   expect_parse("foo ? bar = baz")
   expect_parse("foo ? bar <- baz")
 

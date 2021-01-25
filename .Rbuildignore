@@ -13,3 +13,4 @@
 ^tools/
 ^travis/
 ^src/*\.s?o
+^\.github$
