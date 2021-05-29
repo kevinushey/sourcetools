@@ -132,3 +132,10 @@ test_that("parser handles various escapes in strings", {
   contents <- read("helper-utf8.R")
   expect_parse(contents)
 })
+
+test_that("parser handles multi-line strings", {
+
+  expect_parse('"a\nb\nc" + 1')
+  expect_parse('"a\nb\nc" * 1')
+
+})

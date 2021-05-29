@@ -91,29 +91,38 @@ public:
       return false;
 
     // special case: just a '\n'
-    bool endsWithNewline = map[size - 1] == '\n';
+    bool endsWithNewline =
+      map[size - 1] == '\n' ||
+      map[size - 1] == '\r';
+    
     if (size == 1 && endsWithNewline)
       return true;
 
     // Search for newlines
     const char* lower = map;
-    const char* upper = map;
     const char* end = map + size;
-    while (true)
+    
+    for (const char* it = lower; it != end; it++)
     {
-      upper = std::find(lower, end, '\n');
-      if (upper == end)
-        break;
-
-      // Handle '\r\n'
-      int CR = *(upper - 1) == '\r';
-      upper -= CR;
-
-      // Pass to functor
-      f(lower, upper);
-
-      // Update
-      lower = upper + 1 + CR;
+      // check for newline
+      char ch = *it;
+      bool isNewline = ch == '\r' || ch == '\n';
+      if (!isNewline)
+        continue;
+      
+      // found a newline; call functor
+      f(lower, it);
+      
+      // update iterator, handling '\r\n' specially
+      if (it[0] == '\r' &&
+          it[1] == '\n')
+      {
+        it += 1;
+      }
+      
+      // update lower iterator
+      lower = it + 1;
+      
     }
 
     // If this file ended with a newline, we're done

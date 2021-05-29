@@ -330,9 +330,13 @@ private:
       }
     }
 
-    // Consume a final 'L' for integer literals
-    if (cursor_.peek(distance) == 'L')
+    // Consume a final 'L' for integer literals,
+    // or a final 'i' for complex numbers.
+    if (cursor_.peek(distance) == 'L' ||
+        cursor_.peek(distance) == 'i')
+    {
       ++distance;
+    }
 
     consumeToken(success ? tokens::NUMBER : tokens::INVALID, distance, pToken);
   }

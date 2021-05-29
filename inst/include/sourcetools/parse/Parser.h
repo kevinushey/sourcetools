@@ -490,9 +490,21 @@ private:
 
   bool canParseExpressionContinuation(int precedence = 0)
   {
-    return precedence < precedence::binary(current()) && (
-      state_ == PARSE_STATE_PAREN ||
-      previous().row() == current().row());
+    if (precedence >= precedence::binary(current()))
+      return false;
+
+    if (state_ == PARSE_STATE_PAREN)
+      return true;
+
+    index_type lhs = previous().row();
+    index_type rhs = current().row();
+    if (previous().isType(tokens::STRING))
+    {
+      lhs += std::count(previous().begin(), previous().end(), '\n');
+    }
+
+    return lhs == rhs;
+
   }
 
   ParseNode* parseExpression(int precedence = 0)
