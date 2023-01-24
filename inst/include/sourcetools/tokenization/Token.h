@@ -493,11 +493,12 @@ inline std::string toString(const tokens::Token& token)
   if (contents.size() > N / 2)
     contents = contents.substr(0, N / 2);
   char buff[N];
-  std::sprintf(buff,
-               "[%4ld:%4ld]: %s",
-               static_cast<long>(token.row()),
-               static_cast<long>(token.column()),
-               contents.c_str());
+  std::snprintf(buff,
+                N,
+                "[%4ld:%4ld]: %s",
+                static_cast<long>(token.row()),
+                static_cast<long>(token.column()),
+                contents.c_str());
   return buff;
 }
 

@@ -40,11 +40,11 @@ inline std::string shortFilePath(const std::string& filePath)
 inline std::string debugPosition(const char* filePath, int line)
 {
   static const int N = 1024;
-  char buffer[N + 1];
+  char buffer[N];
   std::string shortPath = shortFilePath(filePath);
   if (shortPath.size() > N / 2)
     shortPath = shortPath.substr(0, N / 2);
-  std::sprintf(buffer, "[%s:%4i]", shortPath.c_str(), line);
+  std::snprintf(buffer, N, "[%s:%4i]", shortPath.c_str(), line);
   return buffer;
 }
 

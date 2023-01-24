@@ -1,6 +1,8 @@
 
 ## sourcetools 0.2.0 (UNRELEASED)
 
+- Remove calls to `std::sprintf()`.
+
 - Support `=>` pipe-bind operator, to be introduced in R 4.1.0.
 
 - Support `|>` pipe operator, to be introduced in R 4.1.0.
