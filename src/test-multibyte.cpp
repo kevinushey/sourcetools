@@ -59,7 +59,7 @@ extern "C" SEXP sourcetools_print_multibyte(SEXP dataSEXP)
 
     if (length == -1)
     {
-      Rf_warning("Invalid multibyte character at index %i\n", it - data);
+      Rf_warning("Invalid multibyte character at index %li\n", (long) (it - data));
       ++it;
       continue;
     }
