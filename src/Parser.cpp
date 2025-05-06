@@ -283,7 +283,7 @@ void reportErrors(const std::vector<parser::ParseError>& errors)
        << it->message() << std::endl << "  ";
   }
 
-  Rf_warning(ss.str().c_str());
+  Rf_warning("%s", ss.str().c_str());
 }
 
 } // anonymous namespace
