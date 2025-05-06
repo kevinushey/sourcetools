@@ -4,7 +4,7 @@ library(microbenchmark)
 ```
 
 <!-- badges: start -->
-[![R-CMD-check](https://github.com/kevinushey/sourcetools/workflows/R-CMD-check/badge.svg)](https://github.com/kevinushey/sourcetools/actions)
+[![R-CMD-check](https://github.com/kevinushey/sourcetools/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/kevinushey/sourcetools/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 # sourcetools
